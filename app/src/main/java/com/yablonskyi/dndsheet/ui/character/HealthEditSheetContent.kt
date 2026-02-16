@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.yablonskyi.dndsheet.R
+import com.yablonskyi.dndsheet.ui.utils.IntTextField
 
 @Composable
 fun HealthEditSheetContent(
@@ -86,38 +87,85 @@ fun HealthEditSheetContent(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             IntTextField(
-                value = localCurrent,
-                label = stringResource(R.string.hp_current),
+                value = localMax,
+                label = stringResource(R.string.hp_max),
                 onValueChange = {
-                    localCurrent = it
-                    pushUpdate()
+                    if (it < 1000) {
+                        localMax = it
+                        pushUpdate()
+                    }
                 },
                 modifier = Modifier.weight(1f)
             )
 
             IntTextField(
-                value = localMax,
-                label = stringResource(R.string.hp_max),
+                value = localCurrent,
+                label = stringResource(R.string.hp_current),
                 onValueChange = {
-                    localMax = it
-                    pushUpdate()
+                    if (it <= localMax) {
+                        localCurrent = it
+                        pushUpdate()
+                    }
                 },
                 modifier = Modifier.weight(1f)
             )
 
-            // Temp HP
             IntTextField(
                 value = localTemp,
                 label = stringResource(R.string.hp_temp),
                 onValueChange = {
-                    localTemp = it
-                    pushUpdate()
+                    if (it < 1000) {
+                        localTemp = it
+                        pushUpdate()
+                    }
                 },
                 modifier = Modifier.weight(1f)
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            TextButton(
+                onClick = {
+                    localCurrent = localMax
+                    pushUpdate()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color(0xff529c64)
+                ),
+                border = BorderStroke(2.dp, Color(0xff529c64)),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(stringResource(R.string.btn_full_heal))
+            }
+
+            TextButton(
+                onClick = {
+                    localCurrent = 0
+                    pushUpdate()
+                },
+                border = BorderStroke(2.dp, Color(0xffe34c1e)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color(0xffe34c1e)
+                ),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(stringResource(R.string.btn_you_are_dead))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
         HorizontalDivider()
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -131,8 +179,29 @@ fun HealthEditSheetContent(
                 value = adjustmentValue,
                 label = stringResource(R.string.amount),
                 onValueChange = { adjustmentValue = it },
-                modifier = Modifier.weight(1f).padding(bottom = 8.dp)
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(bottom = 8.dp)
             )
+
+            // Heal Button
+            TextButton(
+                onClick = {
+                    if (adjustmentValue > 0 && adjustmentValue <= localMax - localCurrent) {
+                        localCurrent = (localCurrent + adjustmentValue).coerceAtMost(localMax)
+                        adjustmentValue = 0
+                        pushUpdate()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Color(0xff529c64)
+                ),
+                border = BorderStroke(2.dp, Color(0xff529c64)),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(stringResource(R.string.heal))
+            }
 
             // Damage Button
             TextButton(
@@ -151,25 +220,6 @@ fun HealthEditSheetContent(
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(stringResource(R.string.damage))
-            }
-
-            // Heal Button
-            TextButton(
-                onClick = {
-                    if (adjustmentValue > 0) {
-                        localCurrent = (localCurrent + adjustmentValue).coerceAtMost(localMax)
-                        adjustmentValue = 0
-                        pushUpdate()
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color(0xff529c64)
-                ),
-                border = BorderStroke(2.dp, Color(0xff529c64)),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(stringResource(R.string.heal))
             }
         }
     }

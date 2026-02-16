@@ -11,6 +11,7 @@ data class Character(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String = "",
     val level: Int = 1,
+    val imagePath: String? = null,
     // HP
     @ColumnInfo(name = "current_hp") val currentHp: Int = 0,
     @ColumnInfo(name = "max_hp") val maxHp: Int = 0,
@@ -24,13 +25,15 @@ data class Character(
     val speed: Int = 30,
     @ColumnInfo(name = "armor_class") val armorClass: Int = 8,
     val shield: Int = 0,
-    val coins: Double = .0,
+    @Embedded(prefix = "money_")
+    val coins: Money = Money(),
     @ColumnInfo(name = "initiative_bonus") val initiativeMiscBonus: Int = 0,
     val proficiencies: String = "",
     val traits: String = "",
     val feats: String = "",
     val inventory: String = "",
     val backstory: String = "",
+    val notes: String = "",
     // Spells
     @Embedded(prefix = "spell_settings_")
     val spellSettings: SpellSettings = SpellSettings(),
@@ -41,7 +44,7 @@ data class Character(
     val skillProficiencies: Map<Skill, ProficiencyLevel> = emptyMap(),
     val savingThrowProficiencies: Set<Ability> = emptySet(),
     val passivePerceptionBonus: Int = 0,
-    val hasJackOfAllTrades: Boolean = false
+    val hasJackOfAllTrades: Boolean = false,
 ) {
     /**
      * Returns a Proficiency Bonus depending on level

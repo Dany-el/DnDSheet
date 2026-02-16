@@ -46,6 +46,7 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.exifinterface)
     // Room
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
@@ -68,6 +69,10 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
 
     implementation(libs.gson)
+
+    implementation(libs.coil.compose)
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

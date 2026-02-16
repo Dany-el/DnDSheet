@@ -49,7 +49,7 @@
     <string name="duration_7_days">7 днів</string>
     <string name="duration_30_days">30 днів</string>
     <string name="duration_until_dispelled">Поки не розсіється</string>
-    <string name="duration_special">Особлива</string>
+    <string name="duration_special">Особливий</string>
 
     <string name="school_abjuration">Відгородження</string>
     <string name="school_conjuration">Виклик</string>
@@ -64,9 +64,9 @@
     <string name="comp_somatic">Соматичний</string>
     <string name="comp_material">Матеріальний</string>
 
-    <string name="attack_none">Немає</string>
+    <string name="attack_none">Нічого</string>
     <string name="attack_melee">Ближня атака</string>
-    <string name="attack_ranged">Далека атака</string>
+    <string name="attack_ranged">Дальня атака</string>
     <string name="attack_save">Ряткидок</string>
 
     <string name="damage_acid">Кислота</string>
@@ -89,7 +89,7 @@
     <string name="ability_int">Інтелект</string>
     <string name="ability_wis">Мудрість</string>
     <string name="ability_cha">Харизма</string>
-    <string name="ability_none">Немає</string>
+    <string name="ability_none">Нічого</string>
 
     <string name="skill_athletics">Атлетика</string>
 
@@ -132,7 +132,7 @@
     <string name="notes">Нотатки</string>
     <string name="add">Додати</string>
     <string name="delete">Видалити</string>
-    <string name="supporting_text_dice">1к20</string>
+    <string name="supporting_text_dice">Неправильний куб</string>
     <string name="appearance">Тема</string>
     <string name="language">Мова</string>
     <string name="characters">Персонажі</string>
@@ -152,7 +152,7 @@
     <string name="silver">Срібло</string>
     <string name="copper">Мідь</string>
     <string name="roll">Кидок</string>
-    <string name="score_label">Рахунок</string>
+    <string name="score_label">Значення</string>
     <string name="backstory">Передісторія</string>
     <string name="settings">Налаштування</string>
     <string name="char_name">Ім\'я</string>
@@ -164,13 +164,13 @@
     <string name="damage">Шкода</string>
     <string name="heal">Лікування</string>
     <string name="amount">Кіл-сть</string>
-    <string name="health">ПЗ</string>
+    <string name="health">ПунктиЗдоров\'я</string>
     <string name="hp_current">Поточне</string>
-    <string name="hp_max">Максимальне</string>
+    <string name="hp_max">Макс.</string>
     <string name="manage_spells">Підготовка чарунків</string>
     <string name="char_subclass">Підклас</string>
     <string name="char_ac">КБ</string>
-    <string name="char_speed">Швидкість</string>
+    <string name="char_speed">Кроки</string>
     <string name="char_initiative_bonus">Бонус Ініціативи</string>
     <string name="char_shield">Щит</string>
     <string name="class_settings">Налаштування Класу</string>
@@ -200,4 +200,55 @@
     <string name="tab_inventory">Спорядження</string>
     <string name="spells">Чарунки</string>
     <string name="spell_name">Назва</string>
+    <string name="cancel">Скасувати</string>
+    <string name="q_delete_character">Видалення персонажа</string>
+    <string name="q_confirm_text_spells">Ви впевнені, що хочете видалити %1$d чарунків? Цю дію неможливо скасувати.</string>
+    <string name="q_confirm_text_characters">Ви впевнені, що хочете видалити %1$d персонажів? Цю дію неможливо скасувати.</string>
+    <string name="q_delete_spell">Видалення чарунка</string>
+    <string name="edit">Редагувати</string>
+    <string name="placeholder_dice">1к12</string>
+    <string name="btn_full_heal">Герої Не Вмирають</string>
+    <string name="btn_you_are_dead">Ви Мрець</string>
+    <string name="confirm_import">Імпорт</string>
+    <string name="export_spells">Експорт</string>
+    <string name="success_export">Успішно експортовано.</string>
+    <string name="failure_export">Щось пішло не так.</string>
+    <string name="success_import">Успішно імпортовано</string>
+    <string name="share">Поширити</string>
+    <string name="failed_to_read_file">Не вдалося прочитати файл</string>
+    <string name="alert_dialog_import_spells">Імпорт Заклинань</string>
+    <string name="spells_imported_success">Чарунки імпортовано!</string>
+    <string name="alert_dialog_spell_confirm_msg">Ви хочете імпортувати %1$d чарунків?</string>
+    <string name="select_all_spells">Обрати Усі</string>
+    <string name="unselect_all_spells">Скасувати вибір</string>
+    <string name="q_confirm_text">Ви впевнені, що хочете видалити %1$s? Цю дію неможливо скасувати.</string>
+    <string name="range_self">На себе</string>
+    <string name="range_touch">Дотик</string>
+    <string name="range_distance">Відстань</string>
+    <string name="range_sight">Видимість</string>
+    <string name="range_unlimited">Необмежена</string>
+    <string name="range_value">Дальність</string>
+    <string name="feets">ф.</string>
+    <string name="spell_slots">Кількість комірок</string>
+    <string name="proficiency_bonus">Бонус майстерності</string>
+    <string name="long_rest">Довгий відпочинок</string>
+    <string name="rest">Відпочинок</string>
+    <string name="msg_long_rest">Це відновить всі ПЗ і скине всі комірки заклинань.</string>
+    <string name="label_long_rest">Почати повноцінний відпочинок?</string>
+    <string name="system_default">За замовчуванням</string>
+    <string name="language_russian">Російська</string>
+    <string name="language_ukrainian">Українська</string>
+    <string name="theme_light">Світла</string>
+    <string name="theme_dark">Темна</string>
+    <string name="language_english">Англійська</string>
+    <string name="name_required">Ім\'я обов\'язково</string>
+    <string name="material_required">Компоненти обов\'язкові</string>
+    <string name="description_required">Опис обов\'язково</string>
+    <string name="select_at_least_one_item">Виберіть щонайменше 1 об\'єкт</string>
+    <string name="import_file_empty">Файл порожній</string>
+    <string name="confirm_import_title">Підтвердження Імпорту</string>
+    <string name="alert_dialog_import_chars">Чи хочете ви імпортувати %1$d персонажів?</string>
+    <string name="loading_please_wait">Зачекайте, будь ласка…</string>
+    <string name="collapse">Згорнути</string>
+    <string name="expand">Розширити</string>
 </resources>

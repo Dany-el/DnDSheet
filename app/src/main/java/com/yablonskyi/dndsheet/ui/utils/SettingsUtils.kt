@@ -1,13 +1,17 @@
 package com.yablonskyi.dndsheet.ui.utils
 
-enum class AppTheme(val label: String) {
-    SYSTEM("System Default"),
-    LIGHT("Light"),
-    DARK("Dark")
+import androidx.annotation.StringRes
+import com.yablonskyi.dndsheet.R
+
+enum class AppTheme(@StringRes val label: Int) {
+    SYSTEM(R.string.system_default),
+    LIGHT(R.string.theme_light),
+    DARK(R.string.theme_dark)
 }
 
-enum class AppLanguage(val code: String, val label: String) {
-    ENGLISH("en-US", "English"),
-    RUSSIAN("ru-RU", "Русский"),
-    UKRAINIAN("uk", "Українська")
+enum class AppLanguage(val code: String, @StringRes val label: Int) {
+    SYSTEM("system", R.string.system_default),
+    ENGLISH("en", R.string.language_english),
+    RUSSIAN("ru", R.string.language_russian),
+    UKRAINIAN("uk", R.string.language_ukrainian)
 }

@@ -12,14 +12,26 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SpellDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertSpell(spell: Spell) : Long
+
+    @Update
+    suspend fun updateSpell(spell: Spell)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSpells(spells: List<Spell>)
 
     @Delete
     suspend fun deleteSpell(spell: Spell)
 
+    @Delete
+    suspend fun deleteSpells(spells: List<Spell>)
+
     @Query("SELECT * FROM spells ORDER BY level ASC, name ASC")
     fun getAllSpellsInLibrary(): Flow<List<Spell>>
+
+    @Query("SELECT spellId FROM spells WHERE name = :name LIMIT 1")
+    suspend fun getSpellIdByName(name: String): Long?
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun assignSpellToCharacter(crossRef: CharacterSpellCrossRef)

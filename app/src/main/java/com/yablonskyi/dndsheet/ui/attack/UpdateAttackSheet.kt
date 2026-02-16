@@ -1,6 +1,7 @@
 package com.yablonskyi.dndsheet.ui.attack
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,8 +41,8 @@ import com.yablonskyi.dndsheet.data.model.character.Ability
 import com.yablonskyi.dndsheet.data.model.character.Attack
 import com.yablonskyi.dndsheet.data.model.character.AttackType
 import com.yablonskyi.dndsheet.data.model.character.DamageType
-import com.yablonskyi.dndsheet.ui.character.IntTextField
-import com.yablonskyi.dndsheet.ui.spell.EnumDropdown
+import com.yablonskyi.dndsheet.ui.utils.EnumDropdown
+import com.yablonskyi.dndsheet.ui.utils.IntTextField
 
 @Composable
 fun UpdateAttackSheet(
@@ -64,6 +65,15 @@ fun UpdateAttackSheet(
     var damageType by remember(attack) { mutableStateOf(attack.damageType) }
     var range by remember(attack) { mutableStateOf(attack.range) }
     var notes by remember(attack) { mutableStateOf(attack.notes) }
+
+    val isNameValid = name.isNotBlank()
+    val isRangeValid = range.isNotBlank()
+    val isDamageDiceValid =
+        damageDice.isNotBlank() && Regex("""^([1-9]\d*)?[dDкК](4|6|8|10|12|20|100)$""").matches(
+            damageDice
+        )
+
+    val isFormValid = isNameValid && isRangeValid && isDamageDiceValid
 
     Column(
         modifier = Modifier
@@ -111,7 +121,7 @@ fun UpdateAttackSheet(
             Button(
                 onClick = {
                     val finalAttack = attack.copy(
-                        name = name,
+                        name = name.trim(),
                         attackType = attackType,
                         ability = ability,
                         isProficient = isProficient,
@@ -120,11 +130,12 @@ fun UpdateAttackSheet(
                         damageDice = damageDice,
                         damageType = damageType,
                         range = range,
-                        notes = notes
+                        notes = notes.trim()
                     )
                     onSave(finalAttack)
                     onDismiss()
                 },
+                enabled = isFormValid,
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -180,17 +191,29 @@ fun AttackFormContent(
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             OutlinedTextField(
                 value = name,
-                onValueChange = onNameChange,
-                label = { Text(stringResource(R.string.char_name)) },
+                onValueChange = {
+                    if (it.length <= 50) onNameChange(it)
+                },
+                label = { Text(stringResource(R.string.spell_name) + "*") },
+                isError = name.isBlank(),
                 modifier = Modifier.weight(1f),
                 singleLine = true
             )
-            OutlinedTextField(
-                value = range,
-                onValueChange = onRangeChange,
-                label = { Text(stringResource(R.string.msg_distance)) },
+            IntTextField(
+                value = range.run {
+                    Regex("\\d+").find(this)?.value?.toInt() ?: 0
+                },
+                validate = { input ->
+                    (input.toIntOrNull() ?: 0) <= 1000
+                },
+                onValueChange = {
+                    onRangeChange(it.toString())
+                },
+                isError = range.isBlank() || range.run {
+                    Regex("\\d+").find(this)?.value?.toInt() ?: 0
+                } == 0,
+                label = stringResource(R.string.msg_distance) + "*",
                 modifier = Modifier.weight(0.6f),
-                singleLine = true
             )
         }
 
@@ -208,7 +231,9 @@ fun AttackFormContent(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(onClick = { onProfChange(!isProficient) })
             ) {
                 Checkbox(checked = isProficient, onCheckedChange = onProfChange)
                 Text(stringResource(R.string.is_proficient))
@@ -225,15 +250,34 @@ fun AttackFormContent(
             )
         }
 
-
         HorizontalDivider()
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+
+            val damageDiceTypingRegex = Regex("""^([1-9]\d*)?([dDкК](1(00?|2)?|20?|4|6|8)?)?$""")
+
+            val damageDiceValidRegex = Regex("""^([1-9]\d*)?[dDкК](4|6|8|10|12|20|100)$""")
+
+            val isDamageDiceError =
+                damageDice.isBlank() || !damageDiceValidRegex.matches(damageDice)
+
             OutlinedTextField(
                 value = damageDice,
-                onValueChange = onDamageDiceChange,
-                label = { Text(stringResource(R.string.damage_dice)) },
-                supportingText = { Text(stringResource(R.string.supporting_text_dice)) },
+                onValueChange = {
+                    if (it.isEmpty() || damageDiceTypingRegex.matches(it)) {
+                        onDamageDiceChange(it)
+                    }
+                },
+                label = { Text(stringResource(R.string.damage_dice) + "*") },
+                supportingText = {
+                    if (isDamageDiceError)
+                        Text(
+                            stringResource(
+                                R.string.supporting_text_dice
+                            )
+                        )
+                },
+                isError = isDamageDiceError,
                 modifier = Modifier.weight(1f),
                 singleLine = true
             )
@@ -251,13 +295,19 @@ fun AttackFormContent(
             IntTextField(
                 value = bonusToHit,
                 label = stringResource(R.string.bonus_hit),
-                onValueChange = onBonusHitChange,
+                validate = { input -> (input.toIntOrNull() ?: 0) < 100 },
+                onValueChange = {
+                    onBonusHitChange(it)
+                },
                 modifier = Modifier.weight(1f)
             )
             IntTextField(
                 value = bonusToDamage,
                 label = stringResource(R.string.bonus_damage),
-                onValueChange = onBonusDamageChange,
+                validate = { input -> (input.toIntOrNull() ?: 0) < 100 },
+                onValueChange = {
+                    onBonusDamageChange(it)
+                },
                 modifier = Modifier.weight(1f)
             )
         }
@@ -267,7 +317,7 @@ fun AttackFormContent(
             onValueChange = onNotesChange,
             label = { Text(stringResource(R.string.notes)) },
             modifier = Modifier.fillMaxWidth(),
-            minLines = 2
+            maxLines = 1
         )
     }
 }

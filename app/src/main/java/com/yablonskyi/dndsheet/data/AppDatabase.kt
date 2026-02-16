@@ -14,7 +14,7 @@ import com.yablonskyi.dndsheet.data.model.character.Spell
 
 @Database(
     entities = [Character::class, Spell::class, Attack::class, CharacterSpellCrossRef::class],
-    version = 1,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

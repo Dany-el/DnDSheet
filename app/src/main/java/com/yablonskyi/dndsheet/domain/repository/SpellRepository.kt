@@ -7,7 +7,13 @@ import kotlinx.coroutines.flow.Flow
 interface SpellRepository {
     suspend fun insertSpell(spell: Spell): Long
 
+    suspend fun updateSpell(spell: Spell)
+
+    suspend fun insertSpells(spells: List<Spell>)
+
     suspend fun deleteSpell(spell: Spell)
+
+    suspend fun deleteSpells(spells: List<Spell>)
 
     fun getAllSpellsInLibrary(): Flow<List<Spell>>
 

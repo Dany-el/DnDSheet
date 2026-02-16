@@ -7,8 +7,8 @@ import androidx.room.Relation
 data class CharacterSheet(
     @Embedded val character: Character,
     @Relation(
-        parentColumn = "id",          // Character.id
-        entityColumn = "spellId",     // Spell.spellId
+        parentColumn = "id",
+        entityColumn = "spellId",
         associateBy = Junction(
             value = CharacterSpellCrossRef::class,
             parentColumn = "characterId",

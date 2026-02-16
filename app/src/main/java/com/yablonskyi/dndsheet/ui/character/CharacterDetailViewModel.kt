@@ -1,5 +1,6 @@
 package com.yablonskyi.dndsheet.ui.character
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,8 @@ import com.yablonskyi.dndsheet.data.model.character.Ability
 import com.yablonskyi.dndsheet.data.model.character.Character
 import com.yablonskyi.dndsheet.data.model.character.ProficiencyLevel
 import com.yablonskyi.dndsheet.data.model.character.Skill
+import com.yablonskyi.dndsheet.data.model.character.SpellLevel
+import com.yablonskyi.dndsheet.data.model.character.SpellSlot
 import com.yablonskyi.dndsheet.domain.repository.CharacterRepository
 import com.yablonskyi.dndsheet.ui.navigation.CharacterSheetRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -76,5 +79,50 @@ class CharacterDetailViewModel @Inject constructor(
         )
 
         updateCharacter(updatedCharacter)
+    }
+
+    /**
+     * @param delta to cast +1, to undo -1
+     */
+    fun useSpellSlot(spellLevel: SpellLevel, delta: Int) {
+        val currentCharacter = character.value ?: return
+
+        val updatedMap = currentCharacter.spellSettings.spellSlots.toMutableMap()
+
+        val slotData = updatedMap[spellLevel] ?: SpellSlot()
+
+        // To cast: delta is +1 (add to used)
+        // To undo: delta is -1 (remove from used)
+        val newCurrentValue = (slotData.current + delta).coerceIn(0, slotData.max)
+
+        Log.i("SpellSlot", "$spellLevel value: $newCurrentValue")
+
+        updatedMap[spellLevel] = slotData.copy(current = newCurrentValue)
+
+        val updatedCharacter = currentCharacter.copy(
+            spellSettings = currentCharacter.spellSettings.copy(
+                spellSlots = updatedMap
+            )
+        )
+
+        updateCharacter(updatedCharacter)
+    }
+
+    fun performLongRest() {
+        val currentCharacter = character.value ?: return
+
+        val clearedSlots = currentCharacter.spellSettings.spellSlots.mapValues { (_, slot) ->
+            slot.copy(current = 0)
+        }
+
+        val restedCharacter = currentCharacter.copy(
+            currentHp = currentCharacter.maxHp,
+            tempHp = 0,
+            spellSettings = currentCharacter.spellSettings.copy(
+                spellSlots = clearedSlots
+            )
+        )
+
+        updateCharacter(restedCharacter)
     }
 }

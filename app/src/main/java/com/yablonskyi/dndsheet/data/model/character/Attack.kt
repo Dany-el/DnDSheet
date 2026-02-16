@@ -34,6 +34,6 @@ data class Attack(
     val damageDice: String = "",
     val damageType: DamageType = DamageType.SLASHING,
     // Properties
-    val range: String = "5 ft",
+    val range: String = "5",
     val notes: String = "",
 )

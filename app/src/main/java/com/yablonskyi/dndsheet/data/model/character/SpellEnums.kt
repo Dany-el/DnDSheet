@@ -79,3 +79,11 @@ enum class SpellDuration(@StringRes val resId: Int) {
     UNTIL_DISPELLED(R.string.duration_until_dispelled),
     SPECIAL(R.string.duration_special);
 }
+
+enum class SpellRangeType(@StringRes val resId: Int) {
+    SELF(R.string.range_self),
+    TOUCH(R.string.range_touch),
+    DISTANCE(R.string.range_distance),
+    SIGHT(R.string.range_sight),
+    UNLIMITED(R.string.range_unlimited)
+}

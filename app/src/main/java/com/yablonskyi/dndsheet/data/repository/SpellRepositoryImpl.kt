@@ -14,8 +14,20 @@ class SpellRepositoryImpl @Inject constructor(
         return spellDao.insertSpell(spell)
     }
 
+    override suspend fun updateSpell(spell: Spell) {
+        spellDao.updateSpell(spell)
+    }
+
+    override suspend fun insertSpells(spells: List<Spell>) {
+        spellDao.insertSpells(spells)
+    }
+
     override suspend fun deleteSpell(spell: Spell) {
         spellDao.deleteSpell(spell)
+    }
+
+    override suspend fun deleteSpells(spells: List<Spell>) {
+        spellDao.deleteSpells(spells)
     }
 
     override fun getAllSpellsInLibrary(): Flow<List<Spell>> {

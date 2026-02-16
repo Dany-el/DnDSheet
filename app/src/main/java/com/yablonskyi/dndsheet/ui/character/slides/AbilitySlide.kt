@@ -1,7 +1,6 @@
 package com.yablonskyi.dndsheet.ui.character.slides
 
 import android.content.res.Configuration
-import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.RadioButtonChecked
@@ -36,6 +36,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -66,12 +68,29 @@ fun AbilitySlide(
     ) {
         LazyColumn(
             contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            items(abilities) { ability ->
+            itemsIndexed(items = abilities, key = { _, item -> item.ordinal }) { index, ability ->
+
+                val itemShape = when {
+                    abilities.size == 1 -> RoundedCornerShape(16.dp)
+                    index == 0 -> RoundedCornerShape(
+                        topStart = 16.dp, topEnd = 16.dp,
+                        bottomStart = 4.dp, bottomEnd = 4.dp
+                    )
+
+                    index == abilities.lastIndex -> RoundedCornerShape(
+                        topStart = 4.dp, topEnd = 4.dp,
+                        bottomStart = 16.dp, bottomEnd = 16.dp
+                    )
+
+                    else -> MaterialTheme.shapes.extraSmall
+                }
+
                 AbilityCard(
                     ability = ability,
+                    shape = itemShape,
                     character = character,
                     onRollClick = onRollClick,
                     onProfSavingThrowClick = onProfSavingThrowClick,
@@ -89,6 +108,7 @@ fun AbilitySlide(
 @Composable
 fun AbilityCard(
     ability: Ability,
+    shape: Shape,
     character: Character,
     onRollClick: (String) -> Unit,
     onAbilityClick: () -> Unit,
@@ -97,6 +117,7 @@ fun AbilityCard(
     modifier: Modifier = Modifier,
 ) {
     Card(
+        shape = shape,
         colors = CardDefaults.cardColors().copy(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer
@@ -223,6 +244,7 @@ fun ModifierRow(
                 )
             }
         }
+        Spacer(Modifier.width(8.dp))
         Surface(
             shape = MaterialTheme.shapes.medium,
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.onPrimary),
@@ -397,7 +419,7 @@ fun formatModifier(value: Int): String {
 }
 
 @Preview(
-    uiMode = Configuration.UI_MODE_TYPE_NORMAL, locale = "uk"
+    uiMode = Configuration.UI_MODE_TYPE_NORMAL, locale = "ru"
 )
 @Composable
 private fun AbilitySlidePreview_Normal() {
@@ -406,7 +428,7 @@ private fun AbilitySlidePreview_Normal() {
             character = UiUtils.sampleCharacters.first(),
             onRollClick = {},
             onAbilityClick = { },
-            onProfSavingThrowClick = {_,_ ->},
+            onProfSavingThrowClick = { _, _ -> },
             onProficiencyChange = { _, _ -> }
         )
     }
@@ -422,7 +444,7 @@ private fun AbilitySlidePreview_Night() {
             character = UiUtils.sampleCharacters.last(),
             onRollClick = {},
             onAbilityClick = { },
-            onProfSavingThrowClick = {_,_ ->},
+            onProfSavingThrowClick = { _, _ -> },
             onProficiencyChange = { _, _ -> }
         )
     }

@@ -1,5 +1,7 @@
 package com.yablonskyi.dndsheet.ui.settings
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,12 +25,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.ui.utils.AppLanguage
 import com.yablonskyi.dndsheet.ui.utils.AppTheme
@@ -37,10 +37,10 @@ import com.yablonskyi.dndsheet.ui.utils.AppTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppSettingsScreen(
-    viewModel: AppSettingsViewModel = hiltViewModel(),
+    viewModel: AppSettingsViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
 ) {
-    val state by viewModel.uiState.collectAsState()
-    val context = LocalContext.current
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val language by viewModel.language.collectAsState()
 
     Scaffold(
         topBar = {
@@ -67,11 +67,11 @@ fun AppSettingsScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
 
-            // --- THEME SECTION ---
+            // THEME
             SettingsSection(title = stringResource(R.string.appearance)) {
                 AppTheme.entries.forEach { theme ->
                     SettingsOptionRow(
-                        text = theme.label,
+                        text = stringResource(theme.label),
                         isSelected = state.theme == theme,
                         onClick = {
                             viewModel.updateTheme(theme)
@@ -82,15 +82,14 @@ fun AppSettingsScreen(
 
             HorizontalDivider()
 
-            // --- LANGUAGE SECTION ---
+            // LANGUAGE
             SettingsSection(title = stringResource(R.string.language)) {
                 AppLanguage.entries.forEach { lang ->
                     SettingsOptionRow(
-                        text = lang.label,
-                        isSelected = state.language == lang,
+                        text = stringResource(lang.label),
+                        isSelected = language == lang.code,
                         onClick = {
-                            viewModel.updateLanguage(lang)
-                            LanguageChangeHelper.changeLanguage(context, lang.code)
+                            viewModel.updateLanguage(lang.code)
                         }
                     )
                 }
@@ -129,9 +128,8 @@ fun SettingsOptionRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp)) // nice ripple shape
             .clickable(onClick = onClick)
-            .padding(vertical = 8.dp, horizontal = 4.dp), // touch target size
+            .padding(vertical = 8.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -141,7 +139,7 @@ fun SettingsOptionRow(
         )
         RadioButton(
             selected = isSelected,
-            onClick = onClick // Handled by row click, but needed here for accessibility
+            onClick = onClick
         )
     }
 }

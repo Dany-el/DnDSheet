@@ -1,9 +1,13 @@
 package com.yablonskyi.dndsheet.data.model.character
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "spells")
+@Entity(
+    tableName = "spells",
+    indices = [Index(value = ["name"], unique = true)]
+)
 data class Spell(
     @PrimaryKey(autoGenerate = true) val spellId: Long = 0,
     // Identity
@@ -12,7 +16,8 @@ data class Spell(
     val level: SpellLevel = SpellLevel.CANTRIP,
     // Casting
     val castTime: SpellCastTime = SpellCastTime.ACTION,
-    val range: String = "",
+    val rangeType: SpellRangeType = SpellRangeType.SELF,
+    val rangeValue: Int? = null,
     val components: List<Component> = emptyList(),
     val material: String? = null,
     val isRitual: Boolean = false,

@@ -14,6 +14,9 @@ interface AttackDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAttack(attack: Attack) : Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAttacks(attack: List<Attack>)
+
     @Update
     suspend fun updateAttack(attack: Attack)
 

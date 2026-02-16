@@ -60,10 +60,8 @@ class AttackViewModel @Inject constructor(
             val attackToSave = attack.copy(characterId = characterId)
 
             if (attackToSave.attackId == 0L) {
-                Log.i("AttackViewModel", "Inserting new attack: $attackToSave")
                 attackRepository.insertAttack(attackToSave)
             } else {
-                Log.i("AttackViewModel", "Updating existing attack: $attackToSave")
                 attackRepository.updateAttack(attackToSave)
             }
         }

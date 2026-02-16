@@ -1,7 +1,6 @@
 package com.yablonskyi.dndsheet.ui.navigation
 
 import androidx.annotation.StringRes
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.serialization.Serializable
 
@@ -18,6 +17,9 @@ data class UpdateSpellRoute(val spellId: Long)
 data class SpellLibraryRoute(
     val characterId: Long = -1L
 )
+
+@Serializable
+object GlobalSpellLibraryRoute
 
 @Serializable
 data class CharacterSettingsRoute(val characterId: Long)

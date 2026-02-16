@@ -94,34 +94,6 @@ class SpellViewModel @Inject constructor(
     fun setFilter(filter: SpellFilter) {
         _currentFilter.value = filter
     }
-
-    fun addSpell(spell: Spell) {
-        viewModelScope.launch {
-            repository.insertSpell(spell)
-        }
-    }
-
-    fun learnExistingSpell(spell: Spell) {
-        viewModelScope.launch {
-            val crossRef = CharacterSpellCrossRef(
-                characterId = characterId,
-                spellId = spell.spellId
-            )
-            repository.assignSpellToCharacter(crossRef)
-        }
-    }
-
-    fun unlearnSpell(spell: Spell) {
-        viewModelScope.launch {
-            repository.removeSpellFromCharacter(characterId, spell.spellId)
-        }
-    }
-
-    fun deleteSpellGlobally(spell: Spell) {
-        viewModelScope.launch {
-            repository.deleteSpell(spell)
-        }
-    }
 }
 
 @Parcelize

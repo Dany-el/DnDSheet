@@ -93,14 +93,16 @@ fun AttackSlide(
                 AttackRow(
                     attack = attack,
                     onUpdate = { onUpdate(attack.originalAttack) },
-                    onRollClick = onRollClick
+                    onRollClick = onRollClick,
+                    modifier = Modifier.animateItem()
                 )
                 HorizontalDivider()
             }
             item {
                 Spacer(Modifier.height(16.dp))
                 InsertAttackRow(
-                    onAdd = onAdd
+                    onAdd = onAdd,
+                    modifier = Modifier.animateItem()
                 )
             }
         }
@@ -133,6 +135,10 @@ fun InsertAttackRow(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add",
                     tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = stringResource(R.string.add).uppercase(),
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
         }
@@ -183,11 +189,10 @@ fun AttackButton(
 ) {
     TextButton(
         onClick = onClick,
-        border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.outline),
-        shape = MaterialTheme.shapes.medium,
+        shape = MaterialTheme.shapes.small,
         colors = ButtonDefaults.buttonColors().copy(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
         ),
         modifier = modifier
     ) {

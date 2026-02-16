@@ -10,6 +10,8 @@ import com.yablonskyi.dndsheet.data.model.character.Skill
 import com.yablonskyi.dndsheet.data.model.character.SpellCastTime
 import com.yablonskyi.dndsheet.data.model.character.SpellDuration
 import com.yablonskyi.dndsheet.data.model.character.SpellLevel
+import com.yablonskyi.dndsheet.data.model.character.SpellRangeType
+import com.yablonskyi.dndsheet.data.model.character.SpellSlot
 
 class Converters {
     @TypeConverter
@@ -67,4 +69,25 @@ class Converters {
 
     @TypeConverter
     fun toDuration(value: String): SpellDuration = SpellDuration.valueOf(value)
+
+    @TypeConverter
+    fun fromSpellSlotsMap(map: Map<SpellLevel, SpellSlot>): String {
+        return Gson().toJson(map)
+    }
+
+    @TypeConverter
+    fun toSpellSlotsMap(jsonString: String): Map<SpellLevel, SpellSlot> {
+        val type = object : TypeToken<Map<SpellLevel, SpellSlot>>() {}.type
+        return try {
+            Gson().fromJson(jsonString, type)
+        } catch (_: Exception) {
+            emptyMap()
+        }
+    }
+
+    @TypeConverter
+    fun fromRange(rangeType: SpellRangeType): String = rangeType.name
+
+    @TypeConverter
+    fun toRange(value: String): SpellRangeType = SpellRangeType.valueOf(value)
 }
