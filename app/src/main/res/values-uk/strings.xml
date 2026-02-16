@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DND Sheet</string>
+
+    <string name="check">Перевірка</string>
+    <string name="saving_throw">Ряткидок</string>
+
+    <string name="level_cantrip">Замовляння</string>
+    <string name="level_1">1-й рівень</string>
+    <string name="level_2">2-й рівень</string>
+    <string name="level_3">3-й рівень</string>
+    <string name="level_4">4-й рівень</string>
+    <string name="level_5">5-й рівень</string>
+    <string name="level_6">6-й рівень</string>
+    <string name="level_7">7-й рівень</string>
+    <string name="level_8">8-й рівень</string>
+    <string name="level_9">9-й рівень</string>
+
+    <string name="time_action">Дія</string>
+    <string name="time_bonus_action">Бонусна Дія</string>
+    <string name="time_reaction">Реакція</string>
+    <string name="time_special">Особливий</string>
+
+    <string name="clipped_time_action">Д</string>
+    <string name="clipped_time_bonus_action">БД</string>
+    <string name="clipped_time_reaction">Р</string>
+    <string name="clipped_time_special">О</string>
+
+    <string name="concentration">Концентрація</string>
+    <string name="ritual">Ритуал</string>
+
+    <string name="clipped_concentration">К</string>
+    <string name="clipped_ritual">Р</string>
+
+    <string name="time_1_min">1 хвилина</string>
+    <string name="time_10_min">10 хвилин</string>
+    <string name="time_1_hr">1 година</string>
+    <string name="time_8_hr">8 годин</string>
+    <string name="time_12_hr">12 годин</string>
+    <string name="time_24_hr">24 години</string>
+
+    <string name="duration_instant">Миттєво</string>
+    <string name="duration_1_round">1 раунд</string>
+    <string name="duration_1_min">1 хвилина</string>
+    <string name="duration_10_min">10 хвилин</string>
+    <string name="duration_1_hr">1 година</string>
+    <string name="duration_8_hr">8 годин</string>
+    <string name="duration_24_hr">24 години</string>
+    <string name="duration_7_days">7 днів</string>
+    <string name="duration_30_days">30 днів</string>
+    <string name="duration_until_dispelled">Поки не розсіється</string>
+    <string name="duration_special">Особлива</string>
+
+    <string name="school_abjuration">Відгородження</string>
+    <string name="school_conjuration">Виклик</string>
+    <string name="school_divination">Віщування</string>
+    <string name="school_enchantment">Чарування</string>
+    <string name="school_evocation">Евокація</string>
+    <string name="school_illusion">Ілюзія</string>
+    <string name="school_necromancy">Некромантія</string>
+    <string name="school_transmutation">Перетворення</string>
+
+    <string name="comp_verbal">Вербальний</string>
+    <string name="comp_somatic">Соматичний</string>
+    <string name="comp_material">Матеріальний</string>
+
+    <string name="attack_none">Немає</string>
+    <string name="attack_melee">Ближня атака</string>
+    <string name="attack_ranged">Далека атака</string>
+    <string name="attack_save">Ряткидок</string>
+
+    <string name="damage_acid">Кислота</string>
+    <string name="damage_bludgeoning">Дробильний</string>
+    <string name="damage_cold">Холод</string>
+    <string name="damage_fire">Вогонь</string>
+    <string name="damage_force">Силовий</string>
+    <string name="damage_lightning">Блискавка</string>
+    <string name="damage_necrotic">Некротичний</string>
+    <string name="damage_piercing">Колючий</string>
+    <string name="damage_poison">Отрута</string>
+    <string name="damage_psychic">Психічний</string>
+    <string name="damage_radiant">Променистий</string>
+    <string name="damage_slashing">Рубаючий</string>
+    <string name="damage_thunder">Грім</string>
+
+    <string name="ability_str">Сила</string>
+    <string name="ability_dex">Спритність</string>
+    <string name="ability_con">Статура</string>
+    <string name="ability_int">Інтелект</string>
+    <string name="ability_wis">Мудрість</string>
+    <string name="ability_cha">Харизма</string>
+    <string name="ability_none">Немає</string>
+
+    <string name="skill_athletics">Атлетика</string>
+
+    <string name="skill_acrobatics">Акробатика</string>
+    <string name="skill_sleight_of_hand">Спритність рук</string>
+    <string name="skill_stealth">Потайливість</string>
+
+    <string name="skill_arcana">Магія</string>
+    <string name="skill_history">Історія</string>
+    <string name="skill_investigation">Розслідування</string>
+    <string name="skill_nature">Природа</string>
+    <string name="skill_religion">Релігія</string>
+
+    <string name="skill_animal_handling">Догляд за тваринами</string>
+    <string name="skill_insight">Проникливість</string>
+    <string name="skill_medicine">Медицина</string>
+    <string name="skill_perception">Уважність</string>
+    <string name="skill_survival">Виживання</string>
+
+    <string name="skill_deception">Обман</string>
+    <string name="skill_intimidation">Залякування</string>
+    <string name="skill_performance">Виступ</string>
+    <string name="skill_persuasion">Переконання</string>
+
+    <string name="msg_no_spells">Не знайдено чарунків.</string>
+
+    <string name="msg_school">Школа</string>
+    <string name="close">Закрити</string>
+    <string name="unknown_character">Невідомий персонаж</string>
+    <string name="filter_all">Усі</string>
+    <string name="attack_title">Назва</string>
+    <string name="attack_bonus_hit">Бонус</string>
+    <string name="attack_damage">Шкода</string>
+    <string name="ability">Характеристика</string>
+    <string name="attack_type">Тип</string>
+    <string name="damage_dice">Шкода</string>
+    <string name="damage_type">Тип Шкоди</string>
+    <string name="bonus_hit">Бонус Влучання</string>
+    <string name="bonus_damage">Бонус Шкоди</string>
+    <string name="notes">Нотатки</string>
+    <string name="add">Додати</string>
+    <string name="delete">Видалити</string>
+    <string name="supporting_text_dice">1к20</string>
+    <string name="appearance">Тема</string>
+    <string name="language">Мова</string>
+    <string name="characters">Персонажі</string>
+    <string name="adjust_health">Калькулятор ПЗ</string>
+    <string name="msg_attack">Атака</string>
+    <string name="tab_backstory">Передісторія</string>
+    <string name="dice_first_letter">к</string>
+    <string name="msg_casting_time">Час відтворення</string>
+    <string name="msg_distance">Відстань</string>
+    <string name="msg_duration">Тривалість</string>
+    <string name="msg_components">Складові</string>
+    <string name="traits">Навички</string>
+    <string name="feats">Риси</string>
+    <string name="proficiencies">Володіння</string>
+    <string name="inventory">Спорядження</string>
+    <string name="gold">Золото</string>
+    <string name="silver">Срібло</string>
+    <string name="copper">Мідь</string>
+    <string name="roll">Кидок</string>
+    <string name="score_label">Рахунок</string>
+    <string name="backstory">Передісторія</string>
+    <string name="settings">Налаштування</string>
+    <string name="char_name">Ім\'я</string>
+    <string name="char_race">Раса</string>
+    <string name="char_class">Клас</string>
+    <string name="save">Зберегти</string>
+    <string name="is_proficient">Володіння</string>
+    <string name="hp_temp">Тимчасове</string>
+    <string name="damage">Шкода</string>
+    <string name="heal">Лікування</string>
+    <string name="amount">Кіл-сть</string>
+    <string name="health">ПЗ</string>
+    <string name="hp_current">Поточне</string>
+    <string name="hp_max">Максимальне</string>
+    <string name="manage_spells">Підготовка чарунків</string>
+    <string name="char_subclass">Підклас</string>
+    <string name="char_ac">КБ</string>
+    <string name="char_speed">Швидкість</string>
+    <string name="char_initiative_bonus">Бонус Ініціативи</string>
+    <string name="char_shield">Щит</string>
+    <string name="class_settings">Налаштування Класу</string>
+    <string name="spell_settings">Налаштування Чарунків</string>
+    <string name="jack_of_all_trades">Майстер на всі руки</string>
+    <string name="spell_ability">Характеристика</string>
+    <string name="spell_saving_throw_bonus">Бонус Влучання</string>
+    <string name="spell_attack_bonus">Бонус Атаки</string>
+    <string name="spell_selection">Підготовка чарунків</string>
+    <string name="search_spells">Вогнекуля…</string>
+    <string name="msg_spell_library">Чарунки</string>
+    <string name="add_spell">Нова чарунка</string>
+    <string name="edit_spell">Зміна</string>
+    <string name="spell_level">Рівень</string>
+    <string name="spell_description">Опис</string>
+    <string name="spell_higher_levels">На вищих рівнях</string>
+    <string name="spell_save_stat">Характеристика</string>
+    <string name="spell_damage_type">Тип Шкоди</string>
+    <string name="spell_damage_dice">Шкода</string>
+    <string name="spell_material_component">Матеріальні компоненти</string>
+    <string name="spell_attack_type">Тип Атаки</string>
+    <string name="none">Нічого</string>
+    <string name="tab_abilities">Характеристики</string>
+    <string name="tab_spells">Чарунки</string>
+    <string name="tab_attacks">Атаки</string>
+    <string name="tab_features">Особливості</string>
+    <string name="tab_inventory">Спорядження</string>
+    <string name="spells">Чарунки</string>
+    <string name="spell_name">Назва</string>
+</resources>

@@ -1,0 +1,208 @@
+<resources>
+    <string name="app_name">DND Sheet</string>
+
+    <string name="check">Check</string>
+    <string name="saving_throw">Saving Throw</string>
+
+    <string name="level_cantrip">Cantrip</string>
+    <string name="level_1">1st Level</string>
+    <string name="level_2">2nd Level</string>
+    <string name="level_3">3rd Level</string>
+    <string name="level_4">4th Level</string>
+    <string name="level_5">5th Level</string>
+    <string name="level_6">6th Level</string>
+    <string name="level_7">7th Level</string>
+    <string name="level_8">8th Level</string>
+    <string name="level_9">9th Level</string>
+
+    <string name="time_action">Action</string>
+    <string name="time_bonus_action">Bonus Action</string>
+    <string name="time_reaction">Reaction</string>
+    <string name="time_special">Special</string>
+
+    <string name="clipped_time_action">A</string>
+    <string name="clipped_time_bonus_action">BA</string>
+    <string name="clipped_time_reaction">R</string>
+    <string name="clipped_time_special">S</string>
+
+    <string name="concentration">Concentration</string>
+    <string name="ritual">Ritual</string>
+
+    <string name="clipped_concentration">C</string>
+    <string name="clipped_ritual">R</string>
+
+    <string name="time_1_min">1 Minute</string>
+    <string name="time_10_min">10 Minutes</string>
+    <string name="time_1_hr">1 Hour</string>
+    <string name="time_8_hr">8 Hours</string>
+    <string name="time_12_hr">12 Hours</string>
+    <string name="time_24_hr">24 Hours</string>
+
+    <string name="duration_instant">Instantaneous</string>
+    <string name="duration_1_round">1 Round</string>
+    <string name="duration_1_min">1 Minute</string>
+    <string name="duration_10_min">10 Minutes</string>
+    <string name="duration_1_hr">1 Hour</string>
+    <string name="duration_8_hr">8 Hours</string>
+    <string name="duration_24_hr">24 Hours</string>
+    <string name="duration_7_days">7 Days</string>
+    <string name="duration_30_days">30 Days</string>
+    <string name="duration_until_dispelled">Until Dispelled</string>
+    <string name="duration_special">Special</string>
+
+    <string name="school_abjuration">Abjuration</string>
+    <string name="school_conjuration">Conjuration</string>
+    <string name="school_divination">Divination</string>
+    <string name="school_enchantment">Enchantment</string>
+    <string name="school_evocation">Evocation</string>
+    <string name="school_illusion">Illusion</string>
+    <string name="school_necromancy">Necromancy</string>
+    <string name="school_transmutation">Transmutation</string>
+
+    <string name="comp_verbal">Verbal</string>
+    <string name="comp_somatic">Somatic</string>
+    <string name="comp_material">Material</string>
+
+    <string name="attack_none">None</string>
+    <string name="attack_melee">Melee Attack</string>
+    <string name="attack_ranged">Ranged Attack</string>
+    <string name="attack_save">Saving Throw</string>
+
+    <string name="damage_acid">Acid</string>
+    <string name="damage_bludgeoning">Bludgeoning</string>
+    <string name="damage_cold">Cold</string>
+    <string name="damage_fire">Fire</string>
+    <string name="damage_force">Force</string>
+    <string name="damage_lightning">Lightning</string>
+    <string name="damage_necrotic">Necrotic</string>
+    <string name="damage_piercing">Piercing</string>
+    <string name="damage_poison">Poison</string>
+    <string name="damage_psychic">Psychic</string>
+    <string name="damage_radiant">Radiant</string>
+    <string name="damage_slashing">Slashing</string>
+    <string name="damage_thunder">Thunder</string>
+
+    <string name="ability_str">Strength</string>
+    <string name="ability_dex">Dexterity</string>
+    <string name="ability_con">Constitution</string>
+    <string name="ability_int">Intelligence</string>
+    <string name="ability_wis">Wisdom</string>
+    <string name="ability_cha">Charisma</string>
+    <string name="ability_none">None</string>
+
+    <string name="skill_athletics">Athletics</string>
+
+    <string name="skill_acrobatics">Acrobatics</string>
+    <string name="skill_sleight_of_hand">Sleight of Hand</string>
+    <string name="skill_stealth">Stealth</string>
+
+    <string name="skill_arcana">Arcana</string>
+    <string name="skill_history">History</string>
+    <string name="skill_investigation">Investigation</string>
+    <string name="skill_nature">Nature</string>
+    <string name="skill_religion">Religion</string>
+
+    <string name="skill_animal_handling">Animal Handling</string>
+    <string name="skill_insight">Insight</string>
+    <string name="skill_medicine">Medicine</string>
+    <string name="skill_perception">Perception</string>
+    <string name="skill_survival">Survival</string>
+
+    <string name="skill_deception">Deception</string>
+    <string name="skill_intimidation">Intimidation</string>
+    <string name="skill_performance">Performance</string>
+    <string name="skill_persuasion">Persuasion</string>
+
+    <string name="msg_no_spells">No spells found.</string>
+    <string name="msg_casting_time">Casting time</string>
+    <string name="msg_distance">Distance</string>
+    <string name="msg_duration">Duration</string>
+    <string name="msg_components">Components</string>
+    <string name="msg_school">School</string>
+
+    <string name="close">Close</string>
+
+    <string name="unknown_character">Unknown character</string>
+    <string name="filter_all">All</string>
+
+    <string name="attack_title">Title</string>
+    <string name="attack_bonus_hit">Bonus</string>
+    <string name="attack_damage">Damage</string>
+    <string name="traits">Traits</string>
+    <string name="feats">Feats</string>
+    <string name="proficiencies">Proficiencies</string>
+    <string name="inventory">Inventory</string>
+    <string name="gold">Gold</string>
+    <string name="silver">Silver</string>
+    <string name="copper">Copper</string>
+    <string name="backstory">Backstory</string>
+    <string name="settings">Settings</string>
+
+    <string name="char_name">Name</string>
+    <string name="char_race">Race</string>
+    <string name="char_class">Class</string>
+    <string name="char_subclass">Subclass</string>
+    <string name="char_ac">AC</string>
+    <string name="char_speed">Speed</string>
+    <string name="char_initiative_bonus">Initiative bonus</string>
+    <string name="char_shield">Shield</string>
+
+    <string name="class_settings">Class Settings</string>
+    <string name="spell_settings">Spell Settings</string>
+    <string name="jack_of_all_trades">Jack Of All Trades</string>
+    <string name="spell_ability">Spell Ability</string>
+    <string name="spell_saving_throw_bonus">DC Bonus</string>
+    <string name="spell_attack_bonus">Attack Bonus</string>
+    <string name="spell_selection">Spell Selection</string>
+    <string name="search_spells">Search spells…</string>
+    <string name="msg_spell_library">Spell Library</string>
+    <string name="add_spell">Creating</string>
+    <string name="edit_spell">Editing</string>
+    <string name="spell_level">Level</string>
+    <string name="spell_material_component">Material components</string>
+    <string name="spell_attack_type">Attack type</string>
+    <string name="spell_save_stat">Save stat</string>
+    <string name="spell_damage_type">Damage type</string>
+    <string name="spell_damage_dice">Damage dice</string>
+    <string name="spell_description">Description</string>
+    <string name="spell_higher_levels">Higher levels</string>
+    <string name="none">None</string>
+    <string name="tab_abilities">Abilities</string>
+    <string name="tab_spells">Spells</string>
+    <string name="tab_attacks">Attacks</string>
+    <string name="tab_features">Features</string>
+    <string name="tab_inventory">Inventory</string>
+    <string name="tab_backstory">Backstory</string>
+    <string name="dice_first_letter">d</string>
+    <string name="roll">Roll</string>
+    <string name="score_label">Score</string>
+    <string name="health">Health</string>
+    <string name="hp_current">Current</string>
+    <string name="hp_max">Max</string>
+    <string name="hp_temp">Temp</string>
+    <string name="damage">Damage</string>
+    <string name="heal">Heal</string>
+    <string name="amount">Amount</string>
+    <string name="adjust_health">Adjust Health</string>
+    <string name="msg_attack">Attack</string>
+    <string name="save">Save</string>
+    <string name="is_proficient">Proficiency</string>
+    <string name="ability">Ability</string>
+    <string name="attack_type">Type</string>
+    <string name="damage_dice">Damage Dice</string>
+    <string name="damage_type">Damage Type</string>
+    <string name="bonus_hit">Hit Bonus</string>
+    <string name="bonus_damage">Damage Bonus</string>
+    <string name="notes">Notes</string>
+    <string name="add">Add</string>
+    <string name="delete">Delete</string>
+    <string name="supporting_text_dice">e.g. 1d20</string>
+    <string name="appearance">Appearance</string>
+    <string name="language">Language</string>
+    <string name="characters">Characters</string>
+    <string name="manage_spells">Manage Spells</string>
+    <string name="spells">Spells</string>
+    <string name="spell_name">Name</string>
+
+
+</resources>
