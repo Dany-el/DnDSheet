@@ -1,5 +1,6 @@
 package com.yablonskyi.dndsheet.ui.dice
 
+import android.media.MediaPlayer
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,10 +16,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -40,7 +43,9 @@ fun DiceRollResultBox(
     hasRegularDice: Boolean = false,
     diceChar: String = stringResource(R.string.dice_first_letter),
 ) {
-    /*    val context = LocalContext.current
+    val context = LocalContext.current
+
+    /*
 
         val uri = if (numbers.any { it == 1 } && hasRegularDice) "https://www.youtube.com/watch?v=L8XbI9aJOXk" else null
 
@@ -48,6 +53,22 @@ fun DiceRollResultBox(
             val intent = Intent(Intent.ACTION_VIEW, it.toUri())
             context.startActivity(intent)
         }*/
+
+    LaunchedEffect(key1 = numbers, key2 = result) {
+        if (hasRegularDice) {
+            val soundResId = when {
+                numbers.any { it == 20 } -> R.raw.crit_success
+                numbers.any { it == 1 } -> R.raw.crit_fail
+                else -> null
+            }
+
+            soundResId?.let { resId ->
+                val mediaPlayer = MediaPlayer.create(context, resId)
+                mediaPlayer.setOnCompletionListener { it.release() }
+                mediaPlayer.start()
+            }
+        }
+    }
 
     val color = if (numbers.any { it == 20 } && hasRegularDice) Color.Green
     else if (numbers.any { it == 1 } && hasRegularDice) Color.Red
