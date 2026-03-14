@@ -74,6 +74,12 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.kotlinx.serialization.json)
 
+//    implementation(libs.pdfbox.android)
+    implementation(libs.itextpdf.kernel)
+    implementation(libs.itextpdf.io)
+    implementation(libs.itextpdf.layout)
+    implementation(libs.itextpdf.forms)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

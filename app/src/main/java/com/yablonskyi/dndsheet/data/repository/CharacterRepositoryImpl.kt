@@ -77,4 +77,8 @@ class CharacterRepositoryImpl @Inject constructor(
     override suspend fun getCharacterSheetsByIds(characterIds: List<Long>): List<CharacterSheet> {
         return characterDao.getCharacterSheetsByIds(characterIds)
     }
+
+    override suspend fun getCharacterSheetById(characterId: Long): CharacterSheet {
+        return characterDao.getCharacterSheetById(characterId)
+    }
 }

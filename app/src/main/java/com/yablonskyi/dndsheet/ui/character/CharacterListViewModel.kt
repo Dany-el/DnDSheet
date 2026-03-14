@@ -74,6 +74,10 @@ class CharacterListViewModel @Inject constructor(
         return repository.getCharacterSheetsByIds(selectedIds)
     }
 
+    suspend fun getCharacterSheetForExport(character: Character): CharacterSheet {
+        return repository.getCharacterSheetById(character.id)
+    }
+
     fun clearLastCreatedId() {
         _lastCreatedId.value = null
     }
