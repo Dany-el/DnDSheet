@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -56,6 +57,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -80,9 +82,14 @@ import com.yablonskyi.dndsheet.ui.spell.SelectionBottomBar
 import com.yablonskyi.dndsheet.ui.theme.DnDSheetTheme
 import com.yablonskyi.dndsheet.ui.utils.DeletingItemConfirmDialog
 import com.yablonskyi.dndsheet.ui.utils.LoadingDialog
+import com.yablonskyi.dndsheet.ui.utils.PdfExporter
 import com.yablonskyi.dndsheet.ui.utils.SlicedDropdownMenu
 import com.yablonskyi.dndsheet.ui.utils.SlicedMenuItem
 import com.yablonskyi.dndsheet.ui.utils.UiUtils
+import com.yablonskyi.dndsheet.ui.utils.sharePdfIntent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,9 +110,11 @@ fun ListOfCharactersScreen(
     // Export/Import
     onImportSheets: (List<CharacterSheet>) -> Unit,
     onExportSheets: suspend () -> List<CharacterSheet>,
+    onGetCharacterSheet: suspend (Character) -> CharacterSheet,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     val selectionFailureMessage = stringResource(R.string.select_at_least_one_item)
     val importMessage = stringResource(R.string.import_file_empty)
@@ -280,6 +289,40 @@ fun ListOfCharactersScreen(
                         onToggleSelection = { toggleSelection(character) },
                         onClick = { onCharacterClick(character.id) },
                         onDelete = { onDelete(character) },
+                        onExport = {
+                            isLoading = true
+
+                            coroutineScope.launch(Dispatchers.IO) {
+                                try {
+                                    val sheet = onGetCharacterSheet(character)
+                                    val pdfFile = PdfExporter.generateCustomSheet(context, sheet)
+
+                                    withContext(Dispatchers.Main) {
+                                        isLoading = false
+
+                                        if (pdfFile != null) {
+                                            sharePdfIntent(context, pdfFile)
+                                        } else {
+                                            Toast.makeText(
+                                                context,
+                                                "Failed to generate PDF",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                    withContext(Dispatchers.Main) {
+                                        isLoading = false
+                                        Toast.makeText(
+                                            context,
+                                            "An error occurred during export",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                            }
+                        },
                         modifier = Modifier.animateItem()
                     )
                 }
@@ -384,6 +427,7 @@ fun CharacterItem(
     onToggleSelection: () -> Unit,
     onClick: () -> Unit,
     onDelete: () -> Unit,
+    onExport: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val haptics = LocalHapticFeedback.current
@@ -463,6 +507,16 @@ fun CharacterItem(
                         onCheckedChange = { onToggleSelection() },
                         modifier = Modifier.align(Alignment.TopEnd)
                     )
+                } else {
+                    IconButton(
+                        onClick = onExport,
+                        modifier = Modifier.align(Alignment.TopEnd)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "Share Sheet"
+                        )
+                    }
                 }
             }
             Column(
@@ -562,7 +616,14 @@ private fun ListOfCharactersRoutePreview() {
             isAllSelected = false,
             selectedCharacters = emptySet(),
             onImportSheets = {},
-            onExportSheets = { emptyList() }
+            onExportSheets = { emptyList() },
+            onGetCharacterSheet = {
+                CharacterSheet(
+                    UiUtils.sampleCharacters.first(),
+                    UiUtils.sampleSpells,
+                    UiUtils.rawAttacks
+                )
+            }
         )
     }
 }

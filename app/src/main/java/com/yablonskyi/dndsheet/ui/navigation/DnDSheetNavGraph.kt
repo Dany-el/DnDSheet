@@ -127,6 +127,7 @@ fun DnDNavGraph(
                 onDelete = viewModel::deleteCharacter,
                 onImportSheets = viewModel::importSheets,
                 onExportSheets = viewModel::getSheetsForExport,
+                onGetCharacterSheet = viewModel::getCharacterSheetForExport,
                 onCharacterClick = { charId ->
                     navController.navigate(
                         CharacterSheetRoute(id = charId)

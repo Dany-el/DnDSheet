@@ -3,4 +3,7 @@
     <cache-path
         name="shared_spells"
         path="spells/" />
+    <cache-path
+        name="shared_pdfs"
+        path="pdf/" />
 </paths>
