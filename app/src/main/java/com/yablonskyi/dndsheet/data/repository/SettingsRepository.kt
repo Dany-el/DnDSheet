@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.yablonskyi.dndsheet.ui.settings.AppSettingsState
+import com.yablonskyi.dndsheet.ui.settings.ListView
 import com.yablonskyi.dndsheet.ui.utils.AppTheme
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -23,14 +24,17 @@ class SettingsRepository @Inject constructor(
 
     private object Keys {
         val THEME = stringPreferencesKey("app_theme")
+        val LIST_VIEW = stringPreferencesKey("list_view")
     }
 
     val appSettings: Flow<AppSettingsState> = context.dataStore.data
         .map { preferences ->
             val themeString = preferences[Keys.THEME] ?: AppTheme.SYSTEM.name
+            val listViewString = preferences[Keys.LIST_VIEW] ?: ListView.LIST.name
 
             AppSettingsState(
                 theme = AppTheme.valueOf(themeString),
+                listView = ListView.valueOf(listViewString),
                 isLoading = false
             )
         }
@@ -38,6 +42,12 @@ class SettingsRepository @Inject constructor(
     suspend fun saveTheme(theme: AppTheme) {
         context.dataStore.edit { preferences ->
             preferences[Keys.THEME] = theme.name
+        }
+    }
+
+    suspend fun saveListView(listView: ListView) {
+        context.dataStore.edit { preferences ->
+            preferences[Keys.LIST_VIEW] = listView.name
         }
     }
 }

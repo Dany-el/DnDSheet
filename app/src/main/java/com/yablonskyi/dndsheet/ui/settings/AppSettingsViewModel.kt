@@ -1,9 +1,11 @@
 package com.yablonskyi.dndsheet.ui.settings
 
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.data.repository.SettingsRepository
 import com.yablonskyi.dndsheet.ui.settings.LanguageChangeHelper.getActiveLanguageCode
 import com.yablonskyi.dndsheet.ui.utils.AppLanguage
@@ -59,10 +61,22 @@ class AppSettingsViewModel @Inject constructor(
     fun syncLanguageWithSystem() {
         _language.value = getActiveLanguageCode()
     }
+
+    fun updateListView(listView: ListView) {
+        viewModelScope.launch {
+            repository.saveListView(listView)
+        }
+    }
 }
 
 data class AppSettingsState(
     val theme: AppTheme = AppTheme.SYSTEM,
     val languageCode: String = AppLanguage.ENGLISH.code,
+    val listView: ListView = ListView.LIST,
     val isLoading: Boolean
 )
+
+enum class ListView(@StringRes val label: Int) {
+    LIST(R.string.list),
+    GRID(R.string.grid)
+}
