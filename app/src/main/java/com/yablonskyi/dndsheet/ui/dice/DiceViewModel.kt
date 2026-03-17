@@ -39,8 +39,8 @@ class DiceViewModel : ViewModel() {
                 numbers.add(roll)
                 total += roll
             }
-            modifier?.let { total += modifier }
         }
+        modifier?.let { total += modifier }
 
         _diceRollState.value = _diceRollState.value.copy(showResult = false)
 

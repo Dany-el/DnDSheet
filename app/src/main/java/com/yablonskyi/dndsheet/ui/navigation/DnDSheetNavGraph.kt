@@ -29,6 +29,7 @@ import com.yablonskyi.dndsheet.ui.character.CharacterSheetScreen
 import com.yablonskyi.dndsheet.ui.character.ListOfCharactersScreen
 import com.yablonskyi.dndsheet.ui.dice.DiceViewModel
 import com.yablonskyi.dndsheet.ui.settings.AppSettingsScreen
+import com.yablonskyi.dndsheet.ui.settings.AppSettingsViewModel
 import com.yablonskyi.dndsheet.ui.spell.CharacterSpellLibraryViewModel
 import com.yablonskyi.dndsheet.ui.spell.GlobalSpellLibraryViewModel
 import com.yablonskyi.dndsheet.ui.spell.SpellEditScreen
@@ -93,12 +94,18 @@ fun DnDNavGraph(
             val activity = LocalActivity.current as ComponentActivity
 
             val viewModel: CharacterListViewModel = hiltViewModel(activity)
+            val settingsViewModel: AppSettingsViewModel = hiltViewModel(activity)
+
+            val uiState by settingsViewModel.uiState.collectAsStateWithLifecycle()
+
             val characterListState by viewModel.characterListState.collectAsStateWithLifecycle()
             val lastCharacterId by viewModel.lastCreatedId.collectAsStateWithLifecycle()
 
             val isSelectionMode by viewModel.isSelectionMode.collectAsStateWithLifecycle()
             val selectedCharacters by viewModel.selectedCharacters.collectAsStateWithLifecycle()
             val isAllSelected by viewModel.isAllSelected.collectAsStateWithLifecycle()
+
+            val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
 
             val defaultName = stringResource(R.string.unknown_character)
 
@@ -113,7 +120,10 @@ fun DnDNavGraph(
 
             ListOfCharactersScreen(
                 characters = characterListState.characters,
+                listView = uiState.listView,
                 loadingState = characterListState.isLoading,
+                searchQuery = searchQuery,
+                onSearchQueryChange = viewModel::updateSearchQuery,
                 isSelectionMode = isSelectionMode,
                 isAllSelected = isAllSelected,
                 selectedCharacters = selectedCharacters,

@@ -25,14 +25,26 @@ class CharacterListViewModel @Inject constructor(
     private val _lastCreatedId = MutableStateFlow<Long?>(null)
     val lastCreatedId = _lastCreatedId.asStateFlow()
 
-    val characterListState: StateFlow<CharacterListState> = repository.getAllCharacters()
-        .map { characterList ->
-            CharacterListState(
-                characters = characterList,
-                isLoading = false
-            )
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery = _searchQuery.asStateFlow()
+
+    val characterListState: StateFlow<CharacterListState> = combine(
+        repository.getAllCharacters(),
+        _searchQuery
+    ) { characters, query ->
+        val filteredList = if (query.isBlank()) {
+            characters
+        } else {
+            characters.filter { char ->
+                char.name.contains(query, ignoreCase = true)
+            }
         }
-        .stateIn(
+
+        CharacterListState(
+            characters = filteredList,
+            isLoading = false
+        )
+    }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = CharacterListState(isLoading = true)
@@ -48,6 +60,10 @@ class CharacterListViewModel @Inject constructor(
         combine(_selectedCharacters, characterListState) { selected, state ->
             selected.size == state.characters.size && state.characters.isNotEmpty()
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
 
     fun createCharacter(character: Character) {
         _lastCreatedId.value = null

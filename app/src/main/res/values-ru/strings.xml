@@ -111,7 +111,7 @@
     <string name="tab_inventory">Инвентарь</string>
     <string name="tab_backstory">Предыстория</string>
     <string name="dice_first_letter">к</string>
-    <string name="spell_saving_throw_bonus">Бонус Попадания</string>
+    <string name="spell_saving_throw_bonus">Бонус Спасброска</string>
     <string name="spell_attack_bonus">Бонус Атаки</string>
     <string name="spell_selection">Подготовка заклинаний</string>
     <string name="search_spells">Фаербол…</string>
@@ -245,4 +245,9 @@
     <string name="collapse">Свернуть</string>
     <string name="expand">Раскрыть</string>
     <string name="skills">Навыки</string>
+    <string name="list_view_title">Изображение списка</string>
+    <string name="list">Список</string>
+    <string name="grid">Сетка</string>
+    <string name="share_as_pdf">Поделиться PDF</string>
+    <string name="search">Антон Чигур</string>
 </resources>

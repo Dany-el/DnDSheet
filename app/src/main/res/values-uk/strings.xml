@@ -177,7 +177,7 @@
     <string name="spell_settings">Налаштування Чарунків</string>
     <string name="jack_of_all_trades">Майстер на всі руки</string>
     <string name="spell_ability">Характеристика</string>
-    <string name="spell_saving_throw_bonus">Бонус Влучання</string>
+    <string name="spell_saving_throw_bonus">Бонус Ряткидка</string>
     <string name="spell_attack_bonus">Бонус Атаки</string>
     <string name="spell_selection">Підготовка чарунків</string>
     <string name="search_spells">Вогнекуля…</string>
@@ -252,4 +252,9 @@
     <string name="collapse">Згорнути</string>
     <string name="expand">Розширити</string>
     <string name="skills">Навички</string>
+    <string name="list_view_title">Вигляд списку</string>
+    <string name="list">Список</string>
+    <string name="grid">Сітка</string>
+    <string name="share_as_pdf">Поширити PDF</string>
+    <string name="search">Пошук</string>
 </resources>

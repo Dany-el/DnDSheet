@@ -1,14 +1,17 @@
 package com.yablonskyi.dndsheet.ui.spell
 
+import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -17,13 +20,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,9 +58,21 @@ fun SpellLibraryTopBar(
     selectedCount: Int,
     onClearSelection: () -> Unit,
     onActionClick: (LibraryMenuAction) -> Unit,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
+
+    var isSearchExpanded by remember { mutableStateOf(false) }
+    val searchFocusRequester = remember { FocusRequester() }
+
+    BackHandler(enabled = isSearchExpanded) {
+        if (isSearchExpanded && !isSelectionMode) {
+            isSearchExpanded = false
+            onSearchQueryChange("")
+        }
+    }
 
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -58,19 +80,7 @@ fun SpellLibraryTopBar(
             titleContentColor = MaterialTheme.colorScheme.primary,
         ),
         navigationIcon = {
-            if (isLearnMode) {
-                IconButton(
-                    onClick = {
-                        onNavigateBack()
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Navigate back",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            } else if (isSelectionMode) {
+            if (isSelectionMode) {
                 Button(
                     onClick = onClearSelection,
                 ) {
@@ -85,10 +95,54 @@ fun SpellLibraryTopBar(
                         Text(text = "$selectedCount")
                     }
                 }
+            } else if (isSearchExpanded) {
+                IconButton(
+                    onClick = {
+                        isSearchExpanded = false
+                        onSearchQueryChange("")
+                    }
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Close search"
+                    )
+                }
+            } else if (isLearnMode) {
+                IconButton(
+                    onClick = {
+                        onNavigateBack()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Navigate back",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         },
         title = {
-            if (!isSelectionMode) {
+            if (isSearchExpanded) {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    placeholder = { Text(stringResource(R.string.search_spells)) },
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(searchFocusRequester),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    )
+                )
+
+                LaunchedEffect(Unit) {
+                    searchFocusRequester.requestFocus()
+                }
+            } else if (!isSelectionMode) {
                 Text(
                     text = stringResource(
                         if (isLearnMode) R.string.spell_selection else R.string.msg_spell_library
@@ -98,6 +152,11 @@ fun SpellLibraryTopBar(
             }
         },
         actions = {
+            if (!isSearchExpanded) {
+                IconButton(onClick = { isSearchExpanded = true }) {
+                    Icon(Icons.Default.Search, contentDescription = "Search")
+                }
+            }
             if (!isLearnMode && !isSelectionMode) {
                 Box {
                     IconButton(onClick = { menuExpanded = true }) {
