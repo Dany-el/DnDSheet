@@ -16,7 +16,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
-fun IntTextField(
+fun NumbersTextField(
     value: Int,
     label: String,
     onValueChange: (Int) -> Unit,
@@ -38,7 +38,7 @@ fun IntTextField(
     OutlinedTextField(
         value = text,
         onValueChange = { newText ->
-            if (newText.all { it.isDigit() } && validate(newText)) {
+            if (newText.matches(Regex("^-?\\d*$")) && validate(newText)) {
                 text = newText
                 val intValue = newText.toIntOrNull() ?: 0
                 onValueChange(intValue)

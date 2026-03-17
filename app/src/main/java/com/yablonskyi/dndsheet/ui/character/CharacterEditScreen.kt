@@ -66,6 +66,7 @@ import com.yablonskyi.dndsheet.data.model.character.SpellLevel
 import com.yablonskyi.dndsheet.ui.theme.DnDSheetTheme
 import com.yablonskyi.dndsheet.ui.utils.EnumDropdown
 import com.yablonskyi.dndsheet.ui.utils.IntTextField
+import com.yablonskyi.dndsheet.ui.utils.NumbersTextField
 import com.yablonskyi.dndsheet.ui.utils.UiUtils
 import kotlinx.coroutines.launch
 
@@ -465,9 +466,9 @@ fun SpellSettings(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    IntTextField(
+                    NumbersTextField(
                         value = character.spellSettings.dcMiscBonus,
-                        validate = { input -> (input.toIntOrNull() ?: 0) < 100 },
+                        validate = { input -> (input.toIntOrNull() ?: 0) in (-100..100) },
                         onValueChange = { newDcBonus ->
                             onUpdate(
                                 character.copy(
@@ -480,9 +481,9 @@ fun SpellSettings(
                         label = stringResource(R.string.spell_saving_throw_bonus),
                         modifier = Modifier.weight(0.5f)
                     )
-                    IntTextField(
+                    NumbersTextField(
                         value = character.spellSettings.attackMiscBonus,
-                        validate = { input -> (input.toIntOrNull() ?: 0) < 100 },
+                        validate = { input -> (input.toIntOrNull() ?: 0) in (-100..100) },
                         onValueChange = { newAttackBonus ->
                             onUpdate(
                                 character.copy(

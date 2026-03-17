@@ -43,6 +43,7 @@ import com.yablonskyi.dndsheet.data.model.character.AttackType
 import com.yablonskyi.dndsheet.data.model.character.DamageType
 import com.yablonskyi.dndsheet.ui.utils.EnumDropdown
 import com.yablonskyi.dndsheet.ui.utils.IntTextField
+import com.yablonskyi.dndsheet.ui.utils.NumbersTextField
 
 @Composable
 fun UpdateAttackSheet(
@@ -292,19 +293,19 @@ fun AttackFormContent(
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            IntTextField(
+            NumbersTextField(
                 value = bonusToHit,
                 label = stringResource(R.string.bonus_hit),
-                validate = { input -> (input.toIntOrNull() ?: 0) < 100 },
+                validate = { input -> (input.toIntOrNull() ?: 0) in (-100..100) },
                 onValueChange = {
                     onBonusHitChange(it)
                 },
                 modifier = Modifier.weight(1f)
             )
-            IntTextField(
+            NumbersTextField(
                 value = bonusToDamage,
                 label = stringResource(R.string.bonus_damage),
-                validate = { input -> (input.toIntOrNull() ?: 0) < 100 },
+                validate = { input -> (input.toIntOrNull() ?: 0) in (-100..100) },
                 onValueChange = {
                     onBonusDamageChange(it)
                 },

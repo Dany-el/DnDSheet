@@ -129,7 +129,9 @@ fun InsertAttackRow(
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -155,9 +157,11 @@ fun AttackRow(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = modifier.fillMaxWidth().clickable(
-            onClick = onUpdate
-        )
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(
+                onClick = onUpdate
+            )
     ) {
         Text(
             text = attack.name,
@@ -200,6 +204,8 @@ fun AttackButton(
             text = text,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
