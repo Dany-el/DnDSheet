@@ -1,6 +1,7 @@
 package com.yablonskyi.dndsheet.ui.spell.launchers
 
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -42,7 +43,7 @@ fun rememberImportLauncher(
                     }
                 }  catch (e: Exception) {
                     Toast.makeText(context, failureMsg, Toast.LENGTH_SHORT).show()
-                    e.printStackTrace()
+                    Log.e("Import", "${e.message}")
                 } finally {
                     onLoadingStateChange(false)
                 }

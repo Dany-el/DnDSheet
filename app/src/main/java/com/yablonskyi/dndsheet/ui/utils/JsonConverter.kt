@@ -58,7 +58,8 @@ suspend fun importSpellsFromJson(
 fun shareSpellAsJsonFile(context: Context, spell: Spell) {
     CoroutineScope(Dispatchers.IO).launch {
         try {
-            val jsonString = Gson().toJson(spell)
+            val spells = listOf(spell)
+            val jsonString = Gson().toJson(spells)
 
             val spellsDir = File(context.cacheDir, "spells")
             if (!spellsDir.exists()) {
