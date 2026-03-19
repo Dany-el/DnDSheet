@@ -223,8 +223,8 @@
     <string name="range_value">Дальность</string>
     <string name="feets">ф.</string>
     <string name="spell_slots">Количество ячеек</string>
-    <string name="proficiency_bonus">Бонус Мастерства</string>
-    <string name="long_rest">Длительный отдых</string>
+    <string name="proficiency_bonus">Владение</string>
+    <string name="long_rest">Отдых</string>
     <string name="rest">Отдых</string>
     <string name="msg_long_rest">Это восстановит все ХП и сбросит все слоты заклинаний.</string>
     <string name="label_long_rest">Начать длительный отдых?</string>
@@ -250,4 +250,5 @@
     <string name="grid">Сетка</string>
     <string name="share_as_pdf">Поделиться PDF</string>
     <string name="search">Антон Чигур</string>
+    <string name="initiative">Инициатива</string>
 </resources>

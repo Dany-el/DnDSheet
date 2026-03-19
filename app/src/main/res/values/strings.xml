@@ -233,8 +233,8 @@
     <string name="range_value">Range</string>
     <string name="feets">ft.</string>
     <string name="spell_slots">Spell slots</string>
-    <string name="proficiency_bonus">Proficiency bonus</string>
-    <string name="long_rest">Long rest</string>
+    <string name="proficiency_bonus">Proficiency</string>
+    <string name="long_rest">Rest</string>
     <string name="rest">Rest</string>
     <string name="msg_long_rest">This will restore all HP and reset all spell slots.</string>
     <string name="label_long_rest">Take a Long Rest?</string>
@@ -260,6 +260,7 @@
     <string name="grid">Grid</string>
     <string name="share_as_pdf">Share PDF</string>
     <string name="search">Search</string>
+    <string name="initiative">Initiative</string>
 
 
 </resources>

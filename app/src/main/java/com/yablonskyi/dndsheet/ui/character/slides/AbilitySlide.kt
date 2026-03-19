@@ -147,18 +147,22 @@ fun AbilityCard(
             )
 
             val relevantSkills = Skill.entries.filter { it.defaultAbility == ability }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                relevantSkills.forEach { skill ->
+                    val totalMod = character.getSkillMod(skill)
+                    val proficiencyLevel =
+                        character.skillProficiencies[skill] ?: ProficiencyLevel.NONE
 
-            relevantSkills.forEach { skill ->
-                val totalMod = character.getSkillMod(skill)
-                val proficiencyLevel = character.skillProficiencies[skill] ?: ProficiencyLevel.NONE
-
-                SkillRow(
-                    skillName = stringResource(skill.nameRes),
-                    proficiencyLevel = proficiencyLevel,
-                    modifierValue = totalMod,
-                    onProficiencyChange = { newLevel -> onProficiencyChange(skill, newLevel) },
-                    onClick = { onRollClick("${DiceRoles.D20.roll}${formatModifier(totalMod)}") }
-                )
+                    SkillRow(
+                        skillName = stringResource(skill.nameRes),
+                        proficiencyLevel = proficiencyLevel,
+                        modifierValue = totalMod,
+                        onProficiencyChange = { newLevel -> onProficiencyChange(skill, newLevel) },
+                        onClick = { onRollClick("${DiceRoles.D20.roll}${formatModifier(totalMod)}") }
+                    )
+                }
             }
         }
     }
@@ -231,7 +235,8 @@ fun ModifierRow(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier
+                    .padding(start = 8.dp)
             ) {
                 Text(
                     text = stringResource(R.string.check).uppercase(),
@@ -255,11 +260,12 @@ fun ModifierRow(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.clickable(
-                    onClick = {
-                        onProficiencyChange(!isProficient)
-                    }
-                )
+                modifier = Modifier
+                    .clickable(
+                        onClick = {
+                            onProficiencyChange(!isProficient)
+                        }
+                    )
             ) {
                 IconButton(
                     onClick = { onProficiencyChange(!isProficient) },
@@ -321,7 +327,6 @@ fun SkillRow(
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp)
             .height(40.dp)
     ) {
         Row(
@@ -435,7 +440,7 @@ private fun AbilitySlidePreview_Normal() {
 }
 
 @Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES
+    uiMode = Configuration.UI_MODE_NIGHT_YES, locale = "uk"
 )
 @Composable
 private fun AbilitySlidePreview_Night() {

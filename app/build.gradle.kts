@@ -80,6 +80,12 @@ dependencies {
     implementation(libs.itextpdf.layout)
     implementation(libs.itextpdf.forms)
 
+    implementation(libs.androidx.material3.window.size.class1)
+    implementation(libs.androidx.adaptive)
+    implementation(libs.androidx.adaptive.layout)
+    implementation(libs.androidx.adaptive.navigation)
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

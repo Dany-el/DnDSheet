@@ -54,17 +54,13 @@ import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.data.model.character.Character
-import com.yablonskyi.dndsheet.data.model.character.MagicSchool
 import com.yablonskyi.dndsheet.data.model.character.Spell
-import com.yablonskyi.dndsheet.data.model.character.SpellCastTime
-import com.yablonskyi.dndsheet.data.model.character.SpellDuration
 import com.yablonskyi.dndsheet.data.model.character.SpellLevel
 import com.yablonskyi.dndsheet.data.model.character.SpellRangeType
 import com.yablonskyi.dndsheet.data.model.character.SpellSlot
 import com.yablonskyi.dndsheet.data.model.dice.DiceRoles
 import com.yablonskyi.dndsheet.ui.spell.SpellFilter
 import com.yablonskyi.dndsheet.ui.theme.DnDSheetTheme
-import com.yablonskyi.dndsheet.ui.utils.MultiSelectDropdownChip
 import com.yablonskyi.dndsheet.ui.utils.UiUtils
 
 @Composable
@@ -85,7 +81,7 @@ fun SpellSlide(
     }
 
     LazyColumn(
-        contentPadding = PaddingValues(horizontal = 16.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier = modifier.fillMaxSize()
     ) {
@@ -434,94 +430,6 @@ fun SpellFiltersRow(
                     selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
-        }
-    }
-}
-
-@Composable
-fun SpellFiltersRow(
-    // Filters
-    selectedSchool: Set<MagicSchool>,
-    selectedLevels: Set<SpellLevel>,
-    selectedDurations: Set<SpellDuration>,
-    selectedCastTimes: Set<SpellCastTime>,
-    selectedConcentration: Boolean,
-    selectedRitual: Boolean,
-    // Toggles
-    toggleSchoolFilter: (MagicSchool) -> Unit,
-    toggleLevelFilter: (SpellLevel) -> Unit,
-    toggleDurationFilter: (SpellDuration) -> Unit,
-    toggleCastTimeFilter: (SpellCastTime) -> Unit,
-    toggleRitual: () -> Unit,
-    toggleConcentration: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-    ) {
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            item {
-                MultiSelectDropdownChip(
-                    title = stringResource(R.string.spell_level),
-                    options = SpellLevel.entries,
-                    selectedOptions = selectedLevels,
-                    onToggle = { toggleLevelFilter(it) },
-                    labelMapper = { stringResource(it.resId) }
-                )
-            }
-            item {
-                MultiSelectDropdownChip(
-                    title = stringResource(R.string.msg_school),
-                    options = MagicSchool.entries,
-                    selectedOptions = selectedSchool,
-                    onToggle = { toggleSchoolFilter(it) },
-                    labelMapper = { stringResource(it.resId) }
-                )
-            }
-            item {
-                MultiSelectDropdownChip(
-                    title = stringResource(R.string.msg_duration),
-                    options = SpellDuration.entries,
-                    selectedOptions = selectedDurations,
-                    onToggle = { toggleDurationFilter(it) },
-                    labelMapper = { stringResource(it.resId) }
-                )
-            }
-        }
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            item {
-                MultiSelectDropdownChip(
-                    title = stringResource(R.string.msg_casting_time),
-                    options = SpellCastTime.entries,
-                    selectedOptions = selectedCastTimes,
-                    onToggle = { toggleCastTimeFilter(it) },
-                    labelMapper = { stringResource(it.resId) }
-                )
-            }
-            item {
-                FilterChip(
-                    selected = selectedConcentration,
-                    onClick = toggleConcentration,
-                    label = { Text(stringResource(R.string.concentration)) },
-                    leadingIcon = {
-                        if (selectedConcentration) Icon(Icons.Default.Check, null)
-                    }
-                )
-            }
-            item {
-                FilterChip(
-                    selected = selectedRitual,
-                    onClick = toggleRitual,
-                    label = { Text(stringResource(R.string.ritual)) },
-                    leadingIcon = {
-                        if (selectedRitual) Icon(Icons.Default.Check, null)
-                    }
-                )
-            }
         }
     }
 }

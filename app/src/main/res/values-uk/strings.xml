@@ -230,8 +230,8 @@
     <string name="range_value">Дальність</string>
     <string name="feets">ф.</string>
     <string name="spell_slots">Кількість комірок</string>
-    <string name="proficiency_bonus">Бонус майстерності</string>
-    <string name="long_rest">Довгий відпочинок</string>
+    <string name="proficiency_bonus">Володіння</string>
+    <string name="long_rest">Відпочинок</string>
     <string name="rest">Відпочинок</string>
     <string name="msg_long_rest">Це відновить всі ПЗ і скине всі комірки заклинань.</string>
     <string name="label_long_rest">Почати повноцінний відпочинок?</string>
@@ -257,4 +257,5 @@
     <string name="grid">Сітка</string>
     <string name="share_as_pdf">Поширити PDF</string>
     <string name="search">Пошук</string>
+    <string name="initiative">Ініціатива</string>
 </resources>

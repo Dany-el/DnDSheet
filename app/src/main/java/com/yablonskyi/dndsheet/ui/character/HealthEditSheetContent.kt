@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -79,147 +80,150 @@ fun HealthEditSheetContent(
                 )
             }
         }
-
         Spacer(modifier = Modifier.height(24.dp))
+        LazyColumn {
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    IntTextField(
+                        value = localMax,
+                        label = stringResource(R.string.hp_max),
+                        onValueChange = {
+                            if (it < 1000) {
+                                localMax = it
+                                pushUpdate()
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            IntTextField(
-                value = localMax,
-                label = stringResource(R.string.hp_max),
-                onValueChange = {
-                    if (it < 1000) {
-                        localMax = it
-                        pushUpdate()
-                    }
-                },
-                modifier = Modifier.weight(1f)
-            )
+                    IntTextField(
+                        value = localCurrent,
+                        label = stringResource(R.string.hp_current),
+                        onValueChange = {
+                            if (it <= localMax) {
+                                localCurrent = it
+                                pushUpdate()
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
 
-            IntTextField(
-                value = localCurrent,
-                label = stringResource(R.string.hp_current),
-                onValueChange = {
-                    if (it <= localMax) {
-                        localCurrent = it
-                        pushUpdate()
-                    }
-                },
-                modifier = Modifier.weight(1f)
-            )
-
-            IntTextField(
-                value = localTemp,
-                label = stringResource(R.string.hp_temp),
-                onValueChange = {
-                    if (it < 1000) {
-                        localTemp = it
-                        pushUpdate()
-                    }
-                },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            TextButton(
-                onClick = {
-                    localCurrent = localMax
-                    pushUpdate()
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color(0xff529c64)
-                ),
-                border = BorderStroke(2.dp, Color(0xff529c64)),
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(stringResource(R.string.btn_full_heal))
+                    IntTextField(
+                        value = localTemp,
+                        label = stringResource(R.string.hp_temp),
+                        onValueChange = {
+                            if (it < 1000) {
+                                localTemp = it
+                                pushUpdate()
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(16.dp))
             }
-
-            TextButton(
-                onClick = {
-                    localCurrent = 0
-                    pushUpdate()
-                },
-                border = BorderStroke(2.dp, Color(0xffe34c1e)),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color(0xffe34c1e)
-                ),
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(stringResource(R.string.btn_you_are_dead))
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider()
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // Amount Input
-            IntTextField(
-                value = adjustmentValue,
-                label = stringResource(R.string.amount),
-                onValueChange = { adjustmentValue = it },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(bottom = 8.dp)
-            )
-
-            // Heal Button
-            TextButton(
-                onClick = {
-                    if (adjustmentValue > 0 && adjustmentValue <= localMax - localCurrent) {
-                        localCurrent = (localCurrent + adjustmentValue).coerceAtMost(localMax)
-                        adjustmentValue = 0
-                        pushUpdate()
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    TextButton(
+                        onClick = {
+                            localCurrent = localMax
+                            pushUpdate()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color(0xff529c64)
+                        ),
+                        border = BorderStroke(2.dp, Color(0xff529c64)),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.btn_full_heal))
                     }
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color(0xff529c64)
-                ),
-                border = BorderStroke(2.dp, Color(0xff529c64)),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(stringResource(R.string.heal))
-            }
 
-            // Damage Button
-            TextButton(
-                onClick = {
-                    if (adjustmentValue > 0) {
-                        localCurrent = (localCurrent - adjustmentValue).coerceAtLeast(0)
-                        adjustmentValue = 0
-                        pushUpdate()
+                    TextButton(
+                        onClick = {
+                            localCurrent = 0
+                            pushUpdate()
+                        },
+                        border = BorderStroke(2.dp, Color(0xffe34c1e)),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color(0xffe34c1e)
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(stringResource(R.string.btn_you_are_dead))
                     }
-                },
-                border = BorderStroke(2.dp, Color(0xffe34c1e)),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Color(0xffe34c1e)
-                ),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(stringResource(R.string.damage))
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Amount Input
+                    IntTextField(
+                        value = adjustmentValue,
+                        label = stringResource(R.string.amount),
+                        onValueChange = { adjustmentValue = it },
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(bottom = 8.dp)
+                    )
+
+                    // Heal Button
+                    TextButton(
+                        onClick = {
+                            if (adjustmentValue > 0 && adjustmentValue <= localMax - localCurrent) {
+                                localCurrent =
+                                    (localCurrent + adjustmentValue).coerceAtMost(localMax)
+                                adjustmentValue = 0
+                                pushUpdate()
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color(0xff529c64)
+                        ),
+                        border = BorderStroke(2.dp, Color(0xff529c64)),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(stringResource(R.string.heal))
+                    }
+
+                    // Damage Button
+                    TextButton(
+                        onClick = {
+                            if (adjustmentValue > 0) {
+                                localCurrent = (localCurrent - adjustmentValue).coerceAtLeast(0)
+                                adjustmentValue = 0
+                                pushUpdate()
+                            }
+                        },
+                        border = BorderStroke(2.dp, Color(0xffe34c1e)),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color(0xffe34c1e)
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(stringResource(R.string.damage))
+                    }
+                }
             }
         }
     }

@@ -51,7 +51,7 @@ fun AttackSlide(
         modifier = modifier.fillMaxSize()
     ) {
         LazyColumn(
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(8.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
             item {
