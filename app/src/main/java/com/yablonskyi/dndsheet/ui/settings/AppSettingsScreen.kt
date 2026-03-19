@@ -4,14 +4,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.ViewList
@@ -65,7 +69,6 @@ fun AppSettingsScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val language by viewModel.language.collectAsStateWithLifecycle()
 
-    // Track which bottom sheet to show
     var activeSheet by remember { mutableStateOf<ActiveSettingsSheet?>(null) }
 
     Scaffold(
@@ -83,40 +86,48 @@ fun AppSettingsScreen(
                 )
             )
         }
-    ) { padding ->
-        Column(
+    ) { innerPadding ->
+        Box(
             modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding(),
+            contentAlignment = Alignment.TopCenter
         ) {
-            // THEME
-            SettingsActionRow(
-                title = stringResource(R.string.appearance),
-                currentValue = stringResource(state.theme.label),
-                onClick = { activeSheet = ActiveSettingsSheet.THEME }
-            )
+            Column(
+                modifier = Modifier.widthIn(max = 840.dp),
+            ) {
+                // THEME
+                SettingsActionRow(
+                    title = stringResource(R.string.appearance),
+                    currentValue = stringResource(state.theme.label),
+                    onClick = { activeSheet = ActiveSettingsSheet.THEME }
+                )
 
-            HorizontalDivider()
+                HorizontalDivider()
 
-            val language =
-                AppLanguage.entries.first { language -> language.code == state.languageCode }
+                val language =
+                    AppLanguage.entries.first { language -> language.code == state.languageCode }
 
-            SettingsActionRow(
-                title = stringResource(R.string.language),
-                currentValue = stringResource(language.label),
-                onClick = { activeSheet = ActiveSettingsSheet.LANGUAGE }
-            )
+                SettingsActionRow(
+                    title = stringResource(R.string.language),
+                    currentValue = stringResource(language.label),
+                    onClick = { activeSheet = ActiveSettingsSheet.LANGUAGE }
+                )
 
-            HorizontalDivider()
+                HorizontalDivider()
 
-            // LIST VIEW
-            SettingsActionRow(
-                title = stringResource(R.string.list_view_title),
-                currentValue = stringResource(state.listView.label),
-                onClick = { activeSheet = ActiveSettingsSheet.LIST_VIEW }
-            )
+                // LIST VIEW
+                SettingsActionRow(
+                    title = stringResource(R.string.list_view_title),
+                    currentValue = stringResource(state.listView.label),
+                    onClick = { activeSheet = ActiveSettingsSheet.LIST_VIEW }
+                )
 
-            HorizontalDivider()
+                HorizontalDivider()
+            }
+
         }
     }
 
@@ -229,11 +240,6 @@ fun <T> SelectionBottomSheet(
                         .padding(horizontal = 16.dp, vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    /*Icon(
-                        imageVector = if (isSelected) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-                        contentDescription = null,
-                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                    )*/
                     RadioButton(
                         selected = isSelected,
                         onClick = null
@@ -246,7 +252,6 @@ fun <T> SelectionBottomSheet(
                         modifier = Modifier.weight(1f)
                     )
                 }
-                HorizontalDivider()
             }
             Spacer(modifier = Modifier.height(16.dp))
         }

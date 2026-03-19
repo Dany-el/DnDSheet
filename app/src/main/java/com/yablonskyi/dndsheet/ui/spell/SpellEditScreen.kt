@@ -4,15 +4,19 @@ import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -196,339 +200,345 @@ fun SpellEditScreen(
                 Icon(Icons.Default.Save, contentDescription = "Save Spell")
             }
         },
-    ) { padding ->
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) { innerPadding ->
+        Box(
             modifier = Modifier
-                .padding(padding)
                 .fillMaxSize()
-                .imePadding()
-                .padding(16.dp),
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding(),
+            contentAlignment = Alignment.TopCenter
         ) {
-            // --- BASIC INFO ---
-            item {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text(stringResource(R.string.spell_name) + "*") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    isError = !isNameValid,
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next,
-                        capitalization = KeyboardCapitalization.Sentences
-                    )
-                )
-            }
-
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    EnumDropdown(
-                        value = level,
-                        labelRes = R.string.spell_level,
-                        options = SpellLevel.entries,
-                        nameMapper = { stringResource(it.resId) },
-                        onSelected = { level = it },
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    EnumDropdown(
-                        value = school,
-                        labelRes = R.string.msg_school,
-                        options = MagicSchool.entries,
-                        nameMapper = { stringResource(it.resId) },
-                        onSelected = { school = it },
-                        modifier = Modifier.weight(1f)
+            LazyColumn(
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.widthIn(max = 840.dp),
+            ) {
+                // --- BASIC INFO ---
+                item {
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text(stringResource(R.string.spell_name) + "*") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        isError = !isNameValid,
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Next,
+                            capitalization = KeyboardCapitalization.Sentences
+                        )
                     )
                 }
-            }
-            // --- CASTING ---
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    EnumDropdown(
-                        value = castTime,
-                        labelRes = R.string.msg_casting_time,
-                        options = SpellCastTime.entries,
-                        nameMapper = { stringResource(it.resId) },
-                        onSelected = { castTime = it },
-                        modifier = Modifier.weight(1f)
-                    )
 
-                    EnumDropdown(
-                        value = rangeType,
-                        labelRes = R.string.range_distance,
-                        options = SpellRangeType.entries,
-                        nameMapper = { stringResource(it.resId) },
-                        onSelected = { rangeType = it },
-                        modifier = Modifier.weight(1f)
-                    )
-                    if (rangeType == SpellRangeType.DISTANCE) {
-                        IntTextField(
-                            value = rangeValue ?: 0,
-                            label = "",
-                            isError = !isDistanceValid,
-                            validate = { input -> (input.toIntOrNull() ?: 0) < 1000 },
-                            onValueChange = { rangeValue = it },
-                            modifier = Modifier.weight(0.5f)
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        EnumDropdown(
+                            value = level,
+                            labelRes = R.string.spell_level,
+                            options = SpellLevel.entries,
+                            nameMapper = { stringResource(it.resId) },
+                            onSelected = { level = it },
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        EnumDropdown(
+                            value = school,
+                            labelRes = R.string.msg_school,
+                            options = MagicSchool.entries,
+                            nameMapper = { stringResource(it.resId) },
+                            onSelected = { school = it },
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
-            }
+                // --- CASTING ---
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        EnumDropdown(
+                            value = castTime,
+                            labelRes = R.string.msg_casting_time,
+                            options = SpellCastTime.entries,
+                            nameMapper = { stringResource(it.resId) },
+                            onSelected = { castTime = it },
+                            modifier = Modifier.weight(1f)
+                        )
 
-            item {
-                HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
-            }
+                        EnumDropdown(
+                            value = rangeType,
+                            labelRes = R.string.range_distance,
+                            options = SpellRangeType.entries,
+                            nameMapper = { stringResource(it.resId) },
+                            onSelected = { rangeType = it },
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (rangeType == SpellRangeType.DISTANCE) {
+                            IntTextField(
+                                value = rangeValue ?: 0,
+                                label = stringResource(R.string.feets),
+                                isError = !isDistanceValid,
+                                validate = { input -> (input.toIntOrNull() ?: 0) < 1000 },
+                                onValueChange = { rangeValue = it },
+                                modifier = Modifier.weight(0.5f)
+                            )
+                        }
+                    }
+                }
 
-            // --- COMPONENTS (V, S, M) ---
-            item {
-                Text(
-                    stringResource(R.string.msg_components),
-                    style = MaterialTheme.typography.labelLarge
-                )
-            }
+                item {
+                    HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
+                }
 
-            item {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(Component.entries) { component ->
-                        FilterChip(
-                            selected = components.contains(component),
-                            onClick = {
-                                val newComponents = if (components.contains(component)) {
-                                    components - component
-                                } else {
-                                    components + component
-                                }.sorted()
+                // --- COMPONENTS (V, S, M) ---
+                item {
+                    Text(
+                        stringResource(R.string.msg_components),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
 
-                                components = newComponents
+                item {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(Component.entries) { component ->
+                            FilterChip(
+                                selected = components.contains(component),
+                                onClick = {
+                                    val newComponents = if (components.contains(component)) {
+                                        components - component
+                                    } else {
+                                        components + component
+                                    }.sorted()
+
+                                    components = newComponents
+                                },
+                                label = {
+                                    Text(
+                                        stringResource(component.resId),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+
+                if (components.contains(Component.MATERIAL)) {
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .bringIntoViewRequester(materialsRequester)
+                                .onFocusEvent { focusState ->
+                                    if (focusState.isFocused) {
+                                        coroutineScope.launch {
+                                            materialsRequester.bringIntoView()
+                                        }
+                                    }
+                                }
+                        ) {
+                            OutlinedTextField(
+                                value = material,
+                                onValueChange = { material = it },
+                                isError = !isMaterialValid,
+                                label = { Text(stringResource(R.string.spell_material_component) + "*") },
+                                keyboardOptions = KeyboardOptions(
+                                    capitalization = KeyboardCapitalization.Sentences
+                                ),
+                                modifier = Modifier.fillMaxWidth(),
+                                minLines = 2,
+                                maxLines = 2
+                            )
+                        }
+                    }
+                }
+
+                // --- DURATION & FLAGS ---
+                item {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        EnumDropdown(
+                            value = duration,
+                            labelRes = R.string.msg_duration,
+                            options = SpellDuration.entries,
+                            nameMapper = { stringResource(it.resId) },
+                            onSelected = { duration = it },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                item {
+                    val ritualInteractionSource = remember { MutableInteractionSource() }
+                    val concentrationInteractionSource = remember { MutableInteractionSource() }
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable(
+                                interactionSource = ritualInteractionSource,
+                                indication = null,
+                                onClick = {
+                                    isRitual = !isRitual
+                                }
+                            )
+                        ) {
+                            Checkbox(
+                                checked = isRitual,
+                                onCheckedChange = { isRitual = it }
+                            )
+                            Text(stringResource(R.string.ritual))
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.clickable(
+                                interactionSource = concentrationInteractionSource,
+                                indication = null,
+                                onClick = {
+                                    isConcentration = !isConcentration
+                                }
+                            )
+                        ) {
+                            Checkbox(
+                                checked = isConcentration,
+                                onCheckedChange = { isConcentration = it }
+                            )
+                            Text(stringResource(R.string.concentration))
+                        }
+                    }
+                }
+
+                item {
+                    HorizontalDivider()
+                }
+
+                // --- COMBAT STATS ---
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        EnumDropdown(
+                            value = attackType,
+                            labelRes = R.string.spell_attack_type,
+                            options = AttackType.entries,
+                            nameMapper = { stringResource(it.resId) },
+                            onSelected = {
+                                attackType = it
+                                if (it == AttackType.NONE) saveStat = null
                             },
-                            label = {
-                                Text(
-                                    stringResource(component.resId),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
+                            modifier = Modifier.weight(1f)
                         )
+                        if (attackType == AttackType.SAVE) {
+                            EnumDropdown(
+                                value = saveStat,
+                                labelRes = R.string.spell_save_stat,
+                                options = Ability.entries.filter { it != Ability.NONE },
+                                nameMapper = {
+                                    it?.let { stringResource(it.nameRes) } ?: ""
+                                },
+                                onSelected = { saveStat = it },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
-            }
 
-            if (components.contains(Component.MATERIAL)) {
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        EnumDropdown(
+                            value = damageType,
+                            labelRes = R.string.spell_damage_type,
+                            options = listOf(null) + DamageType.entries,
+                            nameMapper = {
+                                it?.let { stringResource(it.resId) } ?: stringResource(R.string.none)
+                            },
+                            onSelected = {
+                                damageType = it
+                                if (it == null) damageDice = null
+                            },
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (damageType != null) {
+
+                            val damageDiceTypingRegex =
+                                Regex("""^([1-9]\d*)?([dDкК](1(00?|2)?|20?|4|6|8)?)?$""")
+
+                            OutlinedTextField(
+                                value = damageDice ?: "",
+                                onValueChange = {
+                                    if (it.isEmpty() || damageDiceTypingRegex.matches(it)) {
+                                        damageDice = it
+                                    }
+                                },
+                                label = { Text(stringResource(R.string.spell_damage_dice)) },
+                                placeholder = { Text((stringResource(R.string.placeholder_dice))) },
+                                isError = damageDiceError,
+                                singleLine = true,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
+
+                // --- DESCRIPTION ---
                 item {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .bringIntoViewRequester(materialsRequester)
+                            .bringIntoViewRequester(descriptionRequester)
                             .onFocusEvent { focusState ->
                                 if (focusState.isFocused) {
                                     coroutineScope.launch {
-                                        materialsRequester.bringIntoView()
+                                        descriptionRequester.bringIntoView()
                                     }
                                 }
                             }
                     ) {
                         OutlinedTextField(
-                            value = material,
-                            onValueChange = { material = it },
-                            isError = !isMaterialValid,
-                            label = { Text(stringResource(R.string.spell_material_component) + "*") },
+                            value = description,
+                            onValueChange = { description = it },
+                            label = { Text(stringResource(R.string.spell_description) + "*") },
+                            isError = !isDescriptionValid,
                             keyboardOptions = KeyboardOptions(
                                 capitalization = KeyboardCapitalization.Sentences
                             ),
                             modifier = Modifier.fillMaxWidth(),
+                            minLines = 3,
+                            maxLines = 3
+                        )
+                    }
+                }
+
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .bringIntoViewRequester(higherLevelRequester)
+                            .onFocusEvent { focusState ->
+                                if (focusState.isFocused) {
+                                    coroutineScope.launch {
+                                        higherLevelRequester.bringIntoView()
+                                    }
+                                }
+                            }
+                    ) {
+                        OutlinedTextField(
+                            value = higherLevels,
+                            onValueChange = { higherLevels = it },
+                            label = { Text(stringResource(R.string.spell_higher_levels)) },
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Sentences
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth(),
                             minLines = 2,
                             maxLines = 2
                         )
                     }
                 }
-            }
 
-            // --- DURATION & FLAGS ---
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    EnumDropdown(
-                        value = duration,
-                        labelRes = R.string.msg_duration,
-                        options = SpellDuration.entries,
-                        nameMapper = { stringResource(it.resId) },
-                        onSelected = { duration = it },
-                        modifier = Modifier.weight(1f)
-                    )
+                item {
+                    Spacer(modifier = Modifier.height(72.dp))
                 }
-            }
-
-            item {
-                val ritualInteractionSource = remember { MutableInteractionSource() }
-                val concentrationInteractionSource = remember { MutableInteractionSource() }
-
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable(
-                            interactionSource = ritualInteractionSource,
-                            indication = null,
-                            onClick = {
-                                isRitual = !isRitual
-                            }
-                        )
-                    ) {
-                        Checkbox(
-                            checked = isRitual,
-                            onCheckedChange = { isRitual = it }
-                        )
-                        Text(stringResource(R.string.ritual))
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.clickable(
-                            interactionSource = concentrationInteractionSource,
-                            indication = null,
-                            onClick = {
-                                isConcentration = !isConcentration
-                            }
-                        )
-                    ) {
-                        Checkbox(
-                            checked = isConcentration,
-                            onCheckedChange = { isConcentration = it }
-                        )
-                        Text(stringResource(R.string.concentration))
-                    }
-                }
-            }
-
-            item {
-                HorizontalDivider()
-            }
-
-            // --- COMBAT STATS ---
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    EnumDropdown(
-                        value = attackType,
-                        labelRes = R.string.spell_attack_type,
-                        options = AttackType.entries,
-                        nameMapper = { stringResource(it.resId) },
-                        onSelected = {
-                            attackType = it
-                            if (it == AttackType.NONE) saveStat = null
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                    if (attackType == AttackType.SAVE) {
-                        EnumDropdown(
-                            value = saveStat,
-                            labelRes = R.string.spell_save_stat,
-                            options = Ability.entries.filter { it != Ability.NONE },
-                            nameMapper = {
-                                it?.let { stringResource(it.nameRes) } ?: ""
-                            },
-                            onSelected = { saveStat = it },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    EnumDropdown(
-                        value = damageType,
-                        labelRes = R.string.spell_damage_type,
-                        options = listOf(null) + DamageType.entries,
-                        nameMapper = {
-                            it?.let { stringResource(it.resId) } ?: stringResource(R.string.none)
-                        },
-                        onSelected = {
-                            damageType = it
-                            if (it == null) damageDice = null
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                    if (damageType != null) {
-
-                        val damageDiceTypingRegex =
-                            Regex("""^([1-9]\d*)?([dDкК](1(00?|2)?|20?|4|6|8)?)?$""")
-
-                        OutlinedTextField(
-                            value = damageDice ?: "",
-                            onValueChange = {
-                                if (it.isEmpty() || damageDiceTypingRegex.matches(it)) {
-                                    damageDice = it
-                                }
-                            },
-                            label = { Text(stringResource(R.string.spell_damage_dice)) },
-                            placeholder = { Text((stringResource(R.string.placeholder_dice))) },
-                            isError = damageDiceError,
-                            singleLine = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-                }
-            }
-
-            // --- DESCRIPTION ---
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .bringIntoViewRequester(descriptionRequester)
-                        .onFocusEvent { focusState ->
-                            if (focusState.isFocused) {
-                                coroutineScope.launch {
-                                    descriptionRequester.bringIntoView()
-                                }
-                            }
-                        }
-                ) {
-                    OutlinedTextField(
-                        value = description,
-                        onValueChange = { description = it },
-                        label = { Text(stringResource(R.string.spell_description) + "*") },
-                        isError = !isDescriptionValid,
-                        keyboardOptions = KeyboardOptions(
-                            capitalization = KeyboardCapitalization.Sentences
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 3,
-                        maxLines = 3
-                    )
-                }
-            }
-
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .bringIntoViewRequester(higherLevelRequester)
-                        .onFocusEvent { focusState ->
-                            if (focusState.isFocused) {
-                                coroutineScope.launch {
-                                    higherLevelRequester.bringIntoView()
-                                }
-                            }
-                        }
-                ) {
-                    OutlinedTextField(
-                        value = higherLevels,
-                        onValueChange = { higherLevels = it },
-                        label = { Text(stringResource(R.string.spell_higher_levels)) },
-                        keyboardOptions = KeyboardOptions(
-                            capitalization = KeyboardCapitalization.Sentences
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        minLines = 2,
-                        maxLines = 2
-                    )
-                }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(72.dp))
             }
         }
     }
@@ -537,6 +547,18 @@ fun SpellEditScreen(
 @Preview(locale = "uk")
 @Composable
 private fun SpellEditScreenPreview() {
+    DnDSheetTheme {
+        SpellEditScreen(
+            spell = UiUtils.sampleSpells.filter { it.material != null }.map { it }.first(),
+            onUpdate = {},
+            onNavigateBack = {}
+        )
+    }
+}
+
+@Preview(locale = "uk", device = "spec:width=1280dp,height=800dp,dpi=240")
+@Composable
+private fun SpellEditScreenPreview_Tablet() {
     DnDSheetTheme {
         SpellEditScreen(
             spell = UiUtils.sampleSpells.filter { it.material != null }.map { it }.first(),

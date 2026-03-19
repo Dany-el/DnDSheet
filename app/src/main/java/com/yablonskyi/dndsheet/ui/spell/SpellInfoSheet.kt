@@ -4,7 +4,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -68,122 +70,135 @@ fun SpellInfoSheet(
                 Icon(Icons.Default.Close, contentDescription = "Close")
             }
         }
-
-        Text(
-            text = "${stringResource(spell.level.resId)}, ${
-                stringResource(spell.school.resId)
-            }",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        if (spell.isConcentration || spell.isRitual) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (spell.isConcentration) {
-                    SpellTag(
-                        stringResource(R.string.concentration)
-                    )
-                }
-                if (spell.isRitual) {
-                    SpellTag(
-                        stringResource(R.string.ritual)
-                    )
-                }
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                Text(
+                    text = "${stringResource(spell.level.resId)}, ${
+                        stringResource(spell.school.resId)
+                    }",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-        }
-
-        HorizontalDivider()
-
-        StatRow(
-            label = stringResource(R.string.msg_casting_time),
-            value = stringResource(spell.castTime.resId)
-        )
-
-        val rangeStr = if (spell.rangeValue != null && spell.rangeValue > 0) {
-            "${spell.rangeValue} ${stringResource(R.string.feets)}"
-        } else {
-            stringResource(spell.rangeType.resId)
-        }
-        StatRow(label = stringResource(R.string.range_distance), value = rangeStr)
-
-        val compLetters = spell.components.map { component ->
-            stringResource(component.resId).first().uppercase()
-        }.joinToString(", ")
-
-        val componentsStr =
-            if (spell.components.contains(Component.MATERIAL) && !spell.material.isNullOrBlank()) {
-                "$compLetters (${spell.material})"
-            } else {
-                compLetters
-            }
-        StatRow(label = stringResource(R.string.msg_components), value = componentsStr)
-
-        HorizontalDivider()
-
-
-        if (spell.description.isNotBlank()) {
-            Text(
-                text = stringResource(R.string.spell_description),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Surface(
-                color = OutlinedTextFieldDefaults.colors().unfocusedContainerColor,
-                shape = MaterialTheme.shapes.extraSmall,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                val paragraphs = remember(spell.description) {
-                    spell.description.split("\n").filter { it.isNotBlank() }
+            item {
+                if (spell.isConcentration || spell.isRitual) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    ) {
+                        if (spell.isConcentration) {
+                            SpellTag(
+                                stringResource(R.string.concentration)
+                            )
+                        }
+                        if (spell.isRitual) {
+                            SpellTag(
+                                stringResource(R.string.ritual)
+                            )
+                        }
+                    }
                 }
+                HorizontalDivider()
+            }
+            item {
+                StatRow(
+                    label = stringResource(R.string.msg_casting_time),
+                    value = stringResource(spell.castTime.resId)
+                )
+            }
+            item {
+                val rangeStr = if (spell.rangeValue != null && spell.rangeValue > 0) {
+                    "${spell.rangeValue} ${stringResource(R.string.feets)}"
+                } else {
+                    stringResource(spell.rangeType.resId)
+                }
+                StatRow(label = stringResource(R.string.range_distance), value = rangeStr)
+            }
+            item {
+                val compLetters = spell.components.map { component ->
+                    stringResource(component.resId).first().uppercase()
+                }.joinToString(", ")
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .heightIn(max = 200.dp)
-                ) {
-                    items(paragraphs) { paragraph ->
-                        Text(
-                            text = paragraph,
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Justify,
-                        )
+                val componentsStr =
+                    if (spell.components.contains(Component.MATERIAL) && !spell.material.isNullOrBlank()) {
+                        "$compLetters (${spell.material})"
+                    } else {
+                        compLetters
+                    }
+                StatRow(label = stringResource(R.string.msg_components), value = componentsStr)
+            }
+            item {
+                HorizontalDivider()
+            }
+            item {
+                if (spell.description.isNotBlank()) {
+                    Text(
+                        text = stringResource(R.string.spell_description),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Surface(
+                        color = OutlinedTextFieldDefaults.colors().unfocusedContainerColor,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        val paragraphs = remember(spell.description) {
+                            spell.description.split("\n").filter { it.isNotBlank() }
+                        }
+
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                                .heightIn(max = 200.dp)
+                        ) {
+                            items(paragraphs) { paragraph ->
+                                Text(
+                                    text = paragraph,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    textAlign = TextAlign.Justify,
+                                )
+                            }
+                        }
                     }
                 }
             }
-        }
+            item {
+                if (!spell.higherLevels.isNullOrBlank()) {
+                    Text(
+                        text = stringResource(R.string.spell_higher_levels),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Surface(
+                        color = OutlinedTextFieldDefaults.colors().unfocusedContainerColor,
+                        shape = MaterialTheme.shapes.extraSmall,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        val paragraphs = remember(spell.higherLevels) {
+                            spell.higherLevels.split("\n").filter { it.isNotBlank() }
+                        }
 
-
-        if (!spell.higherLevels.isNullOrBlank()) {
-            Text(
-                text = stringResource(R.string.spell_higher_levels),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Surface(
-                color = OutlinedTextFieldDefaults.colors().unfocusedContainerColor,
-                shape = MaterialTheme.shapes.extraSmall,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                val paragraphs = remember(spell.higherLevels) {
-                    spell.higherLevels.split("\n").filter { it.isNotBlank() }
-                }
-
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .heightIn(max = 150.dp)
-                ) {
-                    items(paragraphs) { paragraph ->
-                        Text(
-                            text = paragraph,
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Justify,
-                        )
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                                .heightIn(max = 150.dp)
+                        ) {
+                            items(paragraphs) { paragraph ->
+                                Text(
+                                    text = paragraph,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    textAlign = TextAlign.Justify,
+                                )
+                            }
+                        }
                     }
                 }
             }

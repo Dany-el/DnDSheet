@@ -2,7 +2,7 @@ package com.yablonskyi.dndsheet.ui
 
 import android.net.Uri
 import android.widget.Toast
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
@@ -12,10 +12,16 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldLayout
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,8 +64,6 @@ fun MainScreen(
 
     var spellsToImport by remember { mutableStateOf<List<Spell>?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
-    val msgOnFailure = stringResource(R.string.failed_to_read_file)
-    val msgOnSuccess = stringResource(R.string.spells_imported_success)
 
     LaunchedEffect(incomingUri) {
         if (incomingUri != null) {
@@ -68,7 +72,11 @@ fun MainScreen(
                 spellsToImport = spells
                 showImportDialog = true
             }.onFailure { error ->
-                Toast.makeText(context, msgOnFailure, Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.failed_to_read_file),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -90,7 +98,11 @@ fun MainScreen(
                     Button(onClick = {
                         globalSpellLibraryViewModel.importSpells(spells)
                         showImportDialog = false
-                        Toast.makeText(context, msgOnSuccess, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.spells_imported_success),
+                            Toast.LENGTH_SHORT
+                        ).show()
 
                         navController.navigate(GlobalSpellLibraryRoute) {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -126,49 +138,92 @@ fun MainScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    val isBottomBarVisible = currentDestination?.let { dest ->
+    val isNavVisible = currentDestination?.let { dest ->
         topLevelRoutes.any { item ->
             dest.hasRoute(item.route::class)
         }
     } == true && !isSpellSelectionMode && !isCharacterSelectionMode
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
-        bottomBar = {
-            if (isBottomBarVisible) {
-                NavigationBar {
-                    topLevelRoutes.forEach { item ->
-                        val isSelected = currentDestination.hierarchy.any {
-                            it.hasRoute(item.route::class)
-                        }
+    val adaptiveInfo = currentWindowAdaptiveInfo()
+    val navLayoutType = if (isNavVisible) {
+        NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
+    } else {
+        NavigationSuiteType.None
+    }
 
-                        NavigationBarItem(
-                            icon = {
-                                Icon(
-                                    item.icon,
-                                    contentDescription = stringResource(item.name)
-                                )
-                            },
-                            label = { Text(stringResource(item.name)) },
-                            selected = isSelected,
-                            onClick = {
-                                navController.navigate(item.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+    NavigationSuiteScaffoldLayout(
+        layoutType = navLayoutType,
+        navigationSuite = {
+            when (navLayoutType) {
+                NavigationSuiteType.NavigationBar -> {
+                    NavigationBar {
+                        topLevelRoutes.forEach { item ->
+                            val isSelected =
+                                currentDestination?.hierarchy?.any { it.hasRoute(item.route::class) } == true
+                            NavigationBarItem(
+                                icon = {
+                                    Icon(
+                                        item.icon,
+                                        contentDescription = stringResource(item.name)
+                                    )
+                                },
+                                label = { Text(stringResource(item.name)) },
+                                selected = isSelected,
+                                onClick = {
+                                    navController.navigate(item.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
+                }
+
+                NavigationSuiteType.NavigationRail, NavigationSuiteType.NavigationDrawer -> {
+                    NavigationRail(
+                        containerColor = NavigationBarDefaults.containerColor,
+                    ) {
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        topLevelRoutes.forEach { item ->
+                            val isSelected =
+                                currentDestination?.hierarchy?.any { it.hasRoute(item.route::class) } == true
+                            NavigationRailItem(
+                                icon = {
+                                    Icon(
+                                        item.icon,
+                                        contentDescription = stringResource(item.name)
+                                    )
+                                },
+                                label = { Text(stringResource(item.name)) },
+                                selected = isSelected,
+                                onClick = {
+                                    navController.navigate(item.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                },
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+
+                NavigationSuiteType.None -> {
                 }
             }
         }
-    ) { outerPadding ->
+    ) {
         DnDNavGraph(
             navController = navController,
-            modifier = Modifier.padding(outerPadding)
         )
     }
 }

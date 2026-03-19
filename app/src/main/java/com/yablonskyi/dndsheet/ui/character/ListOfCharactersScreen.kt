@@ -3,6 +3,7 @@ package com.yablonskyi.dndsheet.ui.character
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
@@ -14,11 +15,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -52,12 +52,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -82,6 +84,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
 import coil.compose.AsyncImage
 import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.data.model.character.Character
@@ -126,6 +129,7 @@ fun ListOfCharactersScreen(
     onImportSheets: (List<CharacterSheet>) -> Unit,
     onExportSheets: suspend () -> List<CharacterSheet>,
     onGetCharacterSheet: suspend (Character) -> CharacterSheet,
+    windowSizeClass: WindowSizeClass,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -208,11 +212,19 @@ fun ListOfCharactersScreen(
         }
     }
 
-    val bottomNavHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val fabSpacing = 72.dp
 
+    val isWideScreen =
+        windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+
+    val screenInsets = if (isWideScreen) {
+        ScaffoldDefaults.contentWindowInsets
+    } else {
+        WindowInsets(bottom = 0.dp)
+    }
+
     Scaffold(
-        contentWindowInsets = WindowInsets(bottom = 0.dp),
+        contentWindowInsets = screenInsets,
         topBar = {
             CenterAlignedTopAppBar(
                 navigationIcon = {
@@ -358,78 +370,97 @@ fun ListOfCharactersScreen(
         }
     ) { padding ->
         if (!loadingState) {
-            when (listView) {
-                ListView.LIST -> {
-                    LazyColumn(
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            top = 16.dp,
-                            end = 16.dp,
-                            bottom = 16.dp + bottomNavHeight + fabSpacing
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = modifier
-                            .fillMaxSize()
-                            .padding(padding)
-                    ) {
-                        itemsIndexed(characters, key = { _, item -> item.id }) { index, character ->
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .consumeWindowInsets(padding),
+                contentAlignment = Alignment.TopCenter
+            ) {
+                when (listView) {
+                    ListView.LIST -> {
+                        LazyColumn(
+                            contentPadding = PaddingValues(
+                                start = 16.dp,
+                                top = 16.dp,
+                                end = 16.dp,
+                                bottom = 16.dp + fabSpacing
+                            ),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.widthIn(max = 840.dp)
+                        ) {
+                            itemsIndexed(
+                                characters,
+                                key = { _, item -> item.id }) { index, character ->
 
-                            val itemShape = when {
-                                characters.size == 1 -> RoundedCornerShape(16.dp)
-                                index == 0 -> RoundedCornerShape(
-                                    topStart = 16.dp, topEnd = 16.dp,
-                                    bottomStart = 4.dp, bottomEnd = 4.dp
+                                val itemShape = when {
+                                    characters.size == 1 -> RoundedCornerShape(16.dp)
+                                    index == 0 -> RoundedCornerShape(
+                                        topStart = 16.dp, topEnd = 16.dp,
+                                        bottomStart = 4.dp, bottomEnd = 4.dp
+                                    )
+
+                                    index == characters.lastIndex -> RoundedCornerShape(
+                                        topStart = 4.dp, topEnd = 4.dp,
+                                        bottomStart = 16.dp, bottomEnd = 16.dp
+                                    )
+
+                                    else -> MaterialTheme.shapes.extraSmall
+                                }
+
+                                CharacterListItem(
+                                    character = character,
+                                    shape = itemShape,
+                                    isSelected = selectedCharacters.contains(character),
+                                    isSelectionMode = isSelectionMode,
+                                    onToggleSelection = { toggleSelection(character) },
+                                    onClick = { onCharacterClick(character.id) },
+                                    onDelete = { onDelete(character) },
+                                    onExport = { onExport(character) },
+                                    modifier = Modifier.animateItem()
                                 )
-
-                                index == characters.lastIndex -> RoundedCornerShape(
-                                    topStart = 4.dp, topEnd = 4.dp,
-                                    bottomStart = 16.dp, bottomEnd = 16.dp
-                                )
-
-                                else -> MaterialTheme.shapes.extraSmall
                             }
-
-                            CharacterListItem(
-                                character = character,
-                                shape = itemShape,
-                                isSelected = selectedCharacters.contains(character),
-                                isSelectionMode = isSelectionMode,
-                                onToggleSelection = { toggleSelection(character) },
-                                onClick = { onCharacterClick(character.id) },
-                                onDelete = { onDelete(character) },
-                                onExport = { onExport(character) },
-                                modifier = Modifier.animateItem()
-                            )
                         }
                     }
-                }
 
-                ListView.GRID -> {
-                    LazyVerticalStaggeredGrid(
-                        columns = StaggeredGridCells.Fixed(2),
-                        contentPadding = PaddingValues(
-                            start = 16.dp,
-                            top = 16.dp,
-                            end = 16.dp,
-                            bottom = 16.dp + bottomNavHeight + fabSpacing
-                        ),
-                        verticalItemSpacing = 4.dp,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = modifier
-                            .fillMaxSize()
-                            .padding(padding)
-                    ) {
-                        items(characters, key = { it.id }) { character ->
-                            CharacterGridItem(
-                                character = character,
-                                isSelected = selectedCharacters.contains(character),
-                                isSelectionMode = isSelectionMode,
-                                onToggleSelection = { toggleSelection(character) },
-                                onClick = { onCharacterClick(character.id) },
-                                onDelete = { onDelete(character) },
-                                onExport = { onExport(character) },
-                                modifier = Modifier.animateItem()
-                            )
+                    ListView.GRID -> {
+                        val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+
+                        val columnCount = when {
+                            windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> 3
+                            windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 3
+                            else -> 2
+                        }
+
+                        LazyVerticalStaggeredGrid(
+                            columns = StaggeredGridCells.Fixed(columnCount),
+                            contentPadding = PaddingValues(
+                                start = 16.dp,
+                                top = 16.dp,
+                                end = 16.dp,
+                                bottom = 16.dp + fabSpacing
+                            ),
+                            verticalItemSpacing = 4.dp,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier
+                                .widthIn(max = 840.dp)
+                        ) {
+                            items(characters, key = { it.id }) { character ->
+                                CharacterGridItem(
+                                    character = character,
+                                    isSelected = selectedCharacters.contains(character),
+                                    isSelectionMode = isSelectionMode,
+                                    onToggleSelection = { toggleSelection(character) },
+                                    onClick = { onCharacterClick(character.id) },
+                                    onDelete = { onDelete(character) },
+                                    onExport = { onExport(character) },
+                                    modifier = Modifier.animateItem(
+                                        fadeInSpec = tween(durationMillis = 600),
+                                        placementSpec = null,
+                                        fadeOutSpec = tween(durationMillis = 200)
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -832,6 +863,7 @@ private fun ListOfCharactersRoutePreview_LIST() {
             selectedCharacters = emptySet(),
             onImportSheets = {},
             onExportSheets = { emptyList() },
+            windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
             onGetCharacterSheet = {
                 CharacterSheet(
                     UiUtils.sampleCharacters.first(),
@@ -843,7 +875,41 @@ private fun ListOfCharactersRoutePreview_LIST() {
     }
 }
 
-@Preview
+@Preview(device = "spec:width=1280dp,height=800dp,dpi=240")
+@Composable
+private fun ListOfCharactersRoutePreview_LIST_TABLET() {
+    DnDSheetTheme {
+        ListOfCharactersScreen(
+            characters = UiUtils.sampleCharacters,
+            loadingState = false,
+            searchQuery = "",
+            onSearchQueryChange = {},
+            listView = ListView.LIST,
+            onAdd = {},
+            onDelete = {},
+            onCharacterClick = {},
+            onDeleteSelected = {},
+            onToggleSelectAll = {},
+            onClearSelection = {},
+            toggleSelection = {},
+            isSelectionMode = false,
+            isAllSelected = false,
+            selectedCharacters = emptySet(),
+            onImportSheets = {},
+            onExportSheets = { emptyList() },
+            windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
+            onGetCharacterSheet = {
+                CharacterSheet(
+                    UiUtils.sampleCharacters.first(),
+                    UiUtils.sampleSpells,
+                    UiUtils.rawAttacks
+                )
+            },
+        )
+    }
+}
+
+@Preview(device = "spec:width=1280dp,height=800dp,dpi=240")
 @Composable
 private fun ListOfCharactersRoutePreview_GRID() {
     DnDSheetTheme {
@@ -865,6 +931,7 @@ private fun ListOfCharactersRoutePreview_GRID() {
             selectedCharacters = emptySet(),
             onImportSheets = {},
             onExportSheets = { emptyList() },
+            windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
             onGetCharacterSheet = {
                 CharacterSheet(
                     UiUtils.sampleCharacters.first(),
