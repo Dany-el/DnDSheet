@@ -1,7 +1,6 @@
 package com.yablonskyi.dndsheet.ui.navigation
 
 import android.annotation.SuppressLint
-import android.content.res.Configuration
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -14,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -70,8 +68,10 @@ fun DnDNavGraph(
                 val targetIndex = getTabIndex(targetState.destination.route)
 
                 if (initialIndex != -1 && targetIndex != -1) {
-                    val forwardDirection = if (isWideScreen) AnimatedContentTransitionScope.SlideDirection.Up else AnimatedContentTransitionScope.SlideDirection.Left
-                    val backwardDirection = if (isWideScreen) AnimatedContentTransitionScope.SlideDirection.Down else AnimatedContentTransitionScope.SlideDirection.Right
+                    val forwardDirection =
+                        if (isWideScreen) AnimatedContentTransitionScope.SlideDirection.Up else AnimatedContentTransitionScope.SlideDirection.Left
+                    val backwardDirection =
+                        if (isWideScreen) AnimatedContentTransitionScope.SlideDirection.Down else AnimatedContentTransitionScope.SlideDirection.Right
 
                     if (targetIndex > initialIndex) {
                         slideIntoContainer(
@@ -93,8 +93,10 @@ fun DnDNavGraph(
                 val targetIndex = getTabIndex(targetState.destination.route)
 
                 if (initialIndex != -1 && targetIndex != -1) {
-                    val forwardDirection = if (isWideScreen) AnimatedContentTransitionScope.SlideDirection.Up else AnimatedContentTransitionScope.SlideDirection.Left
-                    val backwardDirection = if (isWideScreen) AnimatedContentTransitionScope.SlideDirection.Down else AnimatedContentTransitionScope.SlideDirection.Right
+                    val forwardDirection =
+                        if (isWideScreen) AnimatedContentTransitionScope.SlideDirection.Up else AnimatedContentTransitionScope.SlideDirection.Left
+                    val backwardDirection =
+                        if (isWideScreen) AnimatedContentTransitionScope.SlideDirection.Down else AnimatedContentTransitionScope.SlideDirection.Right
 
                     if (targetIndex > initialIndex) {
                         slideOutOfContainer(
