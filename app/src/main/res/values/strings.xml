@@ -261,6 +261,20 @@
     <string name="share_as_pdf">Share PDF</string>
     <string name="search">Search</string>
     <string name="initiative">Initiative</string>
+    <string name="backup_and_sync"><![CDATA[Backup & Sync]]></string>
+    <string name="google_account">Account</string>
+    <string name="syncing">Syncing</string>
+    <string name="sync_now">Sync now</string>
+    <string name="sign_out">Sign out</string>
+    <string name="sign_in">Sign in</string>
+    <string name="last_sync">Last sync</string>
+    <string name="never_synced">Never synced</string>
+    <string name="backup">Backup</string>
+    <string name="restore">Restore</string>
+    <string name="not_signed_in">Not signed in</string>
+    <string name="delete_backup">Delete Backup</string>
+    <string name="dialog_delete_backup_title">Delete Backup?</string>
+    <string name="dialog_delete_backup_text">Are you sure?</string>
 
 
 </resources>

@@ -22,8 +22,18 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("C:\\Users\\Daniel\\Downloads\\dnd-sheet-release-key.jks")
+            storePassword = "regner13242005"
+            keyAlias = "dnd_sheet_app"
+            keyPassword = "regner13242005"
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -42,6 +52,12 @@ android {
     buildFeatures {
         compose = true
     }
+
+    packaging {
+        resources {
+            excludes += "META-INF/DEPENDENCIES"
+        }
+    }
 }
 
 dependencies {
@@ -56,6 +72,7 @@ dependencies {
     // Hilt
     implementation(libs.hilt)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.work)
     ksp(libs.hilt.compiler)
 
     // Jetpack Compose
@@ -85,6 +102,19 @@ dependencies {
     implementation(libs.androidx.adaptive.layout)
     implementation(libs.androidx.adaptive.navigation)
     implementation(libs.androidx.material3.adaptive.navigation.suite)
+
+    // For user authentication
+    implementation(libs.play.services.auth)
+
+    // Workers
+    implementation(libs.androidx.work.runtime.ktx)
+
+    // For the Google Drive API
+    implementation(libs.google.api.client.android)
+    implementation(libs.google.api.services.drive)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.google.http.client.gson)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

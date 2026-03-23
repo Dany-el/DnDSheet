@@ -12,6 +12,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.yablonskyi.dndsheet.data.worker.scheduleDailyBackup
 import com.yablonskyi.dndsheet.ui.settings.AppSettingsViewModel
 import com.yablonskyi.dndsheet.ui.theme.DnDSheetTheme
 import com.yablonskyi.dndsheet.ui.utils.AppTheme
@@ -39,6 +41,11 @@ class MainActivity : AppCompatActivity() {
                 intent.getParcelableExtra(Intent.EXTRA_STREAM)
             }
 
+        val account = GoogleSignIn.getLastSignedInAccount(this)
+        if (account != null) {
+            scheduleDailyBackup(this)
+        }
+
         setContent {
             val appState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -49,10 +56,9 @@ class MainActivity : AppCompatActivity() {
                     AppTheme.SYSTEM -> isSystemInDarkTheme()
                 }
             ) {
-                if (!appState.isLoading)
-                    MainScreen(
-                        incomingUri
-                    )
+                if(!appState.isLoading) {
+                    MainScreen(incomingUri)
+                }
             }
         }
     }

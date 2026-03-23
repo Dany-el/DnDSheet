@@ -258,4 +258,18 @@
     <string name="share_as_pdf">Поширити PDF</string>
     <string name="search">Пошук</string>
     <string name="initiative">Ініціатива</string>
+    <string name="backup_and_sync">Резервне копіювання та синхронізація</string>
+    <string name="google_account">Обліковий запис</string>
+    <string name="syncing">Синхронізація</string>
+    <string name="sync_now">Синхронізувати</string>
+    <string name="sign_out">Вийти</string>
+    <string name="sign_in">Увійти</string>
+    <string name="backup">Зберегти копію</string>
+    <string name="restore">Відновити</string>
+    <string name="last_sync">Остання синхронізація</string>
+    <string name="never_synced">Без синхронізації</string>
+    <string name="not_signed_in">Не авторизовано</string>
+    <string name="delete_backup">Видалити копію</string>
+    <string name="dialog_delete_backup_title">Видалити копію?</string>
+    <string name="dialog_delete_backup_text">Ви впевненні?</string>
 </resources>

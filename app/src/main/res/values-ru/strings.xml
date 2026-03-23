@@ -251,4 +251,18 @@
     <string name="share_as_pdf">Поделиться PDF</string>
     <string name="search">Антон Чигур</string>
     <string name="initiative">Инициатива</string>
+    <string name="backup_and_sync">Резервное копирование и синхронизация</string>
+    <string name="google_account">Учетная запись</string>
+    <string name="syncing">Синхронизация</string>
+    <string name="sync_now">Синхронизировать</string>
+    <string name="sign_out">Выйти</string>
+    <string name="sign_in">Войти</string>
+    <string name="last_sync">Последняя синхронизация</string>
+    <string name="never_synced">Без синхронизации</string>
+    <string name="backup">Создать копию</string>
+    <string name="restore">Восстановить</string>
+    <string name="not_signed_in">Не авторизовано</string>
+    <string name="delete_backup">Удалить копию</string>
+    <string name="dialog_delete_backup_title">Удалить копию?</string>
+    <string name="dialog_delete_backup_text">Вы уверенны?</string>
 </resources>
