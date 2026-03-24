@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -296,93 +297,10 @@ fun CharacterSheetScreen(
                     onNavigateBack = onNavigateBack,
                 )
             } else {
-                TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                    ),
-                    title = {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .clickable(
-                                    interactionSource = remember { MutableInteractionSource() },
-                                    indication = null,
-                                    onClick = { onSettingsNavigate(character.id) }
-                                )
-                        ) {
-                            Surface(
-                                shape = CircleShape,
-                                modifier = Modifier
-                                    .wrapContentHeight()
-                                    .heightIn(max = 48.dp)
-                                    .widthIn(max = 48.dp),
-                                color = MaterialTheme.colorScheme.surfaceContainer
-                            ) {
-                                if (character.imagePath != null) {
-                                    AsyncImage(
-                                        model = character.imagePath,
-                                        contentDescription = "Character Profile",
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.Person,
-                                        contentDescription = "Add Photo",
-                                        modifier = Modifier
-                                            .padding(12.dp)
-                                            .fillMaxSize()
-                                    )
-                                }
-                            }
-                            Spacer(Modifier.width(16.dp))
-                            Column(
-                                horizontalAlignment = Alignment.Start,
-                            ) {
-                                Text(
-                                    text = character.name,
-                                    textAlign = TextAlign.Center,
-                                    fontWeight = FontWeight.SemiBold,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-
-                                val characterInfo = listOf(character.race, character.charClass)
-                                    .filter { it.isNotBlank() }
-                                    .joinToString(" — ")
-
-                                Text(
-                                    text = characterInfo,
-                                    textAlign = TextAlign.Center,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = onNavigateBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                onSettingsNavigate(character.id)
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Settings,
-                                contentDescription = "Options",
-                            )
-                        }
-                    }
+                CharacterTopAppBar(
+                    character = character,
+                    onNavigateBack = onNavigateBack,
+                    onSettingsNavigate = onSettingsNavigate
                 )
             }
         },
@@ -400,169 +318,38 @@ fun CharacterSheetScreen(
                 .imePadding()
         ) {
             if (isWideScreen) {
-                Column(
-                    Modifier
-                        .fillMaxSize()
-                        .padding(top = 8.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                                .align(Alignment.Top)
-                                .padding(vertical = 4.dp)
-                                .padding(end = 8.dp)
-                        ) {
-                            SlideSelector(
-                                tabs = tabs,
-                                currentTab = leftSelectedTab,
-                                onTabSelected = onLeftTabSelected,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Spacer(Modifier.width(16.dp))
-                            HealthBar(
-                                character = character,
-                                onHealthClick = {
-                                    activeSheet = CharacterSheetConfig.EditHealth
-                                },
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                        Spacer(Modifier.width(8.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                        ) {
-                            CharacterDetailsRowExpanded(
-                                character = character,
-                                onRollClick = onDiceButtonClick,
-                                onRestClick = onRestClick,
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            SlideSelector(
-                                tabs = tabs,
-                                currentTab = rightSelectedTab,
-                                onTabSelected = onRightTabSelected,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .align(Alignment.Top)
-                                    .padding(4.dp)
-                            )
-                        }
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                        ) {
-                            Crossfade(
-                                targetState = leftSelectedTab,
-                                modifier = Modifier.align(Alignment.Center),
-                                label = "LeftPaneAnimation"
-                            ) { currentTab ->
-                                tabContent(currentTab, Modifier)
-                            }
-                        }
-                        Spacer(Modifier.width(8.dp))
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                        ) {
-                            Crossfade(
-                                targetState = rightSelectedTab,
-                                modifier = Modifier.align(Alignment.Center),
-                                label = "RightPaneAnimation"
-                            ) { currentTab ->
-                                tabContent(currentTab, Modifier)
-                            }
-                        }
-                    }
-                }
-            } else {
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    CharacterDetailsRow(
-                        character = character,
-                        onRollClick = onDiceButtonClick,
-                        onRestClick = onRestClick,
-                        onHealthClick = {
-                            activeSheet = CharacterSheetConfig.EditHealth
-                        },
-                    )
-                    SlideSelector(
-                        tabs = tabs,
-                        currentTab = currentTab,
-                        onTabSelected = { newTab ->
-                            scope.launch {
-                                pagerState.animateScrollToPage(newTab.ordinal)
-                            }
-                        },
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(horizontal = 8.dp)
-                    )
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) { pageIndex ->
-                        val tab = CharacterTab.getByIndex(pageIndex)
-
-                        val slideModifier = Modifier.fillMaxSize()
-
-                        tabContent(tab, slideModifier)
-                    }
-                }
-            }
-            AnimatedVisibility(
-                visible = diceState.showResult,
-                enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
-                exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
-                modifier = Modifier.align(Alignment.BottomStart)
-            ) {
-                val dismissState = rememberSwipeToDismissBoxState(
-                    SwipeToDismissBoxValue.Settled,
-                    SwipeToDismissBoxDefaults.positionalThreshold
+                WideCharacterLayout(
+                    character = character,
+                    leftSelectedTab = leftSelectedTab,
+                    rightSelectedTab = rightSelectedTab,
+                    onLeftTabSelected = onLeftTabSelected,
+                    onRightTabSelected = onRightTabSelected,
+                    onDiceButtonClick = onDiceButtonClick,
+                    onRestClick = onRestClick,
+                    onHealthClick = { activeSheet = CharacterSheetConfig.EditHealth },
+                    tabContent = { tab, mod -> tabContent(tab, mod) }
                 )
-
-                SwipeToDismissBox(
-                    state = dismissState,
-                    backgroundContent = {},
-                    enableDismissFromStartToEnd = true,
-                    enableDismissFromEndToStart = true,
-                    onDismiss = { dismissValue ->
-                        if (dismissValue != SwipeToDismissBoxValue.Settled) {
-                            onDismissResult()
-                        }
-                    }
-                ) {
-                    DiceRollResultBox(
-                        numbers = diceState.numbers,
-                        strings = diceState.stringDices,
-                        hasRegularDice = diceState.hasRegularDice,
-                        diceMod = diceState.modifier,
-                        result = diceState.result,
-                        isPinned = diceState.isPinned,
-                        onPinClick = onPinClick
-                    )
-                }
+            } else {
+                MobileCharacterLayout(
+                    character = character,
+                    tabs = tabs,
+                    currentTab = currentTab,
+                    pagerState = pagerState,
+                    onDiceButtonClick = onDiceButtonClick,
+                    onRestClick = onRestClick,
+                    onHealthClick = { activeSheet = CharacterSheetConfig.EditHealth },
+                    onTabSelected = { newTab ->
+                        scope.launch { pagerState.animateScrollToPage(newTab.ordinal) }
+                    },
+                    tabContent = { tab, mod -> tabContent(tab, mod) }
+                )
             }
+            DiceResultOverlay(
+                diceState = diceState,
+                onDismiss = onDismissResult,
+                onPinClick = onPinClick,
+                modifier = Modifier.align(Alignment.BottomStart)
+            )
         }
     }
     activeSheet?.let { sheetConfig ->
@@ -625,6 +412,252 @@ fun CharacterSheetScreen(
                     )
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CharacterTopAppBar(
+    character: Character,
+    onNavigateBack: () -> Unit,
+    onSettingsNavigate: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TopAppBar(
+        modifier = modifier,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+        ),
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { onSettingsNavigate(character.id) }
+                    )
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .heightIn(max = 48.dp)
+                        .widthIn(max = 48.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainer
+                ) {
+                    if (character.imagePath != null) {
+                        AsyncImage(
+                            model = character.imagePath,
+                            contentDescription = "Character Profile",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Add Photo",
+                            modifier = Modifier
+                                .padding(12.dp)
+                                .fillMaxSize()
+                        )
+                    }
+                }
+                Spacer(Modifier.width(16.dp))
+                Column(
+                    horizontalAlignment = Alignment.Start,
+                ) {
+                    Text(
+                        text = character.name,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    val characterInfo = listOf(character.race, character.charClass)
+                        .filter { it.isNotBlank() }
+                        .joinToString(" — ")
+
+                    Text(
+                        text = characterInfo,
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = onNavigateBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                )
+            }
+        },
+        actions = {
+            IconButton(
+                onClick = { onSettingsNavigate(character.id) }
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Settings,
+                    contentDescription = "Options",
+                )
+            }
+        }
+    )
+}
+
+@Composable
+fun WideCharacterLayout(
+    character: Character,
+    leftSelectedTab: CharacterTab,
+    rightSelectedTab: CharacterTab,
+    onLeftTabSelected: (CharacterTab) -> Unit,
+    onRightTabSelected: (CharacterTab) -> Unit,
+    onDiceButtonClick: (String) -> Unit,
+    onRestClick: () -> Unit,
+    onHealthClick: () -> Unit,
+    tabContent: @Composable (CharacterTab, Modifier) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier
+            .fillMaxSize()
+            .padding(top = 8.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.Top)
+                    .padding(vertical = 4.dp)
+                    .padding(end = 8.dp)
+            ) {
+                SlideSelector(
+                    tabs = CharacterTab.entries,
+                    currentTab = leftSelectedTab,
+                    onTabSelected = onLeftTabSelected,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(Modifier.width(16.dp))
+                HealthBar(
+                    character = character,
+                    onHealthClick = onHealthClick,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                CharacterDetailsRowExpanded(
+                    character = character,
+                    onRollClick = onDiceButtonClick,
+                    onRestClick = onRestClick,
+                    modifier = Modifier.weight(1f)
+                )
+
+                SlideSelector(
+                    tabs = CharacterTab.entries,
+                    currentTab = rightSelectedTab,
+                    onTabSelected = onRightTabSelected,
+                    modifier = Modifier
+                        .weight(1f)
+                        .align(Alignment.Top)
+                        .padding(4.dp)
+                )
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            ) {
+                Crossfade(
+                    targetState = leftSelectedTab,
+                    modifier = Modifier.align(Alignment.Center),
+                    label = "LeftPaneAnimation"
+                ) { currentTab ->
+                    tabContent(currentTab, Modifier)
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            ) {
+                Crossfade(
+                    targetState = rightSelectedTab,
+                    modifier = Modifier.align(Alignment.Center),
+                    label = "RightPaneAnimation"
+                ) { currentTab ->
+                    tabContent(currentTab, Modifier)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MobileCharacterLayout(
+    character: Character,
+    tabs: List<CharacterTab>,
+    currentTab: CharacterTab,
+    pagerState: PagerState,
+    onDiceButtonClick: (String) -> Unit,
+    onRestClick: () -> Unit,
+    onHealthClick: () -> Unit,
+    onTabSelected: (CharacterTab) -> Unit,
+    tabContent: @Composable (CharacterTab, Modifier) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
+        CharacterDetailsRow(
+            character = character,
+            onRollClick = onDiceButtonClick,
+            onRestClick = onRestClick,
+            onHealthClick = onHealthClick,
+        )
+        SlideSelector(
+            tabs = tabs,
+            currentTab = currentTab,
+            onTabSelected = onTabSelected,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(horizontal = 8.dp)
+        )
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxSize()
+        ) { pageIndex ->
+            val tab = CharacterTab.getByIndex(pageIndex)
+
+            val slideModifier = Modifier.fillMaxSize()
+
+            tabContent(tab, slideModifier)
         }
     }
 }
@@ -786,6 +819,48 @@ fun CharacterDetailsRow(
                 )
                 HorizontalDivider(Modifier.weight(1f))
             }
+        }
+    }
+}
+
+@Composable
+fun DiceResultOverlay(
+    diceState: DiceRollState,
+    onDismiss: () -> Unit,
+    onPinClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AnimatedVisibility(
+        visible = diceState.showResult,
+        enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+        exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
+        modifier = modifier
+    ) {
+        val dismissState = rememberSwipeToDismissBoxState(
+            SwipeToDismissBoxValue.Settled,
+            SwipeToDismissBoxDefaults.positionalThreshold
+        )
+
+        SwipeToDismissBox(
+            state = dismissState,
+            backgroundContent = {},
+            enableDismissFromStartToEnd = true,
+            enableDismissFromEndToStart = true,
+            onDismiss = { dismissValue ->
+                if (dismissValue != SwipeToDismissBoxValue.Settled) {
+                    onDismiss()
+                }
+            }
+        ) {
+            DiceRollResultBox(
+                numbers = diceState.numbers,
+                strings = diceState.stringDices,
+                hasRegularDice = diceState.hasRegularDice,
+                diceMod = diceState.modifier,
+                result = diceState.result,
+                isPinned = diceState.isPinned,
+                onPinClick = onPinClick
+            )
         }
     }
 }
