@@ -25,9 +25,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -72,9 +74,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -134,6 +140,28 @@ fun ListOfCharactersScreen(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
+    val gridState = rememberLazyStaggeredGridState()
+
+    var isFabVisible by remember { mutableStateOf(true) }
+
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                val actualScrollAmount = consumed.y
+                if (actualScrollAmount < -10f) {
+                    isFabVisible = false
+                } else if (actualScrollAmount > 10f) {
+                    isFabVisible = true
+                }
+                return Offset.Zero
+            }
+        }
+    }
 
     var isSearchExpanded by remember { mutableStateOf(false) }
     val searchFocusRequester = remember { FocusRequester() }
@@ -327,14 +355,12 @@ fun ListOfCharactersScreen(
         },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = !isSelectionMode,
+                visible = !isSelectionMode && isFabVisible,
                 enter = scaleIn() + fadeIn(),
                 exit = scaleOut() + fadeOut()
             ) {
                 FloatingActionButton(
                     onClick = onAdd,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(64.dp)
                 ) {
                     Icon(
@@ -380,6 +406,7 @@ fun ListOfCharactersScreen(
                 when (listView) {
                     ListView.LIST -> {
                         LazyColumn(
+                            state = listState,
                             contentPadding = PaddingValues(
                                 start = 16.dp,
                                 top = 16.dp,
@@ -387,7 +414,9 @@ fun ListOfCharactersScreen(
                                 bottom = 16.dp + fabSpacing
                             ),
                             verticalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier.widthIn(max = 840.dp)
+                            modifier = Modifier
+                                .widthIn(max = 840.dp)
+                                .nestedScroll(nestedScrollConnection)
                         ) {
                             itemsIndexed(
                                 characters,
@@ -433,6 +462,7 @@ fun ListOfCharactersScreen(
                         }
 
                         LazyVerticalStaggeredGrid(
+                            state = gridState,
                             columns = StaggeredGridCells.Fixed(columnCount),
                             contentPadding = PaddingValues(
                                 start = 16.dp,
@@ -444,6 +474,7 @@ fun ListOfCharactersScreen(
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                             modifier = Modifier
                                 .widthIn(max = 840.dp)
+                                .nestedScroll(nestedScrollConnection)
                         ) {
                             items(characters, key = { it.id }) { character ->
                                 CharacterGridItem(
@@ -548,7 +579,8 @@ fun CharacterListItem(
 
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else
+                MaterialTheme.colorScheme.surfaceVariant
         ),
         shape = shape,
         modifier = modifier
@@ -578,7 +610,7 @@ fun CharacterListItem(
                     .wrapContentHeight()
                     .heightIn(max = 120.dp)
                     .widthIn(max = 120.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
+                color = MaterialTheme.colorScheme.surfaceContainer,
             ) {
                 if (character.imagePath != null) {
                     AsyncImage(
@@ -623,7 +655,9 @@ fun CharacterListItem(
                             modifier = Modifier.weight(0.2f)
                         )
                     } else {
-                        Box {
+                        Box(
+                            Modifier.weight(0.2f)
+                        ) {
                             IconButton(
                                 onClick = { menuExpanded = true },
                                 modifier = Modifier.align(
@@ -707,7 +741,8 @@ fun CharacterGridItem(
 
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+            containerColor = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else
+                MaterialTheme.colorScheme.surfaceVariant
         ),
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
@@ -740,7 +775,7 @@ fun CharacterGridItem(
                                 topEnd = 8.dp,
                             )
                         ),
-                    color = MaterialTheme.colorScheme.surfaceVariant
+                    color = MaterialTheme.colorScheme.surfaceContainer
                 ) {
                     if (character.imagePath != null) {
                         AsyncImage(
@@ -841,7 +876,7 @@ fun CharacterGridItem(
     }
 }
 
-@Preview
+@Preview(group = "list")
 @Composable
 private fun ListOfCharactersRoutePreview_LIST() {
     DnDSheetTheme {
@@ -860,6 +895,40 @@ private fun ListOfCharactersRoutePreview_LIST() {
             toggleSelection = {},
             isSelectionMode = false,
             isAllSelected = false,
+            selectedCharacters = emptySet(),
+            onImportSheets = {},
+            onExportSheets = { emptyList() },
+            windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
+            onGetCharacterSheet = {
+                CharacterSheet(
+                    UiUtils.sampleCharacters.first(),
+                    UiUtils.sampleSpells,
+                    UiUtils.rawAttacks
+                )
+            },
+        )
+    }
+}
+
+@Preview(group = "list")
+@Composable
+private fun ListOfCharactersRoutePreview_LIST_SELECTION() {
+    DnDSheetTheme {
+        ListOfCharactersScreen(
+            characters = UiUtils.sampleCharacters,
+            loadingState = false,
+            searchQuery = "",
+            onSearchQueryChange = {},
+            listView = ListView.LIST,
+            onAdd = {},
+            onDelete = {},
+            onCharacterClick = {},
+            onDeleteSelected = {},
+            onToggleSelectAll = {},
+            onClearSelection = {},
+            toggleSelection = {},
+            isSelectionMode = true,
+            isAllSelected = true,
             selectedCharacters = emptySet(),
             onImportSheets = {},
             onExportSheets = { emptyList() },

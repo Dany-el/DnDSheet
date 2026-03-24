@@ -222,6 +222,9 @@ fun DnDNavGraph(
 
                     onDiceButtonClick = diceViewModel::rollDiceFromString,
                     onDiceClick = diceViewModel::rollDice,
+                    onPinClick = diceViewModel::pinResult,
+                    onDismissResult = diceViewModel::dismissResult,
+
                     onUpdateCharacter = charViewModel::updateCharacter,
                     onFilterChange = spellViewModel::setFilter,
 

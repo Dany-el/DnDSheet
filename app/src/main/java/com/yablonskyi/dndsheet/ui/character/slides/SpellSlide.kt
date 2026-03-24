@@ -1,6 +1,5 @@
 package com.yablonskyi.dndsheet.ui.character.slides
 
-import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,10 +15,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -32,7 +33,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Surface
@@ -49,8 +49,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.Wallpapers
+import androidx.compose.ui.tooling.preview.PreviewDynamicColors
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.data.model.character.Character
@@ -80,94 +81,98 @@ fun SpellSlide(
         spells.groupBy { it.level }.toSortedMap()
     }
 
-    LazyColumn(
-        contentPadding = PaddingValues(horizontal = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier.fillMaxSize()
+    Box(
+        modifier = modifier.widthIn(max = 520.dp)
     ) {
-        item {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = modifier.fillMaxWidth()
-            ) {
-                SpellFiltersRow(
-                    filters = availableFilters,
-                    selectedFilter = currentFilter,
-                    onFilterChange = onFilterChange,
-                )
-                SpellCastingRow(
-                    savingThrow = character.getSpellSaveDC(),
-                    attackBonus = character.getSpellAttackBonus(),
-                    onRollClick = {
-                        onRollClick(
-                            "${DiceRoles.D20.roll}${formatModifier(character.getSpellAttackBonus())}"
-                        )
-                    },
-                )
-                ManageSpellRow(
-                    onManageSpellsClick = { onManageSpellsClick(character.id) }
-                )
-            }
-        }
-
-        if (spells.isEmpty()) {
+        LazyColumn(
+            contentPadding = PaddingValues(horizontal = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.fillMaxSize()
+        ) {
             item {
-                Text(
-                    text = stringResource(R.string.msg_no_spells),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    textAlign = TextAlign.Center
-                )
-            }
-        } else {
-            groupedSpells.forEach { (level, levelSpells) ->
-                stickyHeader {
-                    SpellLevelHeader(
-                        level = level,
-                        slot = character.spellSettings.spellSlots[level] ?: SpellSlot(),
-                        onSlotClick = { delta ->
-                            onSlotClick(level, delta)
-                        }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = modifier.fillMaxWidth()
+                ) {
+                    SpellFiltersRow(
+                        filters = availableFilters,
+                        selectedFilter = currentFilter,
+                        onFilterChange = onFilterChange,
+                    )
+                    SpellCastingRow(
+                        savingThrow = character.getSpellSaveDC(),
+                        attackBonus = character.getSpellAttackBonus(),
+                        onRollClick = {
+                            onRollClick(
+                                "${DiceRoles.D20.roll}${formatModifier(character.getSpellAttackBonus())}"
+                            )
+                        },
+                    )
+                    ManageSpellRow(
+                        onManageSpellsClick = { onManageSpellsClick(character.id) }
                     )
                 }
+            }
 
-                itemsIndexed(
-                    items = levelSpells,
-                    key = { _, item -> item.spellId }
-                ) { index, spell ->
-
-                    val itemShape = when {
-                        levelSpells.size == 1 -> RoundedCornerShape(16.dp)
-                        index == 0 -> RoundedCornerShape(
-                            topStart = 16.dp, topEnd = 16.dp,
-                            bottomStart = 4.dp, bottomEnd = 4.dp
+            if (spells.isEmpty()) {
+                item {
+                    Text(
+                        text = stringResource(R.string.msg_no_spells),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            } else {
+                groupedSpells.forEach { (level, levelSpells) ->
+                    stickyHeader {
+                        SpellLevelHeader(
+                            level = level,
+                            slot = character.spellSettings.spellSlots[level] ?: SpellSlot(),
+                            onSlotClick = { delta ->
+                                onSlotClick(level, delta)
+                            }
                         )
-
-                        index == levelSpells.lastIndex -> RoundedCornerShape(
-                            topStart = 4.dp, topEnd = 4.dp,
-                            bottomStart = 16.dp, bottomEnd = 16.dp
-                        )
-
-                        else -> MaterialTheme.shapes.extraSmall
                     }
 
-                    SpellCard(
-                        spell = spell,
-                        shape = itemShape,
-                        spellSaveDC = character.getSpellSaveDC(),
-                        onRollClick = { dice ->
-                            onRollClick(dice)
-                        },
-                        onUseSpellClick = { onSlotClick(level, 1) },
-                        onSpellClick = { spell ->
-                            onSpellClick(spell)
+                    itemsIndexed(
+                        items = levelSpells,
+                        key = { _, item -> item.spellId }
+                    ) { index, spell ->
+
+                        val itemShape = when {
+                            levelSpells.size == 1 -> RoundedCornerShape(16.dp)
+                            index == 0 -> RoundedCornerShape(
+                                topStart = 16.dp, topEnd = 16.dp,
+                                bottomStart = 4.dp, bottomEnd = 4.dp
+                            )
+
+                            index == levelSpells.lastIndex -> RoundedCornerShape(
+                                topStart = 4.dp, topEnd = 4.dp,
+                                bottomStart = 16.dp, bottomEnd = 16.dp
+                            )
+
+                            else -> MaterialTheme.shapes.extraSmall
                         }
-                    )
+
+                        SpellCard(
+                            spell = spell,
+                            shape = itemShape,
+                            spellSaveDC = character.getSpellSaveDC(),
+                            onRollClick = { dice ->
+                                onRollClick(dice)
+                            },
+                            onUseSpellClick = { onSlotClick(level, 1) },
+                            onSpellClick = { spell ->
+                                onSpellClick(spell)
+                            }
+                        )
+                    }
                 }
-            }
-            item {
-                Spacer(modifier = Modifier.height(120.dp))
+                item {
+                    Spacer(modifier = Modifier.height(120.dp))
+                }
             }
         }
     }
@@ -187,8 +192,8 @@ fun SpellCastingRow(
             .fillMaxWidth()
     ) {
         Surface(
-            shape = MaterialTheme.shapes.medium,
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+            shape = MaterialTheme.shapes.large,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             color = Color.Transparent,
             modifier = Modifier
                 .height(40.dp)
@@ -208,11 +213,14 @@ fun SpellCastingRow(
                 TextButton(
                     onClick = { },
                     border = BorderStroke(
-                        width = 2.dp,
-                        color = MaterialTheme.colorScheme.primary
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline
                     ),
                     enabled = false,
-                    shape = MaterialTheme.shapes.medium,
+                    shape = MaterialTheme.shapes.large.copy(
+                        topStart = CornerSize(0.dp),
+                        bottomStart = CornerSize(0.dp)
+                    ),
                     colors = ButtonDefaults.buttonColors().copy(
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -224,22 +232,29 @@ fun SpellCastingRow(
                         text = savingThrow.toString(),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
         }
-        Surface(
-            shape = MaterialTheme.shapes.medium,
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
-            color = Color.Transparent,
+        Spacer(Modifier.width(8.dp))
+        Box(
             modifier = Modifier
                 .height(40.dp)
-                .defaultMinSize(minWidth = 160.dp)
+                .defaultMinSize(minWidth = 170.dp)
         ) {
+            Surface(
+                shape = MaterialTheme.shapes.large,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                color = Color.Transparent,
+                modifier = Modifier.matchParentSize()
+            ) { }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.padding(start = 8.dp)
+                modifier = Modifier
+                    .matchParentSize()
+                    .padding(start = 8.dp)
             ) {
                 Text(
                     text = stringResource(R.string.msg_attack).uppercase(),
@@ -249,10 +264,13 @@ fun SpellCastingRow(
                 )
                 TextButton(
                     onClick = onRollClick,
-                    shape = MaterialTheme.shapes.medium,
+                    shape = MaterialTheme.shapes.large.copy(
+                        topStart = CornerSize(4.dp),
+                        bottomStart = CornerSize(4.dp)
+                    ),
                     colors = ButtonDefaults.buttonColors().copy(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary
                     ),
                 ) {
                     Text(
@@ -262,6 +280,7 @@ fun SpellCastingRow(
                     )
                 }
             }
+
         }
     }
 }
@@ -277,11 +296,11 @@ fun ManageSpellRow(
     ) {
         TextButton(
             onClick = onManageSpellsClick,
-            border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.primary),
+            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
             shape = MaterialTheme.shapes.extraSmall,
             colors = ButtonDefaults.buttonColors().copy(
                 containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.primary
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ),
             modifier = Modifier
                 .padding(horizontal = 16.dp)
@@ -303,52 +322,18 @@ fun SpellLevelHeader(
     onSlotClick: (Int) -> Unit
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.background
+        color = MaterialTheme.colorScheme.surface
     ) {
         Column(
             horizontalAlignment = Alignment.Start,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp)
         ) {
             SpellSlotTracker(
                 level = level,
                 slot = slot,
                 onSlotClick = onSlotClick
             )
-            /*HorizontalDivider(thickness = 2.dp)
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp, horizontal = 16.dp)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_hourglass),
-                    contentDescription = null,
-                    modifier = Modifier.weight(0.2f),
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
-                Icon(
-                    painter = painterResource(R.drawable.ic_ruler),
-                    contentDescription = null,
-                    modifier = Modifier.weight(0.8f),
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
-                Icon(
-                    painter = painterResource(R.drawable.ic_swords),
-                    contentDescription = null,
-                    modifier = Modifier.weight(0.6f),
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
-                Icon(
-                    painter = painterResource(R.drawable.dice_d20),
-                    contentDescription = null,
-                    modifier = Modifier.weight(0.6f),
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
-                Spacer(Modifier.width(64.dp))
-            }*/
         }
     }
 }
@@ -369,7 +354,7 @@ fun SpellSlotTracker(
         Text(
             text = stringResource(level.resId),
             style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold,
         )
         LazyRow {
@@ -451,8 +436,8 @@ fun SpellCard(
     Card(
         shape = shape,
         colors = CardDefaults.cardColors().copy(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         modifier = modifier
             .fillMaxWidth()
@@ -577,11 +562,11 @@ fun SpellButton(
     OutlinedIconButton(
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-        border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.onPrimary),
-        colors = IconButtonDefaults.iconButtonColors().copy(
+//        border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.onPrimary),
+        /*colors = IconButtonDefaults.iconButtonColors().copy(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
-        ),
+        ),*/
         modifier = modifier.size(56.dp)
     ) {
         Icon(
@@ -599,7 +584,7 @@ fun SpellTag(
     Surface(
         color = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         shape = RoundedCornerShape(8.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -614,49 +599,11 @@ fun SpellTag(
     }
 }
 
-@Preview
+@PreviewLightDark
+@PreviewDynamicColors
+@PreviewScreenSizes
 @Composable
-private fun SpellSlidePreview_EN() {
-    DnDSheetTheme {
-        SpellSlide(
-            character = UiUtils.sampleCharacters.first(),
-            spells = UiUtils.sampleSpells,
-            availableFilters = UiUtils.availableFilters,
-            currentFilter = UiUtils.currentFilter,
-            onFilterChange = {},
-            onRollClick = {},
-            onSlotClick = { _, _ -> },
-            onManageSpellsClick = {},
-            onSpellClick = {}
-        )
-    }
-}
-
-@Preview(locale = "uk")
-@Composable
-private fun SpellSlidePreview_UA() {
-    DnDSheetTheme {
-        SpellSlide(
-            character = UiUtils.sampleCharacters.first(),
-            spells = UiUtils.sampleSpells,
-            availableFilters = UiUtils.availableFilters,
-            currentFilter = UiUtils.currentFilter,
-            onFilterChange = {},
-            onRollClick = {},
-            onSlotClick = { _, _ -> },
-            onManageSpellsClick = {},
-            onSpellClick = {}
-        )
-    }
-}
-
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL,
-    showSystemUi = false, showBackground = false,
-    wallpaper = Wallpapers.NONE, backgroundColor = 0xFF212121
-)
-@Composable
-private fun SpellSlidePreview_EN_Night() {
+private fun SpellSlidePreview_Light() {
     DnDSheetTheme {
         SpellSlide(
             character = UiUtils.sampleCharacters.first(),

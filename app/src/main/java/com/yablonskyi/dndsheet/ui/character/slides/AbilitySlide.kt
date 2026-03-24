@@ -9,14 +9,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -36,12 +40,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewDynamicColors
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.data.model.character.Ability
@@ -64,7 +71,7 @@ fun AbilitySlide(
     val abilities = Ability.entries.filter { it != Ability.NONE }
 
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.widthIn(max = 520.dp)
     ) {
         LazyColumn(
             contentPadding = PaddingValues(8.dp),
@@ -119,15 +126,15 @@ fun AbilityCard(
     Card(
         shape = shape,
         colors = CardDefaults.cardColors().copy(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         modifier = modifier.fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
                 .fillMaxSize()
+                .padding(horizontal = 8.dp, vertical = 16.dp)
         ) {
             AbilityTitle(
                 ability = ability,
@@ -136,31 +143,48 @@ fun AbilityCard(
                     .padding(bottom = 8.dp)
                     .clickable(onClick = onAbilityClick)
             )
-
             ModifierRow(
                 abilityMod = character.getAbilityMod(ability),
                 savingThrowMod = character.getSavingThrowMod(ability),
                 onProficiencyChange = { isProf -> onProfSavingThrowClick(ability, isProf) },
                 isProficient = character.savingThrowProficiencies.contains(ability),
                 onRollClick = onRollClick,
-                modifier = Modifier.padding(bottom = 8.dp)
             )
 
             val relevantSkills = Skill.entries.filter { it.defaultAbility == ability }
             Column(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                relevantSkills.forEach { skill ->
+                if (relevantSkills.isNotEmpty()) {
+                    Spacer(Modifier.height(8.dp))
+                }
+                relevantSkills.forEachIndexed { index, skill ->
                     val totalMod = character.getSkillMod(skill)
                     val proficiencyLevel =
                         character.skillProficiencies[skill] ?: ProficiencyLevel.NONE
+
+                    val itemShape = when {
+                        relevantSkills.size == 1 -> RoundedCornerShape(16.dp)
+                        index == 0 -> RoundedCornerShape(
+                            topStart = 16.dp, topEnd = 16.dp,
+                            bottomStart = 4.dp, bottomEnd = 4.dp
+                        )
+
+                        index == relevantSkills.lastIndex -> RoundedCornerShape(
+                            topStart = 4.dp, topEnd = 4.dp,
+                            bottomStart = 16.dp, bottomEnd = 16.dp
+                        )
+
+                        else -> MaterialTheme.shapes.extraSmall
+                    }
 
                     SkillRow(
                         skillName = stringResource(skill.nameRes),
                         proficiencyLevel = proficiencyLevel,
                         modifierValue = totalMod,
                         onProficiencyChange = { newLevel -> onProficiencyChange(skill, newLevel) },
-                        onClick = { onRollClick("${DiceRoles.D20.roll}${formatModifier(totalMod)}") }
+                        onClick = { onRollClick("${DiceRoles.D20.roll}${formatModifier(totalMod)}") },
+                        shape = itemShape
                     )
                 }
             }
@@ -210,32 +234,34 @@ fun ModifierRow(
     val (icon, tint) = when (isProficient) {
         false -> Pair(
             Icons.Outlined.RadioButtonUnchecked,
-            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            MaterialTheme.colorScheme.outline
         )
 
         true -> Pair(
             Icons.Filled.RadioButtonChecked,
-            MaterialTheme.colorScheme.primary
+            MaterialTheme.colorScheme.tertiary
         )
     }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = modifier
-            .fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
-        Surface(
-            shape = MaterialTheme.shapes.medium,
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.onPrimary),
-            color = Color.Transparent,
-            modifier = Modifier
-                .height(40.dp)
+        Box(
+            modifier = Modifier.height(40.dp)
         ) {
+            Surface(
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                modifier = Modifier.matchParentSize()
+            ) { }
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier
+                    .fillMaxHeight()
                     .padding(start = 8.dp)
             ) {
                 Text(
@@ -250,17 +276,20 @@ fun ModifierRow(
             }
         }
         Spacer(Modifier.width(8.dp))
-        Surface(
-            shape = MaterialTheme.shapes.medium,
-            border = BorderStroke(2.dp, MaterialTheme.colorScheme.onPrimary),
-            color = Color.Transparent,
-            modifier = Modifier
-                .height(40.dp)
+        Box(
+            modifier = Modifier.height(40.dp)
         ) {
+            Surface(
+                shape = MaterialTheme.shapes.large,
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                modifier = Modifier.matchParentSize()
+            ) { }
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier
+                    .clip(MaterialTheme.shapes.medium)
                     .clickable(
                         onClick = {
                             onProficiencyChange(!isProficient)
@@ -285,7 +314,7 @@ fun ModifierRow(
                 )
                 ModifierButton(
                     onClick = { onRollClick("${DiceRoles.D20.roll}${formatModifier(savingThrowMod)}") },
-                    text = formatModifier(savingThrowMod)
+                    text = formatModifier(savingThrowMod),
                 )
             }
         }
@@ -295,6 +324,7 @@ fun ModifierRow(
 @Composable
 fun SkillRow(
     skillName: String,
+    shape: Shape,
     proficiencyLevel: ProficiencyLevel,
     modifierValue: Int,
     onProficiencyChange: (ProficiencyLevel) -> Unit,
@@ -303,32 +333,36 @@ fun SkillRow(
     val (icon, tint) = when (proficiencyLevel) {
         ProficiencyLevel.NONE -> Pair(
             Icons.Outlined.RadioButtonUnchecked,
-            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            MaterialTheme.colorScheme.outline
         )
 
         ProficiencyLevel.HALF -> Pair(
             Icons.Outlined.Contrast,
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+            MaterialTheme.colorScheme.tertiary
         )
 
         ProficiencyLevel.PROFICIENT -> Pair(
             Icons.Filled.RadioButtonChecked,
-            MaterialTheme.colorScheme.primary
+            MaterialTheme.colorScheme.tertiary
         )
 
         ProficiencyLevel.EXPERT -> Pair(
             Icons.Filled.CheckCircle,
-            MaterialTheme.colorScheme.primary
+            MaterialTheme.colorScheme.tertiary
         )
     }
 
-    Surface(
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
             .height(40.dp)
     ) {
+        Surface(
+            shape = shape,
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+            modifier = Modifier.matchParentSize()
+        ) {
+        }
+
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -362,7 +396,8 @@ fun SkillRow(
             )
             ModifierButton(
                 onClick = { onClick("${DiceRoles.D20.roll}${formatModifier(modifierValue)}") },
-                text = formatModifier(modifierValue)
+                text = formatModifier(modifierValue),
+                shape = shape as CornerBasedShape
             )
         }
     }
@@ -400,16 +435,22 @@ fun ProficiencyToggle(
 @Composable
 fun ModifierButton(
     onClick: () -> Unit,
-    text: String
+    text: String,
+    modifier: Modifier = Modifier,
+    shape: CornerBasedShape = MaterialTheme.shapes.large
 ) {
     TextButton(
         onClick = onClick,
-        border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.onPrimary),
-        shape = MaterialTheme.shapes.medium,
-        colors = ButtonDefaults.buttonColors().copy(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        )
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary),
+        shape = shape.copy(
+            topStart = CornerSize(4.dp),
+            bottomStart = CornerSize(4.dp)
+        ),
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = MaterialTheme.colorScheme.tertiary
+        ),
+        contentPadding = PaddingValues(horizontal = 12.dp),
+        modifier = modifier
     ) {
         Text(
             text = text,
@@ -442,6 +483,8 @@ private fun AbilitySlidePreview_Normal() {
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_YES, locale = "uk"
 )
+@PreviewScreenSizes
+@PreviewDynamicColors
 @Composable
 private fun AbilitySlidePreview_Night() {
     DnDSheetTheme {

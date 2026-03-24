@@ -42,7 +42,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -56,12 +55,16 @@ import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxDefaults
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -83,7 +86,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewDynamicColors
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
@@ -136,6 +141,8 @@ fun CharacterSheetScreen(
 
     onDiceButtonClick: (String) -> Unit,
     onDiceClick: (Map<Int, Int>) -> Unit,
+    onPinClick: () -> Unit,
+    onDismissResult: () -> Unit,
 
     onUpdateCharacter: (Character) -> Unit,
 
@@ -289,39 +296,71 @@ fun CharacterSheetScreen(
                     onNavigateBack = onNavigateBack,
                 )
             } else {
-                CenterAlignedTopAppBar(
+                TopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surface,
-                        titleContentColor = MaterialTheme.colorScheme.primary,
                     ),
                     title = {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null,
-                                onClick = { onSettingsNavigate(character.id) }
-                            )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .clickable(
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    indication = null,
+                                    onClick = { onSettingsNavigate(character.id) }
+                                )
                         ) {
-                            Text(
-                                text = character.name,
-                                textAlign = TextAlign.Center,
-                                fontWeight = FontWeight.SemiBold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            Surface(
+                                shape = CircleShape,
+                                modifier = Modifier
+                                    .wrapContentHeight()
+                                    .heightIn(max = 48.dp)
+                                    .widthIn(max = 48.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainer
+                            ) {
+                                if (character.imagePath != null) {
+                                    AsyncImage(
+                                        model = character.imagePath,
+                                        contentDescription = "Character Profile",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = "Add Photo",
+                                        modifier = Modifier
+                                            .padding(12.dp)
+                                            .fillMaxSize()
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.width(16.dp))
+                            Column(
+                                horizontalAlignment = Alignment.Start,
+                            ) {
+                                Text(
+                                    text = character.name,
+                                    textAlign = TextAlign.Center,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
 
-                            val characterInfo = listOf(character.race, character.charClass)
-                                .filter { it.isNotBlank() }
-                                .joinToString(" — ")
+                                val characterInfo = listOf(character.race, character.charClass)
+                                    .filter { it.isNotBlank() }
+                                    .joinToString(" — ")
 
-                            Text(
-                                text = characterInfo,
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.labelMedium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                                Text(
+                                    text = characterInfo,
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     },
                     navigationIcon = {
@@ -329,7 +368,6 @@ fun CharacterSheetScreen(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
-                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     },
@@ -342,7 +380,6 @@ fun CharacterSheetScreen(
                             Icon(
                                 imageVector = Icons.Rounded.Settings,
                                 contentDescription = "Options",
-                                tint = MaterialTheme.colorScheme.primary,
                             )
                         }
                     }
@@ -427,32 +464,31 @@ fun CharacterSheetScreen(
                         modifier = Modifier
                             .fillMaxSize()
                     ) {
-                        Column(
+                        Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
-                                .padding(end = 4.dp)
                         ) {
                             Crossfade(
                                 targetState = leftSelectedTab,
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier.align(Alignment.Center),
                                 label = "LeftPaneAnimation"
                             ) { currentTab ->
-                                tabContent(currentTab, Modifier.fillMaxSize())
+                                tabContent(currentTab, Modifier)
                             }
                         }
-                        Column(
+                        Spacer(Modifier.width(8.dp))
+                        Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxHeight()
-                                .padding(start = 4.dp)
                         ) {
                             Crossfade(
                                 targetState = rightSelectedTab,
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier.align(Alignment.Center),
                                 label = "RightPaneAnimation"
                             ) { currentTab ->
-                                tabContent(currentTab, Modifier.fillMaxSize())
+                                tabContent(currentTab, Modifier)
                             }
                         }
                     }
@@ -500,13 +536,32 @@ fun CharacterSheetScreen(
                 exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
                 modifier = Modifier.align(Alignment.BottomStart)
             ) {
-                DiceRollResultBox(
-                    numbers = diceState.numbers,
-                    strings = diceState.stringDices,
-                    hasRegularDice = diceState.hasRegularDice,
-                    diceMod = diceState.modifier,
-                    result = diceState.result
+                val dismissState = rememberSwipeToDismissBoxState(
+                    SwipeToDismissBoxValue.Settled,
+                    SwipeToDismissBoxDefaults.positionalThreshold
                 )
+
+                SwipeToDismissBox(
+                    state = dismissState,
+                    backgroundContent = {},
+                    enableDismissFromStartToEnd = true,
+                    enableDismissFromEndToStart = true,
+                    onDismiss = { dismissValue ->
+                        if (dismissValue != SwipeToDismissBoxValue.Settled) {
+                            onDismissResult()
+                        }
+                    }
+                ) {
+                    DiceRollResultBox(
+                        numbers = diceState.numbers,
+                        strings = diceState.stringDices,
+                        hasRegularDice = diceState.hasRegularDice,
+                        diceMod = diceState.modifier,
+                        result = diceState.result,
+                        isPinned = diceState.isPinned,
+                        onPinClick = onPinClick
+                    )
+                }
             }
         }
     }
@@ -592,8 +647,7 @@ fun CharacterDetailsRow(
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         ) {
             Box(
                 contentAlignment = Alignment.Center,
@@ -603,14 +657,14 @@ fun CharacterDetailsRow(
                     painter = painterResource(R.drawable.ic_shield),
                     contentDescription = null,
                     modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "${character.getTotalAc()}",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.align(Alignment.Center),
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             HealthBar(
@@ -625,12 +679,12 @@ fun CharacterDetailsRow(
                     text = character.speed.toString(),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = stringResource(R.string.char_speed).uppercase(),
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -645,16 +699,14 @@ fun CharacterDetailsRow(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .weight(1f)
+                    modifier = Modifier.weight(1f)
                 ) {
                     TextButton(
                         enabled = false,
                         onClick = { },
                         colors = ButtonDefaults.buttonColors().copy(
                             containerColor = Color.Transparent,
-                            contentColor = MaterialTheme.colorScheme.primary,
-                            disabledContentColor = MaterialTheme.colorScheme.primary,
+                            disabledContentColor = MaterialTheme.colorScheme.onSurface,
                             disabledContainerColor = Color.Transparent
                         ),
                         modifier = Modifier.width(80.dp)
@@ -663,15 +715,16 @@ fun CharacterDetailsRow(
                             text = formatModifier(character.getProfBonus()),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Text(
                         text = stringResource(R.string.proficiency_bonus).uppercase()
                             .replaceFirst(" ", "\n"),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
-                        maxLines = 2,
+                        maxLines = 1,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Column(
@@ -683,12 +736,12 @@ fun CharacterDetailsRow(
                         onClick = { onRollClick("${DiceRoles.D20.roll}${formatModifier(character.getInitiativeBonus())}") },
                         border = BorderStroke(
                             width = 2.dp,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.tertiary
                         ),
                         shape = MaterialTheme.shapes.extraSmall,
                         colors = ButtonDefaults.buttonColors().copy(
                             containerColor = Color.Transparent,
-                            contentColor = MaterialTheme.colorScheme.primary
+                            contentColor = MaterialTheme.colorScheme.tertiary,
                         ),
                         modifier = Modifier.width(80.dp)
                     ) {
@@ -702,9 +755,9 @@ fun CharacterDetailsRow(
                         text = stringResource(R.string.initiative).uppercase()
                             .replaceFirst(" ", "\n"),
                         style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
                         textAlign = TextAlign.Center,
-                        maxLines = 2,
+                        maxLines = 1,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 LongRestButton(
@@ -718,7 +771,11 @@ fun CharacterDetailsRow(
             modifier = Modifier.fillMaxWidth()
         ) {
             TextButton(
-                onClick = { isVisible = !isVisible }
+                onClick = { isVisible = !isVisible },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.secondary
+                )
             ) {
                 HorizontalDivider(Modifier.weight(1f))
                 Text(
@@ -755,12 +812,12 @@ fun CharacterDetailsRowExpanded(
                 onClick = { onRollClick("${DiceRoles.D20.roll}${formatModifier(character.getInitiativeBonus())}") },
                 border = BorderStroke(
                     width = 2.dp,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.tertiary
                 ),
                 shape = MaterialTheme.shapes.extraSmall,
                 colors = ButtonDefaults.buttonColors().copy(
                     containerColor = Color.Transparent,
-                    contentColor = MaterialTheme.colorScheme.primary
+                    contentColor = MaterialTheme.colorScheme.tertiary
                 ),
                 modifier = Modifier.width(80.dp)
             ) {
@@ -774,9 +831,9 @@ fun CharacterDetailsRowExpanded(
                 text = stringResource(R.string.initiative).uppercase()
                     .replaceFirst(" ", "\n"),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
-                maxLines = 2,
+                maxLines = 1,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         LongRestButton(
@@ -798,7 +855,6 @@ fun ExpandedTopAppBar(
         modifier = modifier.padding(top = 8.dp),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.primary,
         ),
         title = {
             Row(
@@ -810,18 +866,18 @@ fun ExpandedTopAppBar(
                     modifier = Modifier
                         .weight(1f)
                         .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = { onSettingsNavigate(character.id) }
-                    )
-                ){
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = { onSettingsNavigate(character.id) }
+                        )
+                ) {
                     Surface(
                         shape = CircleShape,
                         modifier = Modifier
                             .wrapContentHeight()
                             .heightIn(max = 64.dp)
                             .widthIn(max = 64.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant
+                        color = MaterialTheme.colorScheme.surfaceContainer
                     ) {
                         if (character.imagePath != null) {
                             AsyncImage(
@@ -835,7 +891,7 @@ fun ExpandedTopAppBar(
                                 imageVector = Icons.Default.Person,
                                 contentDescription = "Add Photo",
                                 modifier = Modifier
-                                    .padding(24.dp)
+                                    .padding(16.dp)
                                     .fillMaxSize()
                             )
                         }
@@ -849,7 +905,8 @@ fun ExpandedTopAppBar(
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.SemiBold,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
                         val characterInfo = listOf(character.race, character.charClass)
@@ -861,7 +918,8 @@ fun ExpandedTopAppBar(
                             textAlign = TextAlign.Center,
                             style = MaterialTheme.typography.labelMedium,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -879,14 +937,14 @@ fun ExpandedTopAppBar(
                             painter = painterResource(R.drawable.ic_shield),
                             contentDescription = null,
                             modifier = Modifier.size(64.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = "${character.getTotalAc()}",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.align(Alignment.Center),
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
@@ -897,12 +955,12 @@ fun ExpandedTopAppBar(
                             text = formatModifier(character.getProfBonus()),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = stringResource(R.string.proficiency_bonus).uppercase(),
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Spacer(modifier = Modifier.width(16.dp))
@@ -913,12 +971,12 @@ fun ExpandedTopAppBar(
                             text = character.speed.toString(),
                             fontSize = 20.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
                             text = stringResource(R.string.char_speed).uppercase(),
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -929,7 +987,6 @@ fun ExpandedTopAppBar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         },
@@ -942,7 +999,6 @@ fun ExpandedTopAppBar(
                 Icon(
                     imageVector = Icons.Rounded.Settings,
                     contentDescription = "Options",
-                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
         }
@@ -1003,11 +1059,11 @@ fun LongRestButton(onConfirmRest: () -> Unit, modifier: Modifier = Modifier) {
         modifier = modifier
     ) {
         Button(
-            border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.primary),
+            border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.tertiary),
             shape = MaterialTheme.shapes.extraSmall,
             colors = ButtonDefaults.buttonColors().copy(
                 containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.primary
+                contentColor = MaterialTheme.colorScheme.tertiary
             ),
             onClick = { showDialog = true },
             modifier = Modifier.width(80.dp)
@@ -1020,9 +1076,9 @@ fun LongRestButton(onConfirmRest: () -> Unit, modifier: Modifier = Modifier) {
         Text(
             text = stringResource(R.string.long_rest).uppercase().replaceFirst(" ", "\n"),
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center,
-            maxLines = 2,
+            maxLines = 1,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 
@@ -1073,10 +1129,7 @@ private fun SlideSelector(
                     .onGloballyPositioned { coordinates ->
                         textFieldSize = coordinates.size.toSize()
                     }
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) { expanded = true }
+                    .clickable { expanded = true }
                     .padding(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -1085,12 +1138,12 @@ private fun SlideSelector(
                     text = stringResource(currentTab.titleRes),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.List,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -1106,7 +1159,7 @@ private fun SlideSelector(
                     text = {
                         Text(
                             text = stringResource(tab.titleRes),
-                            fontWeight = if (tab == currentTab) FontWeight.Bold else FontWeight.Normal
+                            fontWeight = if (tab == currentTab) FontWeight.SemiBold else FontWeight.Normal
                         )
                     },
                     onClick = {
@@ -1137,52 +1190,15 @@ enum class CharacterTab(@StringRes val titleRes: Int) {
     }
 }
 
-@Preview(
-    showBackground = false, showSystemUi = false, locale = "ru",
-    device = "spec:width=1280dp,height=800dp,dpi=240"
-)
+@PreviewDynamicColors
+@PreviewScreenSizes
+@PreviewLightDark
 @Composable
 private fun CharacterSheetScreenPreview() {
     DnDSheetTheme {
         CharacterSheetScreen(
-            character = UiUtils.sampleCharacters[2],
-            spells = UiUtils.sampleSpells,
-            attacks = UiUtils.sampleAttacks,
-            currentFilter = SpellFilter.All,
-            diceState = DiceRollState(),
-            availableFilters = emptyList(),
-            onDiceButtonClick = {},
-            onDiceClick = {},
-            onUpdateCharacter = {},
-            onFilterChange = {},
-            updateAbility = { _, _ -> },
-            updateProfLevel = { _, _ -> },
-            updateSavingThrowProficiency = { _, _ -> },
-            saveAttack = {},
-            deleteAttack = {},
-            onSettingsNavigate = {},
-            onNavigateBack = {},
-            onManageClick = {},
-            onRestClick = {},
-            onSlotClick = { _, _ -> },
-            leftSelectedTab = CharacterTab.ABILITIES,
-            rightSelectedTab = CharacterTab.SPELLS,
-            onLeftTabSelected = {},
-            onRightTabSelected = {}
-        )
-    }
-}
-
-@Preview(
-    showBackground = false, showSystemUi = false,
-    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
-)
-@Composable
-private fun CharacterSheetScreenPreview_Night() {
-    DnDSheetTheme {
-        CharacterSheetScreen(
             character = UiUtils.sampleCharacters.first(),
-            spells = emptyList(),
+            spells = UiUtils.sampleSpells,
             attacks = emptyList(),
             currentFilter = SpellFilter.All,
             diceState = DiceRollState(),
@@ -1204,7 +1220,9 @@ private fun CharacterSheetScreenPreview_Night() {
             leftSelectedTab = CharacterTab.ABILITIES,
             rightSelectedTab = CharacterTab.SPELLS,
             onLeftTabSelected = {},
-            onRightTabSelected = {}
+            onRightTabSelected = {},
+            onPinClick = {},
+            onDismissResult = {}
         )
     }
 }

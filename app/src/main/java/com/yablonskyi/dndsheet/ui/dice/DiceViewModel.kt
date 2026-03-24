@@ -51,7 +51,8 @@ class DiceViewModel : ViewModel() {
                 modifier = modifier,
                 hasRegularDice = hasRegularDice,
                 result = total,
-                showResult = true
+                showResult = true,
+                isPinned = false
             )
 
             delay(5000L)
@@ -77,6 +78,25 @@ class DiceViewModel : ViewModel() {
 
         rollDice(mapOf(sides to count), modifier)
     }
+
+    fun pinResult() {
+        val currentState = _diceRollState.value
+
+        if (currentState.isPinned) {
+            _diceRollState.value = currentState.copy(
+                isPinned = false,
+                showResult = false
+            )
+        } else {
+            hideResultJob?.cancel()
+            _diceRollState.value = currentState.copy(isPinned = true)
+        }
+    }
+
+    fun dismissResult() {
+        hideResultJob?.cancel()
+        _diceRollState.value = _diceRollState.value.copy(showResult = false)
+    }
 }
 
 data class DiceRollState(
@@ -85,5 +105,6 @@ data class DiceRollState(
     val result: Int = 0,
     val stringDices: List<String> = emptyList(),
     val hasRegularDice: Boolean = false,
-    val showResult: Boolean = false
+    val showResult: Boolean = false,
+    val isPinned: Boolean = false
 )

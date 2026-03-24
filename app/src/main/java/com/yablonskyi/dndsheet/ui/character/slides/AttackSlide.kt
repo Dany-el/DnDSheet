@@ -62,21 +62,21 @@ fun AttackSlide(
                     Text(
                         text = stringResource(R.string.attack_title).uppercase(),
                         textAlign = TextAlign.Left,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.weight(1.3f)
                     )
                     Text(
                         text = stringResource(R.string.attack_bonus_hit).uppercase(),
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
                     Text(
                         text = stringResource(R.string.attack_damage).uppercase(),
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier
                             .weight(1f, false)
@@ -120,7 +120,7 @@ fun InsertAttackRow(
         Surface(
             color = MaterialTheme.colorScheme.background.copy(alpha = 0f),
             shape = MaterialTheme.shapes.extraSmall,
-            border = BorderStroke(2.dp, color = MaterialTheme.colorScheme.outline),
+            border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.outline),
             modifier = Modifier
                 .clickable(
                     onClick = onAdd
@@ -136,7 +136,6 @@ fun InsertAttackRow(
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add",
-                    tint = MaterialTheme.colorScheme.primary
                 )
                 Text(
                     text = stringResource(R.string.add).uppercase(),
@@ -193,10 +192,10 @@ fun AttackButton(
 ) {
     TextButton(
         onClick = onClick,
-        shape = MaterialTheme.shapes.small,
+        shape = MaterialTheme.shapes.large,
         colors = ButtonDefaults.buttonColors().copy(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary
         ),
         modifier = modifier
     ) {

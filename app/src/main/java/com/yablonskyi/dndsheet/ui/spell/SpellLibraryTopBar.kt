@@ -22,7 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -75,10 +74,6 @@ fun SpellLibraryTopBar(
     }
 
     CenterAlignedTopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            titleContentColor = MaterialTheme.colorScheme.primary,
-        ),
         navigationIcon = {
             if (isSelectionMode) {
                 Button(
@@ -116,7 +111,6 @@ fun SpellLibraryTopBar(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Navigate back",
-                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -147,7 +141,8 @@ fun SpellLibraryTopBar(
                     text = stringResource(
                         if (isLearnMode) R.string.spell_selection else R.string.msg_spell_library
                     ),
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         },

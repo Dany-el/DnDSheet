@@ -2,16 +2,18 @@ package com.yablonskyi.dndsheet.ui.dice
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -20,11 +22,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
@@ -38,9 +42,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import com.yablonskyi.dndsheet.R
+import com.yablonskyi.dndsheet.ui.theme.DnDSheetTheme
 import com.yablonskyi.dndsheet.ui.utils.diceOptions
 
 @Composable
@@ -88,10 +94,20 @@ fun DiceRollFloatingActionButton(
             slideOutHorizontally(
                 targetOffsetX = { it * distanceMultiplier },
                 animationSpec = tween(150)
+            ) + fadeOut(
+                animationSpec = tween(150)
+            ) + scaleOut(
+                targetScale = 0.8f,
+                animationSpec = tween(150)
             )
         } else {
             slideOutVertically(
                 targetOffsetY = { it * distanceMultiplier },
+                animationSpec = tween(150)
+            ) + fadeOut(
+                animationSpec = tween(150)
+            ) + scaleOut(
+                targetScale = 0.8f,
                 animationSpec = tween(150)
             )
         }
@@ -102,19 +118,20 @@ fun DiceRollFloatingActionButton(
             exit = exitAnimation
         ) {
             Box {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                Button(
+                    shape = FloatingActionButtonDefaults.shape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ),
-                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 6.dp),
+                    onClick = {
+                        clickCounts[dice.sides] = count + 1
+                    },
+                    contentPadding = PaddingValues(0.dp),
+                    elevation = ButtonDefaults.buttonElevation(6.dp),
                     modifier = Modifier
                         .size(64.dp)
                         .align(Alignment.Center)
-                        .clickable(
-                            onClick = {
-                                clickCounts[dice.sides] = count + 1
-                            }
-                        ),
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -131,6 +148,7 @@ fun DiceRollFloatingActionButton(
                         )
                     }
                 }
+
                 if (count > 0) {
                     Box(
                         modifier = Modifier
@@ -212,8 +230,25 @@ fun DiceRollFloatingActionButton(
                     text = stringResource(R.string.roll),
                 )
             },
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
             modifier = Modifier.defaultMinSize(80.dp, 80.dp)
         )
+    }
+}
+
+@Preview
+@Composable
+private fun DiceRollFabPreview() {
+    DnDSheetTheme {
+        Scaffold(
+            floatingActionButton = {
+                DiceRollFloatingActionButton({})
+            }
+        ) {
+            Box(
+                Modifier.padding(it)
+            ) {
+
+            }
+        }
     }
 }

@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -40,6 +41,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
@@ -56,8 +58,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -123,6 +129,27 @@ fun SpellLibraryScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val listState = rememberLazyListState()
+
+    var isFabVisible by remember { mutableStateOf(true) }
+
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                val actualScrollAmount = consumed.y
+                if (actualScrollAmount < -10f) {
+                    isFabVisible = false
+                } else if (actualScrollAmount > 10f) {
+                    isFabVisible = true
+                }
+                return Offset.Zero
+            }
+        }
+    }
 
     val groupedSpells = remember(spells) {
         spells.groupBy { it.spell.level }.toSortedMap()
@@ -207,14 +234,12 @@ fun SpellLibraryScreen(
         },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = !isLearnMode && !isSelectionMode,
+                visible = !isLearnMode && !isSelectionMode && isFabVisible,
                 enter = scaleIn() + fadeIn(),
                 exit = scaleOut() + fadeOut()
             ) {
                 FloatingActionButton(
                     onClick = onAddSpell,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(64.dp)
                 ) {
                     Icon(
@@ -266,14 +291,14 @@ fun SpellLibraryScreen(
                     toggleConcentration = toggleConcentration,
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
-                        .padding(top = 8.dp)
                 )
 
                 if (!loadingState) {
                     LazyColumn(
+                        state = listState,
+                        modifier = Modifier.nestedScroll(nestedScrollConnection),
                         contentPadding = PaddingValues(
                             start = 16.dp,
-                            top = 16.dp,
                             end = 16.dp,
                             bottom = 16.dp + fabSpacing
                         ),
@@ -573,6 +598,10 @@ fun SpellLibraryRow(
     }
 
     ListItem(
+        colors = ListItemDefaults.colors(
+            containerColor = if (isSelected || (item.isLearned && isLearnMode)) MaterialTheme.colorScheme.secondaryContainer else
+                MaterialTheme.colorScheme.surfaceVariant,
+        ),
         modifier = modifier
             .clip(shape)
             .combinedClickable(
@@ -591,7 +620,6 @@ fun SpellLibraryRow(
                 }
             ),
         tonalElevation = 6.dp,
-        shadowElevation = 2.dp,
         overlineContent = {
             Text(
                 text = stringResource(spell.school.resId),

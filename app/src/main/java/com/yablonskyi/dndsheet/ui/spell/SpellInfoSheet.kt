@@ -62,7 +62,7 @@ fun SpellInfoSheet(
                 text = spell.name,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
@@ -224,7 +224,7 @@ fun StatRow(label: String, value: String) {
 private fun SpellInfoSheetPreview() {
     DnDSheetTheme {
         SpellInfoSheet(
-            spell = UiUtils.sampleSpells.first { it.higherLevels != null },
+            spell = UiUtils.sampleSpells.first { it.higherLevels != null }.copy(name = "some long spell name [1234556]"),
             onDismiss = {}
         )
     }

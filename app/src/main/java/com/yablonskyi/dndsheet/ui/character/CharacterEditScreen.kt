@@ -107,7 +107,6 @@ fun CharacterEditScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Localized description",
-                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
