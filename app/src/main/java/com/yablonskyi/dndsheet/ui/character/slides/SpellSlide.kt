@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -29,8 +28,8 @@ import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -82,10 +81,15 @@ fun SpellSlide(
     }
 
     Box(
-        modifier = modifier.widthIn(max = 520.dp)
+        modifier = modifier
     ) {
         LazyColumn(
-            contentPadding = PaddingValues(horizontal = 8.dp),
+            contentPadding = PaddingValues(
+                start = 4.dp,
+                top = 0.dp,
+                end = 4.dp,
+                bottom = 120.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.fillMaxSize()
         ) {
@@ -169,9 +173,6 @@ fun SpellSlide(
                             }
                         )
                     }
-                }
-                item {
-                    Spacer(modifier = Modifier.height(120.dp))
                 }
             }
         }
@@ -353,9 +354,9 @@ fun SpellSlotTracker(
     ) {
         Text(
             text = stringResource(level.resId),
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontWeight = FontWeight.SemiBold,
         )
         LazyRow {
             items(count = slot.max) { index ->
@@ -370,7 +371,7 @@ fun SpellSlotTracker(
                     Icon(
                         imageVector = if (isSpent) Icons.Default.Circle else Icons.Default.RadioButtonUnchecked,
                         contentDescription = null,
-                        tint = if (isSpent) MaterialTheme.colorScheme.primary else Color.Gray,
+                        tint = if (isSpent) CheckboxDefaults.colors().checkedBoxColor else MaterialTheme.colorScheme.outlineVariant,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -409,11 +410,7 @@ fun SpellFiltersRow(
                             modifier = Modifier.size(18.dp)
                         )
                     }
-                } else null,
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                } else null
             )
         }
     }
@@ -436,7 +433,7 @@ fun SpellCard(
     Card(
         shape = shape,
         colors = CardDefaults.cardColors().copy(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         modifier = modifier

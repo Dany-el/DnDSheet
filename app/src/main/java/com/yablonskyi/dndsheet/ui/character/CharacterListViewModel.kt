@@ -58,7 +58,11 @@ class CharacterListViewModel @Inject constructor(
     val isAllSelected: StateFlow<Boolean> =
         combine(_selectedCharacters, characterListState) { selected, state ->
             selected.size == state.characters.size && state.characters.isNotEmpty()
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
     fun updateSearchQuery(query: String) {
         _searchQuery.value = query

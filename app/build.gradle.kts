@@ -1,11 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.serialization)
     alias(libs.plugins.kotlin.plugin.parcelize)
+    id("com.github.skydoves.compose.stability.analyzer") version "0.7.2"
 }
 
 android {
@@ -45,10 +45,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs += "-opt-in=androidx.compose.foundation.ExperimentalFoundationApi"
-    }
     buildFeatures {
         compose = true
     }
@@ -63,6 +59,7 @@ android {
 dependencies {
 
     implementation(libs.androidx.exifinterface)
+    implementation(libs.androidx.compose.animation)
     // Room
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.runtime)
@@ -115,6 +112,9 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.google.http.client.gson)
+
+    // Test
+    testImplementation(libs.kotlinx.coroutines.test)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

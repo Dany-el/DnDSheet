@@ -14,7 +14,9 @@
         android:localeConfig="@xml/locales_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.App.Starting">
+        android:enableOnBackInvokedCallback="true"
+        android:theme="@style/Theme.App.Starting"
+        tools:targetApi="36">
         <activity
             android:name=".ui.MainActivity"
             android:exported="true"

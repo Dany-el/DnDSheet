@@ -12,6 +12,6 @@ enum class AppTheme(@StringRes val label: Int) {
 enum class AppLanguage(val code: String, @StringRes val label: Int) {
     SYSTEM("system", R.string.system_default),
     ENGLISH("en", R.string.language_english),
-    RUSSIAN("ru", R.string.language_russian),
+//    RUSSIAN("ru", R.string.language_russian),
     UKRAINIAN("uk", R.string.language_ukrainian)
 }

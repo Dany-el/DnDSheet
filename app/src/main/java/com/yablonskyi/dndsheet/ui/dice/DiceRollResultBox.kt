@@ -51,7 +51,7 @@ fun DiceRollResultBox(
     else if (numbers.any { it == 1 } && hasRegularDice) Color.Red
     else null
 
-    val fallbackSurface = MaterialTheme.colorScheme.surfaceVariant
+    val fallbackSurface = MaterialTheme.colorScheme.surfaceContainer
 
     val solidDimColor = color?.let {
         lerp(start = it, stop = fallbackSurface, fraction = 0.7f)

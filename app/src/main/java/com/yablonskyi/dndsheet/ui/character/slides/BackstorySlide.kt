@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.yablonskyi.dndsheet.R
+import com.yablonskyi.dndsheet.ui.character.utils.TextFieldWithSheet
 import com.yablonskyi.dndsheet.ui.theme.DnDSheetTheme
 
 @Composable
@@ -35,19 +36,21 @@ fun BackstorySlide(
             }
     ) {
         LazyColumn(
-            contentPadding = PaddingValues(8.dp),
+            contentPadding = PaddingValues(
+                start = 8.dp,
+                top = 8.dp,
+                end = 8.dp,
+                bottom = 120.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxSize()
         ) {
             // Backstory
             item {
-                OutlinedTextFieldWithValue(
+                TextFieldWithSheet(
                     label = stringResource(R.string.backstory),
                     value = backstory,
-                    maxLines = 8,
-                    onSaveText = {
-                        onSaveText(it)
-                    },
+                    onSave = onSaveText
                 )
             }
         }

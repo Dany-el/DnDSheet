@@ -1,6 +1,5 @@
 package com.yablonskyi.dndsheet.ui.spell
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -40,6 +39,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,9 +54,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
 import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.data.model.character.Ability
 import com.yablonskyi.dndsheet.data.model.character.AttackType
@@ -128,7 +130,6 @@ fun SpellEditScreen(
         isNameValid && isDescriptionValid && isMaterialValid && !damageDiceError && isAttackTypeValid && isDistanceValid
 
     val onSaveClick = {
-
         if (isFormValid) {
             val updatedSpell = spell.copy(
                 name = name.trim(),
@@ -149,9 +150,6 @@ fun SpellEditScreen(
                 description = description.trim(),
                 higherLevels = higherLevels.trim()
             )
-
-            Log.i("UpdatedSpell", "$updatedSpell")
-
             onUpdate(updatedSpell)
             onNavigateBack()
         }
@@ -163,26 +161,34 @@ fun SpellEditScreen(
     val higherLevelRequester = remember { BringIntoViewRequester() }
     val materialsRequester = remember { BringIntoViewRequester() }
 
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    val isWideScreen =
+        windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = Color.Transparent,
+                    titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 ),
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
                 title = {
                     Text(
                         text = stringResource(if (spell.spellId == 0L) R.string.add_spell else R.string.edit_spell),
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = if (isWideScreen) null else TextAlign.Left,
+                        modifier = if (isWideScreen) Modifier else Modifier.fillMaxWidth(),
                     )
                 }
             )
@@ -449,7 +455,8 @@ fun SpellEditScreen(
                             labelRes = R.string.spell_damage_type,
                             options = listOf(null) + DamageType.entries,
                             nameMapper = {
-                                it?.let { stringResource(it.resId) } ?: stringResource(R.string.none)
+                                it?.let { stringResource(it.resId) }
+                                    ?: stringResource(R.string.none)
                             },
                             onSelected = {
                                 damageType = it

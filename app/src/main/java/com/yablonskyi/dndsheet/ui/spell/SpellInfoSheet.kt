@@ -1,27 +1,21 @@
 package com.yablonskyi.dndsheet.ui.spell
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -135,71 +129,27 @@ fun SpellInfoSheet(
             item {
                 if (spell.description.isNotBlank()) {
                     Text(
-                        text = stringResource(R.string.spell_description),
-                        style = MaterialTheme.typography.titleMedium,
+                        text = spell.description,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Justify,
                     )
                     Spacer(Modifier.height(8.dp))
-                    Surface(
-                        color = OutlinedTextFieldDefaults.colors().unfocusedContainerColor,
-                        shape = MaterialTheme.shapes.extraSmall,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        val paragraphs = remember(spell.description) {
-                            spell.description.split("\n").filter { it.isNotBlank() }
-                        }
-
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                                .heightIn(max = 200.dp)
-                        ) {
-                            items(paragraphs) { paragraph ->
-                                Text(
-                                    text = paragraph,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    textAlign = TextAlign.Justify,
-                                )
-                            }
-                        }
-                    }
                 }
             }
             item {
                 if (!spell.higherLevels.isNullOrBlank()) {
+                    HorizontalDivider()
+                    Spacer(Modifier.height(8.dp))
                     Text(
                         text = stringResource(R.string.spell_higher_levels),
                         style = MaterialTheme.typography.titleMedium,
                     )
                     Spacer(Modifier.height(8.dp))
-                    Surface(
-                        color = OutlinedTextFieldDefaults.colors().unfocusedContainerColor,
-                        shape = MaterialTheme.shapes.extraSmall,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        val paragraphs = remember(spell.higherLevels) {
-                            spell.higherLevels.split("\n").filter { it.isNotBlank() }
-                        }
-
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                                .heightIn(max = 150.dp)
-                        ) {
-                            items(paragraphs) { paragraph ->
-                                Text(
-                                    text = paragraph,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    textAlign = TextAlign.Justify,
-                                )
-                            }
-                        }
-                    }
+                    Text(
+                        text = spell.higherLevels,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Justify,
+                    )
                 }
             }
         }
@@ -224,7 +174,8 @@ fun StatRow(label: String, value: String) {
 private fun SpellInfoSheetPreview() {
     DnDSheetTheme {
         SpellInfoSheet(
-            spell = UiUtils.sampleSpells.first { it.higherLevels != null }.copy(name = "some long spell name [1234556]"),
+            spell = UiUtils.sampleSpells.first { it.higherLevels != null }
+                .copy(name = "some long spell name [1234556]"),
             onDismiss = {}
         )
     }

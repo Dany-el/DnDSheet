@@ -1,42 +1,44 @@
 [versions]
 adaptive = "1.2.0"
 adaptiveLayout = "1.2.0"
-agp = "8.11.2"
+agp = "9.1.0"
 androidxLifecycle = "2.10.0"
 coreSplashscreen = "1.2.0"
 credentials = "1.5.0"
 credentialsPlayServicesAuth = "1.5.0"
-datastorePreferences = "1.2.0"
+datastorePreferences = "1.2.1"
 googleApiClientAndroid = "2.9.0"
 googleApiServicesDrive = "v3-rev20220815-2.0.0"
 googleHttpClientGson = "2.1.0"
 gson = "2.13.2"
-hilt = "2.57.1"
+hilt = "2.59.2"
 hiltNavigationCompose = "1.3.0"
-io = "9.5.0"
-kernel = "9.5.0"
-kotlin = "2.1.10"
-coreKtx = "1.17.0"
+io = "9.6.0"
+kernel = "9.6.0"
+kotlin = "2.3.20"
+coreKtx = "1.18.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
-kotlinxSerializationJson = "1.8.0"
+kotlinxCoroutinesTest = "1.10.2"
+kotlinxSerializationJson = "1.10.0"
 lifecycleRuntimeKtx = "2.10.0"
-activityCompose = "1.11.0"
-composeBom = "2024.09.00"
+activityCompose = "1.13.0"
+composeBom = "2026.03.01"
 appcompat = "1.7.1"
 material = "1.13.0"
 material3WindowSizeClass = "1.4.0"
 materialIconsExtended = "1.7.8"
-navigationCompose = "2.9.6"
+navigationCompose = "2.9.7"
 pdfboxAndroid = "2.0.27.0"
 playServicesAuth = "21.5.1"
 roomRuntime = "2.8.4"
-ksp = "2.1.10-1.0.30"
+ksp = "2.3.2"
 coil = "2.7.0"
-activity-ktx = "1.9.0"
-exifinterface = "1.3.6"
-workRuntimeKtx = "2.11.1"
+activity-ktx = "1.13.0"
+exifinterface = "1.4.2"
+workRuntimeKtx = "2.11.2"
+animation = "1.10.6"
 
 [libraries]
 androidx-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout", version.ref = "adaptiveLayout" }
@@ -83,6 +85,7 @@ androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 itextpdf-kernel = { module = "com.itextpdf:kernel", version.ref = "kernel" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 itextpdf-layout = { module = "com.itextpdf:layout", version.ref = "io" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
@@ -91,6 +94,7 @@ androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", ve
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 pdfbox-android = { module = "com.tom-roush:pdfbox-android", version.ref = "pdfboxAndroid" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+androidx-compose-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "animation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -3,8 +3,8 @@ package com.yablonskyi.dndsheet.ui.spell
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.combinedClickable
@@ -49,27 +49,25 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import com.yablonskyi.dndsheet.R
@@ -131,31 +129,29 @@ fun SpellLibraryScreen(
     val context = LocalContext.current
     val listState = rememberLazyListState()
 
-    var isFabVisible by remember { mutableStateOf(true) }
+    /*    var isFabVisible by remember { mutableStateOf(true) }
 
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPostScroll(
-                consumed: Offset,
-                available: Offset,
-                source: NestedScrollSource
-            ): Offset {
-                val actualScrollAmount = consumed.y
-                if (actualScrollAmount < -10f) {
-                    isFabVisible = false
-                } else if (actualScrollAmount > 10f) {
-                    isFabVisible = true
+        val nestedScrollConnection = remember {
+            object : NestedScrollConnection {
+                override fun onPostScroll(
+                    consumed: Offset,
+                    available: Offset,
+                    source: NestedScrollSource
+                ): Offset {
+                    val actualScrollAmount = consumed.y
+                    if (actualScrollAmount < -10f) {
+                        isFabVisible = false
+                    } else if (actualScrollAmount > 10f) {
+                        isFabVisible = true
+                    }
+                    return Offset.Zero
                 }
-                return Offset.Zero
             }
-        }
-    }
+        }*/
 
     val groupedSpells = remember(spells) {
         spells.groupBy { it.spell.level }.toSortedMap()
     }
-
-    // ------------ USER SCROLL ------------
 
     // ------------ EXPORT & IMPORT OF SPELLS ------------
 
@@ -192,6 +188,9 @@ fun SpellLibraryScreen(
         }
     )
 
+    // filters
+    var isFiltersExpanded by rememberSaveable { mutableStateOf(false) }
+
     BackHandler(enabled = isSelectionMode) {
         onClearSelection()
     }
@@ -208,8 +207,11 @@ fun SpellLibraryScreen(
         WindowInsets(bottom = 0.dp)
     }
 
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
     Scaffold(
         contentWindowInsets = screenInsets,
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             SpellLibraryTopBar(
                 isLearnMode = isLearnMode,
@@ -229,14 +231,17 @@ fun SpellLibraryScreen(
                             exportLauncher.launch("spells_backup.json")
                         }
                     }
-                }
+                },
+                onToggleFilters = { isFiltersExpanded = !isFiltersExpanded },
+                isFiltersExpanded = isFiltersExpanded,
+                scrollBehavior = scrollBehavior
             )
         },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = !isLearnMode && !isSelectionMode && isFabVisible,
-                enter = scaleIn() + fadeIn(),
-                exit = scaleOut() + fadeOut()
+                visible = !isLearnMode && !isSelectionMode,
+                enter = scaleIn(),
+                exit = scaleOut()
             ) {
                 FloatingActionButton(
                     onClick = onAddSpell,
@@ -274,33 +279,35 @@ fun SpellLibraryScreen(
             Column(
                 modifier = Modifier.widthIn(max = 840.dp)
             ) {
-                SpellFiltersRow(
-                    // Filters
-                    selectedSchool = selectedSchool,
-                    selectedLevels = selectedLevels,
-                    selectedDurations = selectedDurations,
-                    selectedCastTimes = selectedCastTimes,
-                    selectedConcentration = selectedConcentration,
-                    selectedRitual = selectedRitual,
-                    // Toggles
-                    toggleSchoolFilter = toggleSchoolFilter,
-                    toggleLevelFilter = toggleLevelFilter,
-                    toggleDurationFilter = toggleDurationFilter,
-                    toggleCastTimeFilter = toggleCastTimeFilter,
-                    toggleRitual = toggleRitual,
-                    toggleConcentration = toggleConcentration,
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                )
+                AnimatedVisibility(isFiltersExpanded) {
+                    SpellFiltersRow(
+                        // Filters
+                        selectedSchool = selectedSchool,
+                        selectedLevels = selectedLevels,
+                        selectedDurations = selectedDurations,
+                        selectedCastTimes = selectedCastTimes,
+                        selectedConcentration = selectedConcentration,
+                        selectedRitual = selectedRitual,
+                        // Toggles
+                        toggleSchoolFilter = toggleSchoolFilter,
+                        toggleLevelFilter = toggleLevelFilter,
+                        toggleDurationFilter = toggleDurationFilter,
+                        toggleCastTimeFilter = toggleCastTimeFilter,
+                        toggleRitual = toggleRitual,
+                        toggleConcentration = toggleConcentration,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                    )
+                }
 
                 if (!loadingState) {
                     LazyColumn(
                         state = listState,
-                        modifier = Modifier.nestedScroll(nestedScrollConnection),
+//                        modifier = Modifier.nestedScroll(nestedScrollConnection),
                         contentPadding = PaddingValues(
-                            start = 16.dp,
-                            end = 16.dp,
-                            bottom = 16.dp + fabSpacing
+                            start = 8.dp,
+                            end = 8.dp,
+                            bottom = 8.dp + fabSpacing
                         ),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
@@ -317,9 +324,9 @@ fun SpellLibraryScreen(
                                     ) {
                                         Text(
                                             text = stringResource(level.resId),
-                                            style = MaterialTheme.typography.headlineSmall,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            fontWeight = FontWeight.Bold,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            fontWeight = FontWeight.SemiBold,
                                         )
                                     }
                                 }
@@ -328,24 +335,15 @@ fun SpellLibraryScreen(
                                 items = spells, key = { _, item -> item.spell.spellId }
                             ) { index, item ->
 
-                                val itemShape = when {
-                                    spells.size == 1 -> RoundedCornerShape(16.dp)
-                                    index == 0 -> RoundedCornerShape(
-                                        topStart = 16.dp, topEnd = 16.dp,
-                                        bottomStart = 4.dp, bottomEnd = 4.dp
-                                    )
-
-                                    index == spells.lastIndex -> RoundedCornerShape(
-                                        topStart = 4.dp, topEnd = 4.dp,
-                                        bottomStart = 16.dp, bottomEnd = 16.dp
-                                    )
-
-                                    else -> MaterialTheme.shapes.extraSmall
-                                }
+                                val topCorners =
+                                    if (spells.size == 1 || index == 0) 16.dp else 4.dp
+                                val bottomCorners =
+                                    if (spells.size == 1 || index == spells.lastIndex) 16.dp else 4.dp
 
                                 SpellLibraryRow(
                                     item = item,
-                                    shape = itemShape,
+                                    defaultTopCorners = topCorners,
+                                    defaultBottomCorners = bottomCorners,
                                     isLearnMode = isLearnMode,
                                     isSelected = selectedSpells.contains(item.spell),
                                     isSelectionMode = isSelectionMode,
@@ -567,7 +565,8 @@ fun SpellFiltersRow(
 @Composable
 fun SpellLibraryRow(
     item: SpellLibraryItem,
-    shape: Shape,
+    defaultTopCorners: Dp,
+    defaultBottomCorners: Dp,
     isLearnMode: Boolean,
     isSelected: Boolean,
     isSelectionMode: Boolean,
@@ -579,8 +578,33 @@ fun SpellLibraryRow(
 ) {
     val spell = item.spell
 
-    val haptics = LocalHapticFeedback.current
     val context = LocalContext.current
+
+    val animatedColor by animateColorAsState(
+        targetValue = if (isSelected || (item.isLearned && isLearnMode)) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerLowest
+        },
+        label = "cardColorAnimation"
+    )
+
+    val topCorners by animateDpAsState(
+        targetValue = if (isSelected || (item.isLearned && isLearnMode)) 16.dp else defaultTopCorners,
+        label = "topCornersAnimation"
+    )
+
+    val bottomCorners by animateDpAsState(
+        targetValue = if (isSelected || (item.isLearned && isLearnMode)) 16.dp else defaultBottomCorners,
+        label = "bottomCornersAnimation"
+    )
+
+    val animatedShape = RoundedCornerShape(
+        topStart = topCorners,
+        topEnd = topCorners,
+        bottomStart = bottomCorners,
+        bottomEnd = bottomCorners
+    )
 
     var showConfirmDialog by remember {
         mutableStateOf(false)
@@ -599,11 +623,10 @@ fun SpellLibraryRow(
 
     ListItem(
         colors = ListItemDefaults.colors(
-            containerColor = if (isSelected || (item.isLearned && isLearnMode)) MaterialTheme.colorScheme.secondaryContainer else
-                MaterialTheme.colorScheme.surfaceVariant,
+            containerColor = animatedColor,
         ),
         modifier = modifier
-            .clip(shape)
+            .clip(animatedShape)
             .combinedClickable(
                 onClick = {
                     if (isSelectionMode) {
@@ -615,7 +638,6 @@ fun SpellLibraryRow(
                     }
                 },
                 onLongClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     onToggleSelection()
                 }
             ),
@@ -630,7 +652,7 @@ fun SpellLibraryRow(
             Text(
                 text = spell.name,
                 style = MaterialTheme.typography.titleLarge,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 fontWeight = FontWeight.SemiBold,
             )

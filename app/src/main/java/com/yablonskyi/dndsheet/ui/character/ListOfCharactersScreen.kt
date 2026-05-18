@@ -3,9 +3,12 @@ package com.yablonskyi.dndsheet.ui.character
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.combinedClickable
@@ -61,9 +64,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,12 +82,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -88,7 +92,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewDynamicColors
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowSizeClass
 import coil.compose.AsyncImage
@@ -111,57 +117,52 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@Immutable
+data class CharacterListUiState(
+    val characters: List<Character> = emptyList(),
+    val loadingState: Boolean = false,
+    val listView: ListView = ListView.LIST,
+    val searchQuery: String = "",
+    val isSelectionMode: Boolean = false,
+    val isAllSelected: Boolean = false,
+    val selectedCharacters: Set<Character> = emptySet(),
+    val windowSizeClass: WindowSizeClass
+)
+
+@Immutable
+data class CharacterListActions(
+    val onSearchQueryChange: (String) -> Unit = {},
+    val onClearSelection: () -> Unit = {},
+    val onDeleteSelected: () -> Unit = {},
+    val onToggleSelectAll: () -> Unit = {},
+    val toggleSelection: (Character) -> Unit = {},
+    val onAdd: () -> Unit = {},
+    val onDelete: (Character) -> Unit = {},
+    val onCharacterClick: (Long) -> Unit = {},
+    val onImportSheets: (List<CharacterSheet>) -> Unit = {},
+    val onExportSheets: suspend () -> List<CharacterSheet> = { emptyList() },
+    val onGetCharacterSheet: suspend (Character) -> CharacterSheet = { throw Exception("Not implemented") }
+)
+
+@Stable
+data class CharacterItemActions(
+    val onClick: () -> Unit,
+    val onLongClick: () -> Unit,
+    val onToggleSelection: () -> Unit,
+    val onDelete: () -> Unit,
+    val onExport: () -> Unit
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListOfCharactersScreen(
-    characters: List<Character>,
-    loadingState: Boolean,
-    listView: ListView,
-    // Search
-    searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
-    // Selection
-    isSelectionMode: Boolean,
-    isAllSelected: Boolean,
-    onClearSelection: () -> Unit,
-    onDeleteSelected: () -> Unit,
-    onToggleSelectAll: () -> Unit,
-    selectedCharacters: Set<Character>,
-    toggleSelection: (Character) -> Unit,
-    onAdd: () -> Unit,
-    onDelete: (Character) -> Unit,
-    onCharacterClick: (Long) -> Unit,
-    // Export/Import
-    onImportSheets: (List<CharacterSheet>) -> Unit,
-    onExportSheets: suspend () -> List<CharacterSheet>,
-    onGetCharacterSheet: suspend (Character) -> CharacterSheet,
-    windowSizeClass: WindowSizeClass,
+fun SharedTransitionScope.ListOfCharactersScreen(
+    uiState: CharacterListUiState,
+    actions: CharacterListActions,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    val listState = rememberLazyListState()
-    val gridState = rememberLazyStaggeredGridState()
-
-    var isFabVisible by remember { mutableStateOf(true) }
-
-    val nestedScrollConnection = remember {
-        object : NestedScrollConnection {
-            override fun onPostScroll(
-                consumed: Offset,
-                available: Offset,
-                source: NestedScrollSource
-            ): Offset {
-                val actualScrollAmount = consumed.y
-                if (actualScrollAmount < -10f) {
-                    isFabVisible = false
-                } else if (actualScrollAmount > 10f) {
-                    isFabVisible = true
-                }
-                return Offset.Zero
-            }
-        }
-    }
 
     var isSearchExpanded by remember { mutableStateOf(false) }
     val searchFocusRequester = remember { FocusRequester() }
@@ -169,203 +170,101 @@ fun ListOfCharactersScreen(
     val selectionFailureMessage = stringResource(R.string.select_at_least_one_item)
     val importMessage = stringResource(R.string.import_file_empty)
 
-    var isLoading by remember { mutableStateOf(false) }
-
+    var isLocalLoading by remember { mutableStateOf(false) }
     var pendingImportSheets by remember { mutableStateOf<List<CharacterSheet>?>(null) }
 
     // Export Launcher
     val exportLauncher = rememberMultiCharacterExportLauncher(
-        onLoadingStateChange = { isLoading = it },
-        sheetsToExport = onExportSheets,
-        onExportComplete = onClearSelection
+        onLoadingStateChange = { isLocalLoading = it },
+        sheetsToExport = actions.onExportSheets,
+        onExportComplete = actions.onClearSelection
     )
 
     // Import Launcher
     val importLauncher = rememberCharacterImportLauncher(
-        onLoadingStateChange = { isLoading = it },
+        onLoadingStateChange = { isLocalLoading = it },
         onImportCharacters = { sheets ->
             if (sheets.isNotEmpty()) {
                 pendingImportSheets = sheets
             } else {
-                Toast.makeText(
-                    context,
-                    importMessage,
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(context, importMessage, Toast.LENGTH_SHORT).show()
             }
         }
     )
 
-    val onExport = { character: Character ->
-        isLoading = true
-
-        coroutineScope.launch(Dispatchers.IO) {
-            try {
-                val sheet = onGetCharacterSheet(character)
-                val pdfFile = PdfExporter.generateCustomSheet(context, sheet)
-
-                withContext(Dispatchers.Main) {
-                    isLoading = false
-
-                    if (pdfFile != null) {
-                        sharePdfIntent(context, pdfFile)
-                    } else {
+    val onExportPdf: (Character) -> Unit = remember(context, actions.onGetCharacterSheet) {
+        { character: Character ->
+            isLocalLoading = true
+            coroutineScope.launch(Dispatchers.IO) {
+                try {
+                    val sheet = actions.onGetCharacterSheet(character)
+                    val pdfFile = PdfExporter.generateCustomSheet(context, sheet)
+                    withContext(Dispatchers.Main) {
+                        isLocalLoading = false
+                        if (pdfFile != null) {
+                            sharePdfIntent(context, pdfFile)
+                        } else {
+                            Toast.makeText(context, "Failed to generate PDF", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    withContext(Dispatchers.Main) {
+                        isLocalLoading = false
                         Toast.makeText(
                             context,
-                            "Failed to generate PDF",
+                            "An error occurred during export",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                withContext(Dispatchers.Main) {
-                    isLoading = false
-                    Toast.makeText(
-                        context,
-                        "An error occurred during export",
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
             }
         }
     }
 
-    BackHandler(enabled = isSelectionMode || isSearchExpanded) {
-        if (isSelectionMode) {
-            onClearSelection()
+    BackHandler(enabled = uiState.isSelectionMode || isSearchExpanded) {
+        if (uiState.isSelectionMode) {
+            actions.onClearSelection()
         } else if (isSearchExpanded) {
             isSearchExpanded = false
-            onSearchQueryChange("")
+            actions.onSearchQueryChange("")
         }
     }
 
-    val fabSpacing = 72.dp
-
     val isWideScreen =
-        windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
-
-    val screenInsets = if (isWideScreen) {
-        ScaffoldDefaults.contentWindowInsets
-    } else {
-        WindowInsets(bottom = 0.dp)
-    }
+        uiState.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+    val screenInsets =
+        if (isWideScreen) ScaffoldDefaults.contentWindowInsets else WindowInsets(bottom = 0.dp)
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
         contentWindowInsets = screenInsets,
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            CenterAlignedTopAppBar(
-                navigationIcon = {
-                    if (isSelectionMode) {
-                        Button(onClick = onClearSelection) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(Icons.Default.Close, contentDescription = "Clear selection")
-                                Text(text = "${selectedCharacters.size}")
-                            }
-                        }
-                    } else if (isSearchExpanded) {
-                        IconButton(
-                            onClick = {
-                                isSearchExpanded = false
-                                onSearchQueryChange("")
-                            }
-                        ) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Close search"
-                            )
-                        }
-                    }
-                },
-                title = {
-                    if (isSearchExpanded) {
-                        TextField(
-                            value = searchQuery,
-                            onValueChange = onSearchQueryChange,
-                            placeholder = { Text(stringResource(R.string.search)) },
-                            singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .focusRequester(searchFocusRequester),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            )
-                        )
-
-                        LaunchedEffect(Unit) {
-                            searchFocusRequester.requestFocus()
-                        }
-                    } else if (!isSelectionMode) {
-                        Text(
-                            stringResource(R.string.characters),
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                },
-                actions = {
-                    if (!isSearchExpanded) {
-                        IconButton(onClick = { isSearchExpanded = true }) {
-                            Icon(Icons.Default.Search, contentDescription = "Search")
-                        }
-                    }
-
-                    if (!isSelectionMode) {
-                        var menuExpanded by remember { mutableStateOf(false) }
-
-                        Box {
-                            IconButton(onClick = { menuExpanded = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "More Options"
-                                )
-                            }
-
-                            SlicedDropdownMenu(
-                                expanded = menuExpanded,
-                                onDismissRequest = { menuExpanded = false },
-                                items = listOf(
-                                    SlicedMenuItem(
-                                        text = stringResource(R.string.confirm_import),
-                                        icon = Icons.Default.Download,
-                                        onClick = {
-                                            importLauncher.launch(
-                                                arrayOf(
-                                                    "application/json",
-                                                    "*/*"
-                                                )
-                                            )
-                                        }
-                                    )
-                                )
-                            )
-                        }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                )
+            CharactersTopAppBar(
+                uiState = uiState,
+                actions = actions,
+                isSearchExpanded = isSearchExpanded,
+                onSearchExpandedChange = { isSearchExpanded = it },
+                searchFocusRequester = searchFocusRequester,
+                scrollBehavior = scrollBehavior,
+                onImportClick = { importLauncher.launch(arrayOf("application/json", "*/*")) }
             )
         },
         floatingActionButton = {
             AnimatedVisibility(
-                visible = !isSelectionMode && isFabVisible,
-                enter = scaleIn() + fadeIn(),
-                exit = scaleOut() + fadeOut()
+                visible = !uiState.isSelectionMode,
+                enter = scaleIn(),
+                exit = scaleOut()
             ) {
                 FloatingActionButton(
-                    onClick = onAdd,
+                    onClick = actions.onAdd,
                     modifier = Modifier.size(64.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Create New Character",
+                        contentDescription = "Create New Character"
                     )
                 }
             }
@@ -375,127 +274,30 @@ fun ListOfCharactersScreen(
                 title = stringResource(R.string.q_delete_character),
                 confirmMsg = stringResource(
                     R.string.q_confirm_text_characters,
-                    selectedCharacters.size
+                    uiState.selectedCharacters.size
                 ),
-                isSelectionMode = isSelectionMode,
-                isAllSelected = isAllSelected,
+                isSelectionMode = uiState.isSelectionMode,
+                isAllSelected = uiState.isAllSelected,
                 onExportSelected = {
-                    if (selectedCharacters.isEmpty()) {
-                        Toast.makeText(
-                            context,
-                            selectionFailureMessage,
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    if (uiState.selectedCharacters.isEmpty()) {
+                        Toast.makeText(context, selectionFailureMessage, Toast.LENGTH_SHORT).show()
                     } else {
                         exportLauncher.launch("characters_backup.json")
                     }
                 },
-                onDeleteSelected = onDeleteSelected,
-                onToggleSelectAll = onToggleSelectAll
+                onDeleteSelected = actions.onDeleteSelected,
+                onToggleSelectAll = actions.onToggleSelectAll
             )
         }
     ) { padding ->
-        if (!loadingState) {
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .consumeWindowInsets(padding),
-                contentAlignment = Alignment.TopCenter
-            ) {
-                when (listView) {
-                    ListView.LIST -> {
-                        LazyColumn(
-                            state = listState,
-                            contentPadding = PaddingValues(
-                                start = 16.dp,
-                                top = 16.dp,
-                                end = 16.dp,
-                                bottom = 16.dp + fabSpacing
-                            ),
-                            verticalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier
-                                .widthIn(max = 840.dp)
-                                .nestedScroll(nestedScrollConnection)
-                        ) {
-                            itemsIndexed(
-                                characters,
-                                key = { _, item -> item.id }) { index, character ->
-
-                                val itemShape = when {
-                                    characters.size == 1 -> RoundedCornerShape(16.dp)
-                                    index == 0 -> RoundedCornerShape(
-                                        topStart = 16.dp, topEnd = 16.dp,
-                                        bottomStart = 4.dp, bottomEnd = 4.dp
-                                    )
-
-                                    index == characters.lastIndex -> RoundedCornerShape(
-                                        topStart = 4.dp, topEnd = 4.dp,
-                                        bottomStart = 16.dp, bottomEnd = 16.dp
-                                    )
-
-                                    else -> MaterialTheme.shapes.extraSmall
-                                }
-
-                                CharacterListItem(
-                                    character = character,
-                                    shape = itemShape,
-                                    isSelected = selectedCharacters.contains(character),
-                                    isSelectionMode = isSelectionMode,
-                                    onToggleSelection = { toggleSelection(character) },
-                                    onClick = { onCharacterClick(character.id) },
-                                    onDelete = { onDelete(character) },
-                                    onExport = { onExport(character) },
-                                    modifier = Modifier.animateItem()
-                                )
-                            }
-                        }
-                    }
-
-                    ListView.GRID -> {
-                        val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
-
-                        val columnCount = when {
-                            windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> 3
-                            windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 3
-                            else -> 2
-                        }
-
-                        LazyVerticalStaggeredGrid(
-                            state = gridState,
-                            columns = StaggeredGridCells.Fixed(columnCount),
-                            contentPadding = PaddingValues(
-                                start = 16.dp,
-                                top = 16.dp,
-                                end = 16.dp,
-                                bottom = 16.dp + fabSpacing
-                            ),
-                            verticalItemSpacing = 4.dp,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier
-                                .widthIn(max = 840.dp)
-                                .nestedScroll(nestedScrollConnection)
-                        ) {
-                            items(characters, key = { it.id }) { character ->
-                                CharacterGridItem(
-                                    character = character,
-                                    isSelected = selectedCharacters.contains(character),
-                                    isSelectionMode = isSelectionMode,
-                                    onToggleSelection = { toggleSelection(character) },
-                                    onClick = { onCharacterClick(character.id) },
-                                    onDelete = { onDelete(character) },
-                                    onExport = { onExport(character) },
-                                    modifier = Modifier.animateItem(
-                                        fadeInSpec = tween(durationMillis = 600),
-                                        placementSpec = null,
-                                        fadeOutSpec = tween(durationMillis = 200)
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+        if (!uiState.loadingState) {
+            CharactersContent(
+                uiState = uiState,
+                actions = actions,
+                animatedVisibilityScope = animatedVisibilityScope,
+                onExportPdf = onExportPdf,
+                modifier = Modifier.padding(padding)
+            )
         } else {
             Box(
                 Modifier
@@ -507,97 +309,339 @@ fun ListOfCharactersScreen(
         }
     }
 
-    if (isLoading) {
-        LoadingDialog()
-    }
+    if (isLocalLoading) LoadingDialog()
 
-    pendingImportSheets?.let { sheetsToImport ->
-        val successMsg: String = stringResource(R.string.success_import)
-
+    pendingImportSheets?.let { sheets ->
+        val successMsg = stringResource(R.string.success_import)
         AlertDialog(
-            onDismissRequest = {
-                pendingImportSheets = null
-            },
-            title = {
-                Text(stringResource(R.string.confirm_import_title))
-            },
-            text = {
-                Text(stringResource(R.string.alert_dialog_import_chars, sheetsToImport.size))
-            },
+            onDismissRequest = { pendingImportSheets = null },
+            title = { Text(stringResource(R.string.confirm_import_title)) },
+            text = { Text(stringResource(R.string.alert_dialog_import_chars, sheets.size)) },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        onImportSheets(sheetsToImport)
-                        pendingImportSheets = null
-                        Toast.makeText(context, successMsg, Toast.LENGTH_SHORT).show()
-                    }
-                ) {
-                    Text(stringResource(R.string.confirm_import))
-                }
+                TextButton(onClick = {
+                    actions.onImportSheets(sheets)
+                    pendingImportSheets = null
+                    Toast.makeText(context, successMsg, Toast.LENGTH_SHORT).show()
+                }) { Text(stringResource(R.string.confirm_import)) }
             },
             dismissButton = {
-                TextButton(
-                    onClick = {
-                        pendingImportSheets = null
-                    }
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
+                TextButton(onClick = {
+                    pendingImportSheets = null
+                }) { Text(stringResource(R.string.cancel)) }
             }
         )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CharacterListItem(
-    character: Character,
-    shape: Shape,
-    isSelected: Boolean,
-    isSelectionMode: Boolean,
-    onToggleSelection: () -> Unit,
-    onClick: () -> Unit,
-    onDelete: () -> Unit,
-    onExport: () -> Unit,
+fun CharactersTopAppBar(
+    uiState: CharacterListUiState,
+    actions: CharacterListActions,
+    isSearchExpanded: Boolean,
+    onSearchExpandedChange: (Boolean) -> Unit,
+    searchFocusRequester: FocusRequester,
+    scrollBehavior: TopAppBarScrollBehavior,
+    onImportClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val haptics = LocalHapticFeedback.current
+    val elevatedSurfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
+    val isWideScreen =
+        uiState.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
-    var menuExpanded by remember { mutableStateOf(false) }
+    CenterAlignedTopAppBar(
+        modifier = modifier,
+        navigationIcon = {
+            if (uiState.isSelectionMode) {
+                Button(
+                    onClick = actions.onClearSelection,
+                    modifier = Modifier.padding(start = 4.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = "Clear selection")
+                        Text(text = "${uiState.selectedCharacters.size}")
+                    }
+                }
+            } else if (isSearchExpanded) {
+                IconButton(onClick = {
+                    onSearchExpandedChange(false)
+                    actions.onSearchQueryChange("")
+                }) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close search")
+                }
+            }
+        },
+        title = {
+            if (isSearchExpanded) {
+                TextField(
+                    value = uiState.searchQuery,
+                    onValueChange = actions.onSearchQueryChange,
+                    placeholder = { Text(stringResource(R.string.search)) },
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(searchFocusRequester),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    )
+                )
+                LaunchedEffect(Unit) { searchFocusRequester.requestFocus() }
+            } else if (!uiState.isSelectionMode) {
+                Text(
+                    stringResource(R.string.characters),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Medium),
+                    textAlign = if (isWideScreen) TextAlign.Center else TextAlign.Left,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        actions = {
+            if (!isSearchExpanded) {
+                IconButton(onClick = { onSearchExpandedChange(true) }) {
+                    Icon(Icons.Default.Search, contentDescription = "Search")
+                }
+            }
+            if (!uiState.isSelectionMode) {
+                var menuExpanded by remember { mutableStateOf(false) }
+                Box {
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "More Options")
+                    }
+                    SlicedDropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false },
+                        items = listOf(
+                            SlicedMenuItem(
+                                text = stringResource(R.string.confirm_import),
+                                icon = Icons.Default.Download,
+                                onClick = onImportClick
+                            )
+                        )
+                    )
+                }
+            }
+        },
+        scrollBehavior = if (!uiState.isSelectionMode && !isSearchExpanded) scrollBehavior else null,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = elevatedSurfaceColor,
+            scrolledContainerColor = elevatedSurfaceColor,
+            titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    )
+}
 
-    var showConfirmDialog by remember {
-        mutableStateOf(false)
+@Composable
+fun SharedTransitionScope.CharactersContent(
+    uiState: CharacterListUiState,
+    actions: CharacterListActions,
+    onExportPdf: (Character) -> Unit,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier
+) {
+    val fabSpacing = 72.dp
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .consumeWindowInsets(PaddingValues(bottom = fabSpacing)),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        when (uiState.listView) {
+            ListView.LIST -> {
+                CharactersList(
+                    uiState = uiState,
+                    actions = actions,
+                    onExportPdf = onExportPdf,
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    fabSpacing = fabSpacing
+                )
+            }
+
+            ListView.GRID -> {
+                CharactersGrid(
+                    uiState = uiState,
+                    actions = actions,
+                    onExportPdf = onExportPdf,
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    fabSpacing = fabSpacing
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SharedTransitionScope.CharactersList(
+    uiState: CharacterListUiState,
+    actions: CharacterListActions,
+    onExportPdf: (Character) -> Unit,
+    fabSpacing: Dp,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier
+) {
+    val listState = rememberLazyListState()
+    LazyColumn(
+        state = listState,
+        contentPadding = PaddingValues(
+            start = 8.dp,
+            top = 8.dp,
+            end = 8.dp,
+            bottom = 8.dp + fabSpacing
+        ),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier.widthIn(max = 840.dp)
+    ) {
+        itemsIndexed(uiState.characters, key = { _, item -> item.id }) { index, character ->
+            val topCorners = if (uiState.characters.size == 1 || index == 0) 16.dp else 4.dp
+            val bottomCorners =
+                if (uiState.characters.size == 1 || index == uiState.characters.lastIndex) 16.dp else 4.dp
+
+            val itemActions = rememberCharacterItemActions(character, uiState, actions, onExportPdf)
+
+            CharacterListItem(
+                character = character,
+                defaultTopCorners = topCorners,
+                defaultBottomCorners = bottomCorners,
+                isSelected = uiState.selectedCharacters.contains(character),
+                isSelectionMode = uiState.isSelectionMode,
+                itemActions = itemActions,
+                animatedVisibilityScope = animatedVisibilityScope,
+                modifier = Modifier.animateItem()
+            )
+        }
+    }
+}
+
+@Composable
+fun SharedTransitionScope.CharactersGrid(
+    uiState: CharacterListUiState,
+    actions: CharacterListActions,
+    onExportPdf: (Character) -> Unit,
+    fabSpacing: Dp,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier
+) {
+    val gridState = rememberLazyStaggeredGridState()
+    val columnCount = when {
+        uiState.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> 3
+        uiState.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 3
+        else -> 2
     }
 
-    if (showConfirmDialog) {
-        DeletingItemConfirmDialog(
-            title = stringResource(R.string.q_delete_character),
-            text = stringResource(R.string.q_confirm_text, character.name),
-            onConfirm = onDelete,
-            onDiscard = { showConfirmDialog = false },
+    LazyVerticalStaggeredGrid(
+        state = gridState,
+        columns = StaggeredGridCells.Fixed(columnCount),
+        contentPadding = PaddingValues(
+            start = 8.dp,
+            top = 8.dp,
+            end = 8.dp,
+            bottom = 8.dp + fabSpacing
+        ),
+        verticalItemSpacing = 4.dp,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier.widthIn(max = 840.dp)
+    ) {
+        items(uiState.characters, key = { it.id }) { character ->
+            val itemActions = rememberCharacterItemActions(character, uiState, actions, onExportPdf)
+            CharacterGridItem(
+                character = character,
+                isSelected = uiState.selectedCharacters.contains(character),
+                isSelectionMode = uiState.isSelectionMode,
+                itemActions = itemActions,
+                animatedVisibilityScope = animatedVisibilityScope,
+                modifier = Modifier.animateItem(
+                    fadeInSpec = tween(600),
+                    placementSpec = null,
+                    fadeOutSpec = tween(200)
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun rememberCharacterItemActions(
+    character: Character,
+    uiState: CharacterListUiState,
+    actions: CharacterListActions,
+    onExportPdf: (Character) -> Unit
+): CharacterItemActions {
+    val haptics = LocalHapticFeedback.current
+    return remember(character, uiState.isSelectionMode, actions, onExportPdf) {
+        CharacterItemActions(
+            onClick = {
+                if (uiState.isSelectionMode) actions.toggleSelection(character)
+                else actions.onCharacterClick(character.id)
+            },
+            onLongClick = {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                actions.toggleSelection(character)
+            },
+            onToggleSelection = { actions.toggleSelection(character) },
+            onDelete = { actions.onDelete(character) },
+            onExport = { onExportPdf(character) }
         )
     }
+}
+
+@Composable
+fun SharedTransitionScope.CharacterListItem(
+    character: Character,
+    defaultTopCorners: Dp,
+    defaultBottomCorners: Dp,
+    isSelected: Boolean,
+    isSelectionMode: Boolean,
+    itemActions: CharacterItemActions,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier
+) {
+    val animatedColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer
+        else MaterialTheme.colorScheme.surfaceContainerLowest,
+        label = "cardColorAnimation"
+    )
+
+    val topCorners by animateDpAsState(
+        targetValue = if (isSelected) 16.dp else defaultTopCorners,
+        label = "topCornersAnimation"
+    )
+    val bottomCorners by animateDpAsState(
+        targetValue = if (isSelected) 16.dp else defaultBottomCorners,
+        label = "bottomCornersAnimation"
+    )
+
+    val animatedShape = RoundedCornerShape(
+        topStart = topCorners,
+        topEnd = topCorners,
+        bottomStart = bottomCorners,
+        bottomEnd = bottomCorners
+    )
+
+    val imageShape = RoundedCornerShape(
+        topStart = topCorners,
+        bottomStart = bottomCorners,
+        topEnd = 0.dp,
+        bottomEnd = 0.dp
+    )
 
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else
-                MaterialTheme.colorScheme.surfaceVariant
-        ),
-        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = animatedColor),
+        shape = animatedShape,
         modifier = modifier
             .heightIn(min = 120.dp)
             .wrapContentHeight()
+            .clip(animatedShape)
             .combinedClickable(
-                onClick = {
-                    if (isSelectionMode) {
-                        onToggleSelection()
-                    } else {
-                        onClick()
-                    }
-                },
-                onLongClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onToggleSelection()
-                }
+                onClick = itemActions.onClick,
+                onLongClick = itemActions.onLongClick
             )
     ) {
         Row(
@@ -605,31 +649,18 @@ fun CharacterListItem(
                 .fillMaxWidth()
                 .wrapContentHeight()
         ) {
-            Surface(
+            CharacterItemImage(
+                imagePath = character.imagePath,
+                shape = imageShape,
                 modifier = Modifier
-                    .wrapContentHeight()
-                    .heightIn(max = 120.dp)
-                    .widthIn(max = 120.dp),
-                color = MaterialTheme.colorScheme.surfaceContainer,
-            ) {
-                if (character.imagePath != null) {
-                    AsyncImage(
-                        model = character.imagePath,
-                        contentDescription = "Character Profile",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
+                    .size(120.dp)
+                    .sharedBounds(
+                        sharedContentState = rememberSharedContentState(key = "image_${character.id}"),
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                        clipInOverlayDuringTransition = OverlayClip(imageShape)
                     )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Add Photo",
-                        modifier = Modifier
-                            .padding(24.dp)
-                            .fillMaxSize()
-                    )
-                }
-            }
+            )
 
             Column(
                 modifier = Modifier
@@ -639,7 +670,6 @@ fun CharacterListItem(
                 Row {
                     Text(
                         text = character.name,
-                        textAlign = TextAlign.Start,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
@@ -647,64 +677,31 @@ fun CharacterListItem(
                         modifier = Modifier
                             .weight(1f)
                             .align(Alignment.CenterVertically)
-                    )
-                    if (isSelectionMode) {
-                        Checkbox(
-                            checked = isSelected,
-                            onCheckedChange = { onToggleSelection() },
-                            modifier = Modifier.weight(0.2f)
-                        )
-                    } else {
-                        Box(
-                            Modifier.weight(0.2f)
-                        ) {
-                            IconButton(
-                                onClick = { menuExpanded = true },
-                                modifier = Modifier.align(
-                                    Alignment.TopEnd
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "Options",
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                            SlicedDropdownMenu(
-                                expanded = menuExpanded,
-                                onDismissRequest = { menuExpanded = false },
-                                items = listOf(
-                                    SlicedMenuItem(
-                                        text = stringResource(R.string.share_as_pdf),
-                                        icon = Icons.Default.Share,
-                                        onClick = onExport
-                                    ),
-                                    SlicedMenuItem(
-                                        text = stringResource(R.string.delete),
-                                        icon = Icons.Default.Delete,
-                                        contentColor = MaterialTheme.colorScheme.error,
-                                        onClick = { showConfirmDialog = true }
-                                    )
-                                )
+                            .sharedBounds(
+                                sharedContentState = rememberSharedContentState(key = "name_${character.id}"),
+                                animatedVisibilityScope = animatedVisibilityScope,
+                                resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
                             )
-                        }
-                    }
-                }
-                val characterInfo = listOf(character.race, character.charClass)
-                    .filter { it.isNotBlank() }
-                    .joinToString(" — ")
-
-                if (characterInfo.isNotBlank()) {
-                    Text(
-                        text = characterInfo,
-                        style = MaterialTheme.typography.labelLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                    )
+                    CharacterItemTrailingAction(
+                        isSelected = isSelected,
+                        isSelectionMode = isSelectionMode,
+                        characterName = character.name,
+                        onToggleSelection = itemActions.onToggleSelection,
+                        onExport = itemActions.onExport,
+                        onDelete = itemActions.onDelete,
+                        modifier = Modifier.weight(0.2f)
                     )
                 }
-                Text(
-                    text = "${stringResource(R.string.spell_level)} ${character.level}",
-                    style = MaterialTheme.typography.labelLarge,
+                CharacterMetadata(
+                    race = character.race,
+                    charClass = character.charClass,
+                    level = character.level,
+                    classRaceModifier = Modifier.sharedBounds(
+                        sharedContentState = rememberSharedContentState(key = "class_${character.id}"),
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
+                    )
                 )
             }
         }
@@ -712,302 +709,225 @@ fun CharacterListItem(
 }
 
 @Composable
-fun CharacterGridItem(
+fun SharedTransitionScope.CharacterGridItem(
     character: Character,
     isSelected: Boolean,
     isSelectionMode: Boolean,
-    onToggleSelection: () -> Unit,
-    onClick: () -> Unit,
-    onDelete: () -> Unit,
-    onExport: () -> Unit,
+    itemActions: CharacterItemActions,
+    animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier
 ) {
-    val haptics = LocalHapticFeedback.current
+    val animatedColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer
+        else MaterialTheme.colorScheme.surfaceContainerLowest,
+        label = "cardColorAnimation"
+    )
 
-    var menuExpanded by remember { mutableStateOf(false) }
-
-    var showConfirmDialog by remember {
-        mutableStateOf(false)
-    }
-
-    if (showConfirmDialog) {
-        DeletingItemConfirmDialog(
-            title = stringResource(R.string.q_delete_character),
-            text = stringResource(R.string.q_confirm_text, character.name),
-            onConfirm = onDelete,
-            onDiscard = { showConfirmDialog = false },
-        )
-    }
+    val imageShape = RoundedCornerShape(
+        topStart = 8.dp,
+        topEnd = 8.dp,
+        bottomStart = 0.dp,
+        bottomEnd = 0.dp
+    )
 
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else
-                MaterialTheme.colorScheme.surfaceVariant
-        ),
+        colors = CardDefaults.cardColors(containerColor = animatedColor),
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
             .combinedClickable(
-                onClick = {
-                    if (isSelectionMode) {
-                        onToggleSelection()
-                    } else {
-                        onClick()
-                    }
-                },
-                onLongClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onToggleSelection()
-                }
+                onClick = itemActions.onClick,
+                onLongClick = itemActions.onLongClick
             )
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Box {
-                Surface(
+                CharacterItemImage(
+                    imagePath = character.imagePath,
+                    shape = imageShape,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .wrapContentHeight()
                         .heightIn(min = 180.dp)
-                        .clip(
-                            RoundedCornerShape(
-                                topStart = 8.dp,
-                                topEnd = 8.dp,
-                            )
+                        .sharedBounds(
+                            sharedContentState = rememberSharedContentState(key = "image_${character.id}"),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds,
+                            clipInOverlayDuringTransition = OverlayClip(imageShape)
                         ),
-                    color = MaterialTheme.colorScheme.surfaceContainer
-                ) {
-                    if (character.imagePath != null) {
-                        AsyncImage(
-                            model = character.imagePath,
-                            contentDescription = "Character Profile",
-                            contentScale = ContentScale.FillWidth,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight()
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Add Photo",
-                            modifier = Modifier
-                                .padding(24.dp)
-                                .fillMaxSize()
-                        )
-                    }
-                }
-                if (isSelectionMode) {
-                    Checkbox(
-                        checked = isSelected,
-                        onCheckedChange = { onToggleSelection() },
-                        modifier = Modifier.align(Alignment.TopEnd)
-                    )
-                } else {
-                    Box(
-                        Modifier.align(
-                            Alignment.TopEnd
-                        )
-                    ) {
-                        IconButton(
-                            onClick = { menuExpanded = true },
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = "Options",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                        SlicedDropdownMenu(
-                            expanded = menuExpanded,
-                            onDismissRequest = { menuExpanded = false },
-                            items = listOf(
-                                SlicedMenuItem(
-                                    text = stringResource(R.string.share_as_pdf),
-                                    icon = Icons.Default.Share,
-                                    onClick = onExport
-                                ),
-                                SlicedMenuItem(
-                                    text = stringResource(R.string.delete),
-                                    icon = Icons.Default.Delete,
-                                    contentColor = MaterialTheme.colorScheme.error,
-                                    onClick = { showConfirmDialog = true }
-                                )
-                            )
-                        )
-                    }
-                }
+                )
+                CharacterItemTrailingAction(
+                    isSelected = isSelected,
+                    isSelectionMode = isSelectionMode,
+                    characterName = character.name,
+                    onToggleSelection = itemActions.onToggleSelection,
+                    onExport = itemActions.onExport,
+                    onDelete = itemActions.onDelete,
+                    modifier = Modifier.align(Alignment.TopEnd)
+                )
             }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(8.dp)
             ) {
-                Row {
-                    Text(
-                        text = character.name,
-                        textAlign = TextAlign.Start,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier
-                            .weight(1f)
-                            .align(Alignment.CenterVertically)
-                    )
-                }
-                val characterInfo = listOf(character.race, character.charClass)
-                    .filter { it.isNotBlank() }
-                    .joinToString(" — ")
-
-                if (characterInfo.isNotBlank()) {
-                    Text(
-                        text = characterInfo,
-                        style = MaterialTheme.typography.labelLarge,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
                 Text(
-                    text = "${stringResource(R.string.spell_level)} ${character.level}",
-                    style = MaterialTheme.typography.labelLarge,
+                    text = character.name,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.sharedBounds(
+                        sharedContentState = rememberSharedContentState(key = "name_${character.id}"),
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
+                    )
+                )
+                CharacterMetadata(
+                    race = character.race,
+                    charClass = character.charClass,
+                    level = character.level,
+                    classRaceModifier = Modifier.sharedBounds(
+                        sharedContentState = rememberSharedContentState(key = "class_${character.id}"),
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
+                    )
                 )
             }
         }
     }
 }
 
-@Preview(group = "list")
+@Composable
+fun CharacterItemImage(
+    imagePath: String?,
+    modifier: Modifier = Modifier,
+    shape: RoundedCornerShape? = null
+) {
+    Surface(
+        modifier = modifier.then(if (shape != null) Modifier.clip(shape) else Modifier),
+        color = MaterialTheme.colorScheme.surfaceContainer
+    ) {
+        if (imagePath != null) {
+            AsyncImage(
+                model = imagePath,
+                contentDescription = "Character Profile",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Fallback profile",
+                modifier = Modifier
+                    .padding(24.dp)
+                    .fillMaxSize()
+            )
+        }
+    }
+}
+
+@Composable
+fun CharacterItemTrailingAction(
+    isSelected: Boolean,
+    isSelectionMode: Boolean,
+    characterName: String,
+    onToggleSelection: () -> Unit,
+    onExport: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (isSelectionMode) {
+        Box(
+            modifier = modifier
+        ) {
+            Checkbox(checked = isSelected, onCheckedChange = { onToggleSelection() })
+        }
+    } else {
+        var menuExpanded by remember { mutableStateOf(false) }
+        var showConfirmDialog by remember { mutableStateOf(false) }
+
+        if (showConfirmDialog) {
+            DeletingItemConfirmDialog(
+                title = stringResource(R.string.q_delete_character),
+                text = stringResource(R.string.q_confirm_text, characterName),
+                onConfirm = onDelete,
+                onDiscard = { showConfirmDialog = false },
+            )
+        }
+
+        Box(
+            modifier = modifier
+        ) {
+            IconButton(
+                onClick = { menuExpanded = true },
+                modifier = Modifier.align(Alignment.TopEnd)
+            ) {
+                Icon(Icons.Default.MoreVert, contentDescription = "Options")
+            }
+            SlicedDropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false },
+                items = listOf(
+                    SlicedMenuItem(
+                        text = stringResource(R.string.share_as_pdf),
+                        icon = Icons.Default.Share,
+                        onClick = onExport
+                    ),
+                    SlicedMenuItem(
+                        text = stringResource(R.string.delete),
+                        icon = Icons.Default.Delete,
+                        contentColor = MaterialTheme.colorScheme.error,
+                        onClick = { showConfirmDialog = true })
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun CharacterMetadata(
+    race: String,
+    charClass: String,
+    level: Int,
+    modifier: Modifier = Modifier,
+    classRaceModifier: Modifier,
+) {
+    val characterInfo = remember(race, charClass) {
+        listOf(race, charClass).filter { it.isNotBlank() }.joinToString(" — ")
+    }
+    if (characterInfo.isNotBlank()) {
+        Text(
+            text = characterInfo,
+            style = MaterialTheme.typography.labelLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = classRaceModifier
+        )
+    }
+    Text(
+        text = "${stringResource(R.string.spell_level)} $level",
+        style = MaterialTheme.typography.labelLarge
+    )
+}
+
+@PreviewLightDark
+@PreviewDynamicColors
 @Composable
 private fun ListOfCharactersRoutePreview_LIST() {
     DnDSheetTheme {
-        ListOfCharactersScreen(
-            characters = UiUtils.sampleCharacters,
-            loadingState = false,
-            searchQuery = "",
-            onSearchQueryChange = {},
-            listView = ListView.LIST,
-            onAdd = {},
-            onDelete = {},
-            onCharacterClick = {},
-            onDeleteSelected = {},
-            onToggleSelectAll = {},
-            onClearSelection = {},
-            toggleSelection = {},
-            isSelectionMode = false,
-            isAllSelected = false,
-            selectedCharacters = emptySet(),
-            onImportSheets = {},
-            onExportSheets = { emptyList() },
-            windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
-            onGetCharacterSheet = {
-                CharacterSheet(
-                    UiUtils.sampleCharacters.first(),
-                    UiUtils.sampleSpells,
-                    UiUtils.rawAttacks
+        SharedTransitionLayout {
+            AnimatedVisibility(true) {
+                ListOfCharactersScreen(
+                    uiState = CharacterListUiState(
+                        characters = UiUtils.sampleCharacters,
+                        loadingState = false,
+                        searchQuery = "",
+                        listView = ListView.LIST,
+                        windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+                    ),
+                    actions = CharacterListActions(),
+                    animatedVisibilityScope = this
                 )
-            },
-        )
-    }
-}
-
-@Preview(group = "list")
-@Composable
-private fun ListOfCharactersRoutePreview_LIST_SELECTION() {
-    DnDSheetTheme {
-        ListOfCharactersScreen(
-            characters = UiUtils.sampleCharacters,
-            loadingState = false,
-            searchQuery = "",
-            onSearchQueryChange = {},
-            listView = ListView.LIST,
-            onAdd = {},
-            onDelete = {},
-            onCharacterClick = {},
-            onDeleteSelected = {},
-            onToggleSelectAll = {},
-            onClearSelection = {},
-            toggleSelection = {},
-            isSelectionMode = true,
-            isAllSelected = true,
-            selectedCharacters = emptySet(),
-            onImportSheets = {},
-            onExportSheets = { emptyList() },
-            windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
-            onGetCharacterSheet = {
-                CharacterSheet(
-                    UiUtils.sampleCharacters.first(),
-                    UiUtils.sampleSpells,
-                    UiUtils.rawAttacks
-                )
-            },
-        )
-    }
-}
-
-@Preview(device = "spec:width=1280dp,height=800dp,dpi=240")
-@Composable
-private fun ListOfCharactersRoutePreview_LIST_TABLET() {
-    DnDSheetTheme {
-        ListOfCharactersScreen(
-            characters = UiUtils.sampleCharacters,
-            loadingState = false,
-            searchQuery = "",
-            onSearchQueryChange = {},
-            listView = ListView.LIST,
-            onAdd = {},
-            onDelete = {},
-            onCharacterClick = {},
-            onDeleteSelected = {},
-            onToggleSelectAll = {},
-            onClearSelection = {},
-            toggleSelection = {},
-            isSelectionMode = false,
-            isAllSelected = false,
-            selectedCharacters = emptySet(),
-            onImportSheets = {},
-            onExportSheets = { emptyList() },
-            windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
-            onGetCharacterSheet = {
-                CharacterSheet(
-                    UiUtils.sampleCharacters.first(),
-                    UiUtils.sampleSpells,
-                    UiUtils.rawAttacks
-                )
-            },
-        )
-    }
-}
-
-@Preview(device = "spec:width=1280dp,height=800dp,dpi=240")
-@Composable
-private fun ListOfCharactersRoutePreview_GRID() {
-    DnDSheetTheme {
-        ListOfCharactersScreen(
-            characters = UiUtils.sampleCharacters,
-            loadingState = false,
-            searchQuery = "",
-            onSearchQueryChange = {},
-            listView = ListView.GRID,
-            onAdd = {},
-            onDelete = {},
-            onCharacterClick = {},
-            onDeleteSelected = {},
-            onToggleSelectAll = {},
-            onClearSelection = {},
-            toggleSelection = {},
-            isSelectionMode = false,
-            isAllSelected = false,
-            selectedCharacters = emptySet(),
-            onImportSheets = {},
-            onExportSheets = { emptyList() },
-            windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
-            onGetCharacterSheet = {
-                CharacterSheet(
-                    UiUtils.sampleCharacters.first(),
-                    UiUtils.sampleSpells,
-                    UiUtils.rawAttacks
-                )
-            },
-        )
+            }
+        }
     }
 }

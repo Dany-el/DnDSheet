@@ -71,10 +71,15 @@ fun AbilitySlide(
     val abilities = Ability.entries.filter { it != Ability.NONE }
 
     Box(
-        modifier = modifier.widthIn(max = 520.dp)
+        modifier = modifier
     ) {
         LazyColumn(
-            contentPadding = PaddingValues(8.dp),
+            contentPadding = PaddingValues(
+                start = 8.dp,
+                top = 8.dp,
+                end = 8.dp,
+                bottom = 120.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.fillMaxSize()
         ) {
@@ -105,9 +110,6 @@ fun AbilitySlide(
                     onProficiencyChange = onProficiencyChange,
                 )
             }
-            item {
-                Spacer(modifier = Modifier.height(90.dp))
-            }
         }
     }
 }
@@ -126,7 +128,7 @@ fun AbilityCard(
     Card(
         shape = shape,
         colors = CardDefaults.cardColors().copy(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         modifier = modifier.fillMaxWidth(),
@@ -253,7 +255,7 @@ fun ModifierRow(
         ) {
             Surface(
                 shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
                 modifier = Modifier.matchParentSize()
             ) { }
 
@@ -281,7 +283,7 @@ fun ModifierRow(
         ) {
             Surface(
                 shape = MaterialTheme.shapes.large,
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
                 modifier = Modifier.matchParentSize()
             ) { }
 
@@ -358,7 +360,7 @@ fun SkillRow(
     ) {
         Surface(
             shape = shape,
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
             modifier = Modifier.matchParentSize()
         ) {
         }
@@ -367,6 +369,7 @@ fun SkillRow(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(shape)
                 .clickable(
                     onClick = {
                         val nextLevel = when (proficiencyLevel) {

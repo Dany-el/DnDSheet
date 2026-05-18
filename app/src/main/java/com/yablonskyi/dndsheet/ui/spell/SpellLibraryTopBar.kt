@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Upload
@@ -18,10 +20,15 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,7 +43,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
 import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.ui.utils.SlicedDropdownMenu
 import com.yablonskyi.dndsheet.ui.utils.SlicedMenuItem
@@ -49,6 +58,8 @@ enum class LibraryMenuAction(
     EXPORT(R.string.export_spells, Icons.Default.Upload)
 }
 
+enum class TopBarMode { SELECTION, SEARCH, LEARN, DEFAULT }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpellLibraryTopBar(
@@ -60,11 +71,18 @@ fun SpellLibraryTopBar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
     onNavigateBack: () -> Unit,
+    onToggleFilters: () -> Unit,
+    isFiltersExpanded: Boolean,
+    scrollBehavior: TopAppBarScrollBehavior
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
     var isSearchExpanded by remember { mutableStateOf(false) }
     val searchFocusRequester = remember { FocusRequester() }
+
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    val isWideScreen =
+        windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
     BackHandler(enabled = isSearchExpanded) {
         if (isSearchExpanded && !isSelectionMode) {
@@ -73,50 +91,72 @@ fun SpellLibraryTopBar(
         }
     }
 
+    val elevatedSurfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
+
+    val currentMode = remember(isSelectionMode, isSearchExpanded, isLearnMode) {
+        when {
+            isSelectionMode -> TopBarMode.SELECTION
+            isSearchExpanded -> TopBarMode.SEARCH
+            isLearnMode -> TopBarMode.LEARN
+            else -> TopBarMode.DEFAULT
+        }
+    }
+
     CenterAlignedTopAppBar(
+        scrollBehavior = if (!isSelectionMode && !isSearchExpanded) scrollBehavior else null,
         navigationIcon = {
-            if (isSelectionMode) {
-                Button(
-                    onClick = onClearSelection,
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            when (currentMode) {
+                TopBarMode.SELECTION ->
+                    Button(
+                        onClick = {
+                            onClearSelection()
+                            isSearchExpanded = false
+                            onSearchQueryChange("")
+                        },
+                        modifier = Modifier.padding(start = 4.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Clear selection",
+                            )
+                            Text(text = "$selectedCount")
+                        }
+                    }
+
+                TopBarMode.SEARCH ->
+                    IconButton(
+                        onClick = {
+                            isSearchExpanded = false
+                            onSearchQueryChange("")
+                        }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Clear selection",
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Close search"
                         )
-                        Text(text = "$selectedCount")
                     }
-                }
-            } else if (isSearchExpanded) {
-                IconButton(
-                    onClick = {
-                        isSearchExpanded = false
-                        onSearchQueryChange("")
+
+                TopBarMode.LEARN ->
+                    IconButton(
+                        onClick = {
+                            onNavigateBack()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Navigate back",
+                        )
                     }
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Close search"
-                    )
-                }
-            } else if (isLearnMode) {
-                IconButton(
-                    onClick = {
-                        onNavigateBack()
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Navigate back",
-                    )
-                }
+
+                TopBarMode.DEFAULT -> {}
             }
         },
         title = {
-            if (isSearchExpanded) {
+            if (currentMode == TopBarMode.SEARCH) {
                 TextField(
                     value = searchQuery,
                     onValueChange = onSearchQueryChange,
@@ -136,13 +176,16 @@ fun SpellLibraryTopBar(
                 LaunchedEffect(Unit) {
                     searchFocusRequester.requestFocus()
                 }
-            } else if (!isSelectionMode) {
+            } else if (currentMode != TopBarMode.SELECTION) {
                 Text(
                     text = stringResource(
                         if (isLearnMode) R.string.spell_selection else R.string.msg_spell_library
                     ),
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Medium
+                    ),
+                    textAlign = if (isWideScreen) TextAlign.Center else TextAlign.Left,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         },
@@ -151,6 +194,15 @@ fun SpellLibraryTopBar(
                 IconButton(onClick = { isSearchExpanded = true }) {
                     Icon(Icons.Default.Search, contentDescription = "Search")
                 }
+            }
+            IconButton(
+                onClick = onToggleFilters,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.FilterList,
+                    contentDescription = "Toggle Filters",
+                    tint = if (isFiltersExpanded) MaterialTheme.colorScheme.primary else LocalContentColor.current
+                )
             }
             if (!isLearnMode && !isSelectionMode) {
                 Box {
@@ -176,6 +228,13 @@ fun SpellLibraryTopBar(
                     )
                 }
             }
-        }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = elevatedSurfaceColor,
+            scrolledContainerColor = elevatedSurfaceColor,
+            titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     )
 }

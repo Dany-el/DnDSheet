@@ -179,7 +179,7 @@
     <string name="spell_ability">Характеристика</string>
     <string name="spell_saving_throw_bonus">Бонус Ряткидка</string>
     <string name="spell_attack_bonus">Бонус Атаки</string>
-    <string name="spell_selection">Підготовка чарунків</string>
+    <string name="spell_selection">Підготовка</string>
     <string name="search_spells">Вогнекуля…</string>
     <string name="msg_spell_library">Чарунки</string>
     <string name="add_spell">Нова чарунка</string>
@@ -272,4 +272,5 @@
     <string name="delete_backup">Видалити копію</string>
     <string name="dialog_delete_backup_title">Видалити копію?</string>
     <string name="dialog_delete_backup_text">Ви впевненні?</string>
+    <string name="tap_to_edit">Натисніть, щоб редагувати</string>
 </resources>

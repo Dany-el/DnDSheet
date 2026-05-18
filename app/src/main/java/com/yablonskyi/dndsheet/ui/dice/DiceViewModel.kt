@@ -1,5 +1,6 @@
 package com.yablonskyi.dndsheet.ui.dice
 
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yablonskyi.dndsheet.ui.character.slides.formatModifier

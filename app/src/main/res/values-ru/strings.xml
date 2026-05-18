@@ -113,7 +113,7 @@
     <string name="dice_first_letter">к</string>
     <string name="spell_saving_throw_bonus">Бонус Спасброска</string>
     <string name="spell_attack_bonus">Бонус Атаки</string>
-    <string name="spell_selection">Подготовка заклинаний</string>
+    <string name="spell_selection">Подготовка</string>
     <string name="search_spells">Фаербол…</string>
     <string name="msg_spell_library">Заклинания</string>
     <string name="add_spell">Новое заклинание</string>
@@ -265,4 +265,5 @@
     <string name="delete_backup">Удалить копию</string>
     <string name="dialog_delete_backup_title">Удалить копию?</string>
     <string name="dialog_delete_backup_text">Вы уверенны?</string>
+    <string name="tap_to_edit">Нажмите, чтобы редактировать</string>
 </resources>
