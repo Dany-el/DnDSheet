@@ -164,9 +164,6 @@ fun SharedTransitionScope.ListOfCharactersScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    var isSearchExpanded by remember { mutableStateOf(false) }
-    val searchFocusRequester = remember { FocusRequester() }
-
     val selectionFailureMessage = stringResource(R.string.select_at_least_one_item)
     val importMessage = stringResource(R.string.import_file_empty)
 
@@ -223,15 +220,6 @@ fun SharedTransitionScope.ListOfCharactersScreen(
         }
     }
 
-    BackHandler(enabled = uiState.isSelectionMode || isSearchExpanded) {
-        if (uiState.isSelectionMode) {
-            actions.onClearSelection()
-        } else if (isSearchExpanded) {
-            isSearchExpanded = false
-            actions.onSearchQueryChange("")
-        }
-    }
-
     val isWideScreen =
         uiState.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val screenInsets =
@@ -245,9 +233,6 @@ fun SharedTransitionScope.ListOfCharactersScreen(
             CharactersTopAppBar(
                 uiState = uiState,
                 actions = actions,
-                isSearchExpanded = isSearchExpanded,
-                onSearchExpandedChange = { isSearchExpanded = it },
-                searchFocusRequester = searchFocusRequester,
                 scrollBehavior = scrollBehavior,
                 onImportClick = { importLauncher.launch(arrayOf("application/json", "*/*")) }
             )
@@ -338,23 +323,36 @@ fun SharedTransitionScope.ListOfCharactersScreen(
 fun CharactersTopAppBar(
     uiState: CharacterListUiState,
     actions: CharacterListActions,
-    isSearchExpanded: Boolean,
-    onSearchExpandedChange: (Boolean) -> Unit,
-    searchFocusRequester: FocusRequester,
     scrollBehavior: TopAppBarScrollBehavior,
     onImportClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var isSearchExpanded by remember { mutableStateOf(false) }
+    val searchFocusRequester = remember { FocusRequester() }
+
     val elevatedSurfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
     val isWideScreen =
         uiState.windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
+    BackHandler(enabled = uiState.isSelectionMode || isSearchExpanded) {
+        if (uiState.isSelectionMode) {
+            actions.onClearSelection()
+        } else if (isSearchExpanded) {
+            isSearchExpanded = false
+            actions.onSearchQueryChange("")
+        }
+    }
+
     CenterAlignedTopAppBar(
         modifier = modifier,
         navigationIcon = {
-            if (uiState.isSelectionMode) {
-                Button(
-                    onClick = actions.onClearSelection,
+            when {
+                uiState.isSelectionMode -> Button(
+                    onClick = {
+                        actions.onClearSelection()
+                        isSearchExpanded = false
+                        actions.onSearchQueryChange("")
+                    },
                     modifier = Modifier.padding(start = 4.dp)
                 ) {
                     Row(
@@ -363,13 +361,16 @@ fun CharactersTopAppBar(
                     ) {
                         Icon(Icons.Default.Close, contentDescription = "Clear selection")
                         Text(text = "${uiState.selectedCharacters.size}")
+
                     }
                 }
-            } else if (isSearchExpanded) {
-                IconButton(onClick = {
-                    onSearchExpandedChange(false)
-                    actions.onSearchQueryChange("")
-                }) {
+
+                isSearchExpanded -> IconButton(
+                    onClick = {
+                        isSearchExpanded = false
+                        actions.onSearchQueryChange("")
+                    }
+                ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close search")
                 }
             }
@@ -403,7 +404,7 @@ fun CharactersTopAppBar(
         },
         actions = {
             if (!isSearchExpanded) {
-                IconButton(onClick = { onSearchExpandedChange(true) }) {
+                IconButton(onClick = { isSearchExpanded = true }) {
                     Icon(Icons.Default.Search, contentDescription = "Search")
                 }
             }

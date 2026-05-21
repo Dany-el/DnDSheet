@@ -58,8 +58,6 @@ enum class LibraryMenuAction(
     EXPORT(R.string.export_spells, Icons.Default.Upload)
 }
 
-enum class TopBarMode { SELECTION, SEARCH, LEARN, DEFAULT }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpellLibraryTopBar(
@@ -76,87 +74,56 @@ fun SpellLibraryTopBar(
     scrollBehavior: TopAppBarScrollBehavior
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
-
     var isSearchExpanded by remember { mutableStateOf(false) }
     val searchFocusRequester = remember { FocusRequester() }
-
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val isWideScreen =
         windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
     BackHandler(enabled = isSearchExpanded) {
-        if (isSearchExpanded && !isSelectionMode) {
-            isSearchExpanded = false
-            onSearchQueryChange("")
-        }
+        isSearchExpanded = false
+        onSearchQueryChange("")
     }
 
     val elevatedSurfaceColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
 
-    val currentMode = remember(isSelectionMode, isSearchExpanded, isLearnMode) {
-        when {
-            isSelectionMode -> TopBarMode.SELECTION
-            isSearchExpanded -> TopBarMode.SEARCH
-            isLearnMode -> TopBarMode.LEARN
-            else -> TopBarMode.DEFAULT
-        }
-    }
-
     CenterAlignedTopAppBar(
-        scrollBehavior = if (!isSelectionMode && !isSearchExpanded) scrollBehavior else null,
+        scrollBehavior = if (!isSearchExpanded) scrollBehavior else null,
         navigationIcon = {
-            when (currentMode) {
-                TopBarMode.SELECTION ->
-                    Button(
-                        onClick = {
-                            onClearSelection()
-                            isSearchExpanded = false
-                            onSearchQueryChange("")
-                        },
-                        modifier = Modifier.padding(start = 4.dp)
+            when {
+                isSelectionMode -> Button(
+                    onClick = {
+                        onClearSelection()
+                        isSearchExpanded = false
+                        onSearchQueryChange("")
+                    },
+                    modifier = Modifier.padding(start = 4.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Clear selection",
-                            )
-                            Text(text = "$selectedCount")
-                        }
+                        Icon(Icons.Default.Close, contentDescription = "Clear selection")
+                        Text(text = "$selectedCount")
                     }
+                }
 
-                TopBarMode.SEARCH ->
-                    IconButton(
-                        onClick = {
-                            isSearchExpanded = false
-                            onSearchQueryChange("")
-                        }
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Close search"
-                        )
+                isSearchExpanded -> IconButton(
+                    onClick = {
+                        isSearchExpanded = false
+                        onSearchQueryChange("")
                     }
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close search")
+                }
 
-                TopBarMode.LEARN ->
-                    IconButton(
-                        onClick = {
-                            onNavigateBack()
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back",
-                        )
-                    }
-
-                TopBarMode.DEFAULT -> {}
+                isLearnMode -> IconButton(onClick = onNavigateBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Navigate back")
+                }
             }
         },
         title = {
-            if (currentMode == TopBarMode.SEARCH) {
+            if (isSearchExpanded) {
                 TextField(
                     value = searchQuery,
                     onValueChange = onSearchQueryChange,
@@ -172,11 +139,8 @@ fun SpellLibraryTopBar(
                         unfocusedIndicatorColor = Color.Transparent
                     )
                 )
-
-                LaunchedEffect(Unit) {
-                    searchFocusRequester.requestFocus()
-                }
-            } else if (currentMode != TopBarMode.SELECTION) {
+                LaunchedEffect(Unit) { searchFocusRequester.requestFocus() }
+            } else if (!isSelectionMode) {
                 Text(
                     text = stringResource(
                         if (isLearnMode) R.string.spell_selection else R.string.msg_spell_library
@@ -195,24 +159,19 @@ fun SpellLibraryTopBar(
                     Icon(Icons.Default.Search, contentDescription = "Search")
                 }
             }
-            IconButton(
-                onClick = onToggleFilters,
-            ) {
+            IconButton(onClick = onToggleFilters) {
                 Icon(
                     imageVector = Icons.Default.FilterList,
                     contentDescription = "Toggle Filters",
-                    tint = if (isFiltersExpanded) MaterialTheme.colorScheme.primary else LocalContentColor.current
+                    tint = if (isFiltersExpanded) MaterialTheme.colorScheme.primary
+                    else LocalContentColor.current
                 )
             }
             if (!isLearnMode && !isSelectionMode) {
                 Box {
                     IconButton(onClick = { menuExpanded = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More Options"
-                        )
+                        Icon(Icons.Default.MoreVert, contentDescription = "More Options")
                     }
-
                     SlicedDropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
@@ -220,9 +179,7 @@ fun SpellLibraryTopBar(
                             SlicedMenuItem(
                                 text = stringResource(action.title),
                                 icon = action.icon,
-                                onClick = {
-                                    onActionClick(action)
-                                }
+                                onClick = { onActionClick(action) }
                             )
                         }
                     )
