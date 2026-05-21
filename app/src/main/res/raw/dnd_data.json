@@ -1,0 +1,268 @@
+{
+  "races": [
+    {
+      "id": "dragonborn",
+      "name": "Dragonborn",
+      "size": "Medium",
+      "speed": 30,
+      "abilityBonuses": { "STR": 2, "CHA": 1 },
+      "grantedSkills": [],
+      "traits": ["Draconic Ancestry", "Breath Weapon", "Damage Resistance"],
+      "description": "Born of dragons, Dragonborn walk proudly through a world that greets them with fearful incomprehension."
+    },
+    {
+      "id": "dwarf_hill",
+      "name": "Hill Dwarf",
+      "size": "Medium",
+      "speed": 25,
+      "abilityBonuses": { "CON": 2, "WIS": 1 },
+      "grantedSkills": [],
+      "traits": ["Darkvision", "Dwarven Resilience", "Stonecunning", "Dwarven Toughness"],
+      "description": "As a hill dwarf, you have keen senses, deep intuition, and remarkable resilience."
+    },
+    {
+      "id": "dwarf_mountain",
+      "name": "Mountain Dwarf",
+      "size": "Medium",
+      "speed": 25,
+      "abilityBonuses": { "STR": 2, "CON": 2 },
+      "grantedSkills": [],
+      "traits": ["Darkvision", "Dwarven Resilience", "Stonecunning", "Dwarven Armor Training"],
+      "description": "As a mountain dwarf, you're strong and hardy, accustomed to a difficult life in rugged terrain."
+    },
+    {
+      "id": "elf_high",
+      "name": "High Elf",
+      "size": "Medium",
+      "speed": 30,
+      "abilityBonuses": { "DEX": 2, "INT": 1 },
+      "grantedSkills": ["PERCEPTION"],
+      "traits": ["Darkvision", "Fey Ancestry", "Trance", "Keen Senses", "Elf Weapon Training", "Cantrip", "Extra Language"],
+      "description": "High elves have a keen mind and a mastery of at least the basics of magic."
+    },
+    {
+      "id": "elf_wood",
+      "name": "Wood Elf",
+      "size": "Medium",
+      "speed": 35,
+      "abilityBonuses": { "DEX": 2, "WIS": 1 },
+      "grantedSkills": ["PERCEPTION"],
+      "traits": ["Darkvision", "Fey Ancestry", "Trance", "Keen Senses", "Elf Weapon Training", "Fleet of Foot", "Mask of the Wild"],
+      "description": "Wood elves have keen senses and intuition, and their fleet feet carry them quickly through their native forests."
+    },
+    {
+      "id": "gnome_forest",
+      "name": "Forest Gnome",
+      "size": "Small",
+      "speed": 25,
+      "abilityBonuses": { "INT": 2, "DEX": 1 },
+      "grantedSkills": [],
+      "traits": ["Darkvision", "Gnome Cunning", "Natural Illusionist", "Speak with Small Beasts"],
+      "description": "Forest gnomes have a natural knack for illusion and inherent quickness and stealth."
+    },
+    {
+      "id": "gnome_rock",
+      "name": "Rock Gnome",
+      "size": "Small",
+      "speed": 25,
+      "abilityBonuses": { "INT": 2, "CON": 1 },
+      "grantedSkills": [],
+      "traits": ["Darkvision", "Gnome Cunning", "Artificer's Lore", "Tinker"],
+      "description": "Rock gnomes have a natural inventiveness and hardiness beyond that of other gnomes."
+    },
+    {
+      "id": "halfling_lightfoot",
+      "name": "Lightfoot Halfling",
+      "size": "Small",
+      "speed": 25,
+      "abilityBonuses": { "DEX": 2, "CHA": 1 },
+      "grantedSkills": [],
+      "traits": ["Lucky", "Brave", "Halfling Nimbleness", "Naturally Stealthy"],
+      "description": "As a lightfoot halfling, you can easily hide from notice, even using other people as cover."
+    },
+    {
+      "id": "halfling_stout",
+      "name": "Stout Halfling",
+      "size": "Small",
+      "speed": 25,
+      "abilityBonuses": { "DEX": 2, "CON": 1 },
+      "grantedSkills": [],
+      "traits": ["Lucky", "Brave", "Halfling Nimbleness", "Stout Resilience"],
+      "description": "As a stout halfling, you're hardier than average and have some resistance to poison."
+    },
+    {
+      "id": "human",
+      "name": "Human",
+      "size": "Medium",
+      "speed": 30,
+      "abilityBonuses": { "STR": 1, "DEX": 1, "CON": 1, "INT": 1, "WIS": 1, "CHA": 1 },
+      "grantedSkills": [],
+      "traits": ["Extra Language", "Versatile"],
+      "description": "Humans are the most adaptable and ambitious people among the common races."
+    },
+    {
+      "id": "half_elf",
+      "name": "Half-Elf",
+      "size": "Medium",
+      "speed": 30,
+      "abilityBonuses": { "CHA": 2 },
+      "grantedSkills": [],
+      "traits": ["Darkvision", "Fey Ancestry", "Skill Versatility", "Extra Language"],
+      "description": "Half-elves combine what some say are the best qualities of their elf and human parents."
+    },
+    {
+      "id": "half_orc",
+      "name": "Half-Orc",
+      "size": "Medium",
+      "speed": 30,
+      "abilityBonuses": { "STR": 2, "CON": 1 },
+      "grantedSkills": ["INTIMIDATION"],
+      "traits": ["Darkvision", "Menacing", "Relentless Endurance", "Savage Attacks"],
+      "description": "Half-orcs inherit a tendency toward chaos from their orc parents and are not strongly inclined toward good."
+    },
+    {
+      "id": "tiefling",
+      "name": "Tiefling",
+      "size": "Medium",
+      "speed": 30,
+      "abilityBonuses": { "INT": 1, "CHA": 2 },
+      "grantedSkills": [],
+      "traits": ["Darkvision", "Hellish Resistance", "Infernal Legacy"],
+      "description": "Tieflings are derived from human bloodlines, and in the broadest possible sense, they still look human."
+    }
+  ],
+  "classes": [
+    {
+      "id": "barbarian",
+      "name": "Barbarian",
+      "hitDice": "d12",
+      "primaryAbility": "STR",
+      "savingThrows": ["STR", "CON"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ANIMAL_HANDLING", "ATHLETICS", "INTIMIDATION", "NATURE", "PERCEPTION", "SURVIVAL"],
+      "spellcastingAbility": null,
+      "description": "A fierce warrior who can enter a battle rage."
+    },
+    {
+      "id": "bard",
+      "name": "Bard",
+      "hitDice": "d8",
+      "primaryAbility": "CHA",
+      "savingThrows": ["DEX", "CHA"],
+      "skillChoiceCount": 3,
+      "availableSkills": [],
+      "spellcastingAbility": "CHA",
+      "description": "An inspiring magician whose power echoes the music of creation."
+    },
+    {
+      "id": "cleric",
+      "name": "Cleric",
+      "hitDice": "d8",
+      "primaryAbility": "WIS",
+      "savingThrows": ["WIS", "CHA"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["HISTORY", "INSIGHT", "MEDICINE", "PERSUASION", "RELIGION"],
+      "spellcastingAbility": "WIS",
+      "description": "A priestly champion who wields divine magic in service of a higher power."
+    },
+    {
+      "id": "druid",
+      "name": "Druid",
+      "hitDice": "d8",
+      "primaryAbility": "WIS",
+      "savingThrows": ["INT", "WIS"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ARCANA", "ANIMAL_HANDLING", "INSIGHT", "MEDICINE", "NATURE", "PERCEPTION", "RELIGION", "SURVIVAL"],
+      "spellcastingAbility": "WIS",
+      "description": "A priest of the Old Faith, wielding the powers of nature and adopting animal forms."
+    },
+    {
+      "id": "fighter",
+      "name": "Fighter",
+      "hitDice": "d10",
+      "primaryAbility": "STR",
+      "savingThrows": ["STR", "CON"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ACROBATICS", "ANIMAL_HANDLING", "ATHLETICS", "HISTORY", "INSIGHT", "INTIMIDATION", "PERCEPTION", "SURVIVAL"],
+      "spellcastingAbility": null,
+      "description": "A master of martial combat, skilled with a variety of weapons and armor."
+    },
+    {
+      "id": "monk",
+      "name": "Monk",
+      "hitDice": "d8",
+      "primaryAbility": "DEX",
+      "savingThrows": ["STR", "DEX"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ACROBATICS", "ATHLETICS", "HISTORY", "INSIGHT", "RELIGION", "STEALTH"],
+      "spellcastingAbility": null,
+      "description": "A master of martial arts, harnessing the power of the body in pursuit of physical and spiritual perfection."
+    },
+    {
+      "id": "paladin",
+      "name": "Paladin",
+      "hitDice": "d10",
+      "primaryAbility": "STR",
+      "savingThrows": ["WIS", "CHA"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ATHLETICS", "INSIGHT", "INTIMIDATION", "MEDICINE", "PERSUASION", "RELIGION"],
+      "spellcastingAbility": "CHA",
+      "description": "A holy warrior bound to a sacred oath."
+    },
+    {
+      "id": "ranger",
+      "name": "Ranger",
+      "hitDice": "d10",
+      "primaryAbility": "DEX",
+      "savingThrows": ["STR", "DEX"],
+      "skillChoiceCount": 3,
+      "availableSkills": ["ANIMAL_HANDLING", "ATHLETICS", "INSIGHT", "INVESTIGATION", "NATURE", "PERCEPTION", "STEALTH", "SURVIVAL"],
+      "spellcastingAbility": "WIS",
+      "description": "A warrior who uses martial prowess and nature magic to combat threats on the edges of civilization."
+    },
+    {
+      "id": "rogue",
+      "name": "Rogue",
+      "hitDice": "d8",
+      "primaryAbility": "DEX",
+      "savingThrows": ["DEX", "INT"],
+      "skillChoiceCount": 4,
+      "availableSkills": ["ACROBATICS", "ATHLETICS", "DECEPTION", "INSIGHT", "INTIMIDATION", "INVESTIGATION", "PERCEPTION", "PERFORMANCE", "PERSUASION", "SLEIGHT_OF_HAND", "STEALTH"],
+      "spellcastingAbility": null,
+      "description": "A scoundrel who uses stealth and trickery to overcome obstacles and enemies."
+    },
+    {
+      "id": "sorcerer",
+      "name": "Sorcerer",
+      "hitDice": "d6",
+      "primaryAbility": "CHA",
+      "savingThrows": ["CON", "CHA"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ARCANA", "DECEPTION", "INSIGHT", "INTIMIDATION", "PERSUASION", "RELIGION"],
+      "spellcastingAbility": "CHA",
+      "description": "A spellcaster who draws on inherent magic from a gift or bloodline."
+    },
+    {
+      "id": "warlock",
+      "name": "Warlock",
+      "hitDice": "d8",
+      "primaryAbility": "CHA",
+      "savingThrows": ["WIS", "CHA"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ARCANA", "DECEPTION", "HISTORY", "INTIMIDATION", "INVESTIGATION", "NATURE", "RELIGION"],
+      "spellcastingAbility": "CHA",
+      "description": "A wielder of magic derived from a bargain with an extraplanar entity."
+    },
+    {
+      "id": "wizard",
+      "name": "Wizard",
+      "hitDice": "d6",
+      "primaryAbility": "INT",
+      "savingThrows": ["INT", "WIS"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ARCANA", "HISTORY", "INSIGHT", "INVESTIGATION", "MEDICINE", "RELIGION"],
+      "spellcastingAbility": "INT",
+      "description": "A scholarly magic-user capable of manipulating the structures of spells."
+    }
+  ]
+}

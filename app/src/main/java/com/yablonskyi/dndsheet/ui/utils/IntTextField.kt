@@ -6,11 +6,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,15 +35,21 @@ fun IntTextField(
     keyboardActions: KeyboardActions = KeyboardActions()
 ) {
 
-    var text by remember(value) { mutableStateOf(value.toString()) }
+    var text by remember { mutableStateOf(value.toString()) }
+    var isFocused by remember { mutableStateOf(false) }
+
+    LaunchedEffect(value) {
+        if (!isFocused) {
+            text = value.toString()
+        }
+    }
 
     OutlinedTextField(
         value = text,
         onValueChange = { newText ->
-            if (newText.all { it.isDigit() } && validate(newText)) {
+            if (newText.isEmpty() || newText.all { it.isDigit() } && validate(newText)) {
                 text = newText
-                val intValue = newText.toIntOrNull() ?: 0
-                onValueChange(intValue)
+                newText.toIntOrNull()?.let { onValueChange(it) }
             }
         },
         label = {
@@ -61,6 +69,11 @@ fun IntTextField(
         keyboardActions = keyboardActions,
         singleLine = true,
         isError = isError,
-        modifier = modifier
+        modifier = modifier.onFocusChanged { focusState ->
+            isFocused = focusState.isFocused
+            if (!focusState.isFocused && text.isEmpty()) {
+                text = value.toString()
+            }
+        }
     )
 }

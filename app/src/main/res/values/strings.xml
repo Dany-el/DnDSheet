@@ -276,6 +276,47 @@
     <string name="dialog_delete_backup_title">Delete Backup?</string>
     <string name="dialog_delete_backup_text">Are you sure?</string>
     <string name="tap_to_edit">Tap to edit</string>
+    <string name="back">Back</string>
+    <string name="next">Next</string>
+    <string name="wizard_step_name">Character Name</string>
+    <string name="wizard_step_race">Choose Race</string>
+    <string name="wizard_step_class">Choose Class</string>
+    <string name="wizard_step_skills">Choose Skills</string>
+    <string name="wizard_step_counter">Step %1$d of %2$d</string>
+    <string name="wizard_name_title">What\'s your character\'s name?</string>
+    <string name="wizard_name_subtitle">You can always change this later from the character settings.</string>
+    <string name="wizard_name_label">Character Name</string>
+    <string name="wizard_name_error">Name cannot be empty</string>
+    <string name="wizard_race_subtitle">Pick a race to see its ability bonuses and traits.</string>
+    <string name="wizard_class_subtitle">Pick a class to see its hit dice, saving throws, and skill options.</string>
+    <string name="wizard_granted_skills">Grants: %s</string>
+    <string name="wizard_saving_throws">Saves: %s</string>
+    <string name="wizard_spellcaster">Spellcaster</string>
+    <string name="wizard_skills_subtitle">These proficiencies will be applied to your sheet automatically.</string>
+    <string name="wizard_skills_selected">%1$d / %2$d chosen</string>
+    <string name="wizard_create">Create</string>
+    <string name="homebrew">Homebrew</string>
+    <string name="ability_method_standard">Standard</string>
+    <string name="ability_method_pointbuy">Point Buy</string>
+    <string name="ability_method_roll">Roll</string>
+    <string name="ability_pool_hint">Tap a value, then tap an ability to assign it.</string>
+    <string name="tap_to_assign">Tap to assign</string>
+    <string name="unassign">Remove</string>
+    <string name="points_remaining">%d pts left</string>
+    <string name="roll_abilities">Roll Abilities</string>
+    <string name="reroll_all">Reroll All</string>
+    <string name="roll_select_hint">Tap a result, then tap an ability row to assign it.</string>
+    <string name="wizard_set_level">Starting Level</string>
+    <string name="wizard_set_level_hint">Defaults to level 1 if skipped.</string>
+    <string name="wizard_level_label">Level</string>
+    <string name="wizard_starting_hp">Starting HP</string>
+    <string name="wizard_prof_bonus_preview">Proficiency Bonus at this level: +%d</string>
+    <string name="wizard_step_abilities">Abilities</string>
+    <string name="wizard_step_level">Choose Level</string>
 
+    <plurals name="wizard_skill_choices">
+        <item quantity="one">%d skill</item>
+        <item quantity="other">%d skills</item>
+    </plurals>
 
 </resources>
