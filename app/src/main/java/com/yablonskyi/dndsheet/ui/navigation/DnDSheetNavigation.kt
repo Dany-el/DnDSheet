@@ -32,3 +32,6 @@ data class BottomNavItem<T : Any>(
     val route: T,
     val icon: ImageVector
 )
+
+@Serializable
+object CharacterCreationWizardRoute

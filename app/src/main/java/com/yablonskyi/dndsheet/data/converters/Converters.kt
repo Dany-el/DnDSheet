@@ -90,4 +90,30 @@ class Converters {
 
     @TypeConverter
     fun toRange(value: String): SpellRangeType = SpellRangeType.valueOf(value)
+
+    @TypeConverter
+    fun fromAbilityIntMap(map: Map<Ability, Int>): String = Gson().toJson(map)
+
+    @TypeConverter
+    fun toAbilityIntMap(json: String): Map<Ability, Int> {
+        val type = object : TypeToken<Map<Ability, Int>>() {}.type
+        return Gson().fromJson(json, type) ?: emptyMap()
+    }
+
+    @TypeConverter
+    fun fromSkillList(list: List<Skill>): String =
+        list.joinToString(",") { it.name }
+
+    @TypeConverter
+    fun toSkillList(data: String): List<Skill> =
+        if (data.isBlank()) emptyList()
+        else data.split(",").mapNotNull { runCatching { Skill.valueOf(it) }.getOrNull() }
+
+    @TypeConverter
+    fun fromStringList(list: List<String>): String =
+        list.joinToString("|||")
+
+    @TypeConverter
+    fun toStringList(data: String): List<String> =
+        if (data.isBlank()) emptyList() else data.split("|||")
 }

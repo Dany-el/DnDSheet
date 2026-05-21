@@ -1,0 +1,268 @@
+{
+  "races": [
+    {
+      "id": "dragonborn",
+      "name": "Драконорожденный",
+      "size": "Средний",
+      "speed": 30,
+      "abilityBonuses": { "STR": 2, "CHA": 1 },
+      "grantedSkills": [],
+      "traits": ["Драконье происхождение", "Оружие дыхания", "Сопротивление урону"],
+      "description": "Рожденные драконами, драконорожденные гордо шагают по миру, который встречает их со страхом и непониманием."
+    },
+    {
+      "id": "dwarf_hill",
+      "name": "Холмовой дварф",
+      "size": "Средний",
+      "speed": 25,
+      "abilityBonuses": { "CON": 2, "WIS": 1 },
+      "grantedSkills": [],
+      "traits": ["Темное зрение", "Дварфская стойкость", "Знание камня", "Дварфская выдержка"],
+      "description": "Как холмовой дварф, вы обладаете острыми чувствами, глубокой интуицией и поразительной стойкостью."
+    },
+    {
+      "id": "dwarf_mountain",
+      "name": "Горный дварф",
+      "size": "Средний",
+      "speed": 25,
+      "abilityBonuses": { "STR": 2, "CON": 2 },
+      "grantedSkills": [],
+      "traits": ["Темное зрение", "Дварфская стойкость", "Знание камня", "Дварфское владение доспехами"],
+      "description": "Как горный дварф, вы сильны и выносливы, привыкли к суровой жизни в пересеченной местности."
+    },
+    {
+      "id": "elf_high",
+      "name": "Высший эльф",
+      "size": "Средний",
+      "speed": 30,
+      "abilityBonuses": { "DEX": 2, "INT": 1 },
+      "grantedSkills": ["PERCEPTION"],
+      "traits": ["Темное зрение", "Наследие фей", "Транс", "Острые чувства", "Эльфийская боевая подготовка", "Заговор", "Дополнительный язык"],
+      "description": "Высшие эльфы обладают острым умом и владеют как минимум основами магии."
+    },
+    {
+      "id": "elf_wood",
+      "name": "Лесной эльф",
+      "size": "Средний",
+      "speed": 35,
+      "abilityBonuses": { "DEX": 2, "WIS": 1 },
+      "grantedSkills": ["PERCEPTION"],
+      "traits": ["Темное зрение", "Наследие фей", "Транс", "Острые чувства", "Эльфийская боевая подготовка", "Быстрые ноги", "Маска дикой природы"],
+      "description": "У лесных эльфов острые чувства и интуиция, а их быстрые ноги стремительно несут их через родные леса."
+    },
+    {
+      "id": "gnome_forest",
+      "name": "Лесной гном",
+      "size": "Маленький",
+      "speed": 25,
+      "abilityBonuses": { "INT": 2, "DEX": 1 },
+      "grantedSkills": [],
+      "traits": ["Темное зрение", "Гномья хитрость", "Природный иллюзионист", "Общение с мелкими зверями"],
+      "description": "Лесные гномы обладают врожденным талантом к иллюзиям, а также природной быстротой и скрытностью."
+    },
+    {
+      "id": "gnome_rock",
+      "name": "Скальный гном",
+      "size": "Маленький",
+      "speed": 25,
+      "abilityBonuses": { "INT": 2, "CON": 1 },
+      "grantedSkills": [],
+      "traits": ["Темное зрение", "Гномья хитрость", "Ремесленные знания", "Жестянщик"],
+      "description": "Скальные гномы обладают природной изобретательностью и выносливостью, превосходящей других гномов."
+    },
+    {
+      "id": "halfling_lightfoot",
+      "name": "Легконогий полурослик",
+      "size": "Маленький",
+      "speed": 25,
+      "abilityBonuses": { "DEX": 2, "CHA": 1 },
+      "grantedSkills": [],
+      "traits": ["Счастливчик", "Храбрец", "Проворство полурослика", "Естественная скрытность"],
+      "description": "Как легконогий полурослик, вы можете легко прятаться от чужих глаз, даже используя других людей в качестве укрытия."
+    },
+    {
+      "id": "halfling_stout",
+      "name": "Коренастый полурослик",
+      "size": "Маленький",
+      "speed": 25,
+      "abilityBonuses": { "DEX": 2, "CON": 1 },
+      "grantedSkills": [],
+      "traits": ["Счастливчик", "Храбрец", "Проворство полурослика", "Стойкость коренастых"],
+      "description": "Как коренастый полурослик, вы выносливее обычного и имеете некоторое сопротивление ядам."
+    },
+    {
+      "id": "human",
+      "name": "Человек",
+      "size": "Средний",
+      "speed": 30,
+      "abilityBonuses": { "STR": 1, "DEX": 1, "CON": 1, "INT": 1, "WIS": 1, "CHA": 1 },
+      "grantedSkills": [],
+      "traits": ["Дополнительный язык", "Универсальность"],
+      "description": "Люди — самые приспосабливающиеся и амбициозные из всех распространенных рас."
+    },
+    {
+      "id": "half_elf",
+      "name": "Полуэльф",
+      "size": "Средний",
+      "speed": 30,
+      "abilityBonuses": { "CHA": 2 },
+      "grantedSkills": [],
+      "traits": ["Темное зрение", "Наследие фей", "Универсальность навыков", "Дополнительный язык"],
+      "description": "Полуэльфы сочетают в себе то, что некоторые называют лучшими качествами их эльфийских и человеческих родителей."
+    },
+    {
+      "id": "half_orc",
+      "name": "Полуорк",
+      "size": "Средний",
+      "speed": 30,
+      "abilityBonuses": { "STR": 2, "CON": 1 },
+      "grantedSkills": ["INTIMIDATION"],
+      "traits": ["Темное зрение", "Угрожающий", "Непоколебимая стойкость", "Свирепые атаки"],
+      "description": "Полуорки унаследовали склонность к хаосу от своих орочьих родителей и не имеют сильной склонности к добру."
+    },
+    {
+      "id": "tiefling",
+      "name": "Тифлинг",
+      "size": "Средний",
+      "speed": 30,
+      "abilityBonuses": { "INT": 1, "CHA": 2 },
+      "grantedSkills": [],
+      "traits": ["Темное зрение", "Адское сопротивление", "Дьявольское наследие"],
+      "description": "Тифлинги происходят от человеческих родословных и в самом широком смысле все еще выглядят как люди."
+    }
+  ],
+  "classes": [
+    {
+      "id": "barbarian",
+      "name": "Варвар",
+      "hitDice": "к12",
+      "primaryAbility": "STR",
+      "savingThrows": ["STR", "CON"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ANIMAL_HANDLING", "ATHLETICS", "INTIMIDATION", "NATURE", "PERCEPTION", "SURVIVAL"],
+      "spellcastingAbility": null,
+      "description": "Свирепый воин, способный впадать в боевую ярость."
+    },
+    {
+      "id": "bard",
+      "name": "Бард",
+      "hitDice": "к8",
+      "primaryAbility": "CHA",
+      "savingThrows": ["DEX", "CHA"],
+      "skillChoiceCount": 3,
+      "availableSkills": [],
+      "spellcastingAbility": "CHA",
+      "description": "Вдохновляющий маг, чья сила вторит музыке мироздания."
+    },
+    {
+      "id": "cleric",
+      "name": "Жрец",
+      "hitDice": "к8",
+      "primaryAbility": "WIS",
+      "savingThrows": ["WIS", "CHA"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["HISTORY", "INSIGHT", "MEDICINE", "PERSUASION", "RELIGION"],
+      "spellcastingAbility": "WIS",
+      "description": "Священный поборник, владеющий божественной магией на службе высших сил."
+    },
+    {
+      "id": "druid",
+      "name": "Друид",
+      "hitDice": "к8",
+      "primaryAbility": "WIS",
+      "savingThrows": ["INT", "WIS"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ARCANA", "ANIMAL_HANDLING", "INSIGHT", "MEDICINE", "NATURE", "PERCEPTION", "RELIGION", "SURVIVAL"],
+      "spellcastingAbility": "WIS",
+      "description": "Жрец Старой Веры, управляющий силами природы и принимающий облик животных."
+    },
+    {
+      "id": "fighter",
+      "name": "Воин",
+      "hitDice": "к10",
+      "primaryAbility": "STR",
+      "savingThrows": ["STR", "CON"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ACROBATICS", "ANIMAL_HANDLING", "ATHLETICS", "HISTORY", "INSIGHT", "INTIMIDATION", "PERCEPTION", "SURVIVAL"],
+      "spellcastingAbility": null,
+      "description": "Мастер боевых искусств, искусно владеющий разнообразным оружием и доспехами."
+    },
+    {
+      "id": "monk",
+      "name": "Монах",
+      "hitDice": "к8",
+      "primaryAbility": "DEX",
+      "savingThrows": ["STR", "DEX"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ACROBATICS", "ATHLETICS", "HISTORY", "INSIGHT", "RELIGION", "STEALTH"],
+      "spellcastingAbility": null,
+      "description": "Мастер боевых искусств, использующий силу тела для достижения физического и духовного совершенства."
+    },
+    {
+      "id": "paladin",
+      "name": "Паладин",
+      "hitDice": "к10",
+      "primaryAbility": "STR",
+      "savingThrows": ["WIS", "CHA"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ATHLETICS", "INSIGHT", "INTIMIDATION", "MEDICINE", "PERSUASION", "RELIGION"],
+      "spellcastingAbility": "CHA",
+      "description": "Святой воин, связанный священной клятвой."
+    },
+    {
+      "id": "ranger",
+      "name": "Следопыт",
+      "hitDice": "к10",
+      "primaryAbility": "DEX",
+      "savingThrows": ["STR", "DEX"],
+      "skillChoiceCount": 3,
+      "availableSkills": ["ANIMAL_HANDLING", "ATHLETICS", "INSIGHT", "INVESTIGATION", "NATURE", "PERCEPTION", "STEALTH", "SURVIVAL"],
+      "spellcastingAbility": "WIS",
+      "description": "Воин, использующий боевое мастерство и магию природы для борьбы с угрозами на границах цивилизации."
+    },
+    {
+      "id": "rogue",
+      "name": "Плут",
+      "hitDice": "к8",
+      "primaryAbility": "DEX",
+      "savingThrows": ["DEX", "INT"],
+      "skillChoiceCount": 4,
+      "availableSkills": ["ACROBATICS", "ATHLETICS", "DECEPTION", "INSIGHT", "INTIMIDATION", "INVESTIGATION", "PERCEPTION", "PERFORMANCE", "PERSUASION", "SLEIGHT_OF_HAND", "STEALTH"],
+      "spellcastingAbility": null,
+      "description": "Негодяй, использующий скрытность и хитрость для преодоления препятствий и врагов."
+    },
+    {
+      "id": "sorcerer",
+      "name": "Чародей",
+      "hitDice": "к6",
+      "primaryAbility": "CHA",
+      "savingThrows": ["CON", "CHA"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ARCANA", "DECEPTION", "INSIGHT", "INTIMIDATION", "PERSUASION", "RELIGION"],
+      "spellcastingAbility": "CHA",
+      "description": "Заклинатель, черпающий силу из врожденной магии благодаря дару или родословной."
+    },
+    {
+      "id": "warlock",
+      "name": "Колдун",
+      "hitDice": "к8",
+      "primaryAbility": "CHA",
+      "savingThrows": ["WIS", "CHA"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ARCANA", "DECEPTION", "HISTORY", "INTIMIDATION", "INVESTIGATION", "NATURE", "RELIGION"],
+      "spellcastingAbility": "CHA",
+      "description": "Владелец магии, полученной благодаря сделке с потусторонней сущностью."
+    },
+    {
+      "id": "wizard",
+      "name": "Волшебник",
+      "hitDice": "к6",
+      "primaryAbility": "INT",
+      "savingThrows": ["INT", "WIS"],
+      "skillChoiceCount": 2,
+      "availableSkills": ["ARCANA", "HISTORY", "INSIGHT", "INVESTIGATION", "MEDICINE", "RELIGION"],
+      "spellcastingAbility": "INT",
+      "description": "Ученый маг, способный управлять самой структурой заклинаний."
+    }
+  ]
+}

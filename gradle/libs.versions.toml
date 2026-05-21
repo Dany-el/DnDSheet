@@ -39,6 +39,8 @@ activity-ktx = "1.13.0"
 exifinterface = "1.4.2"
 workRuntimeKtx = "2.11.2"
 animation = "1.10.6"
+material3 = "1.4.0"
+foundation = "1.11.1"
 
 [libraries]
 androidx-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout", version.ref = "adaptiveLayout" }
@@ -95,6 +97,8 @@ androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterfa
 pdfbox-android = { module = "com.tom-roush:pdfbox-android", version.ref = "pdfboxAndroid" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 androidx-compose-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "animation" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

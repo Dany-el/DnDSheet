@@ -14,6 +14,7 @@ import com.google.gson.reflect.TypeToken
 import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.data.model.character.CharacterSheet
 import com.yablonskyi.dndsheet.data.repository.SettingsRepository
+import com.yablonskyi.dndsheet.data.rulebook.BuiltInRulebookLoader
 import com.yablonskyi.dndsheet.domain.repository.CharacterRepository
 import com.yablonskyi.dndsheet.ui.settings.LanguageChangeHelper.getActiveLanguageCode
 import com.yablonskyi.dndsheet.ui.utils.AppLanguage
@@ -38,7 +39,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AppSettingsViewModel @Inject constructor(
     private val repository: SettingsRepository,
-    private val charRepository: CharacterRepository
+    private val charRepository: CharacterRepository,
+    private val rulebookLoader: BuiltInRulebookLoader
 ) : ViewModel() {
 
     private val _language = MutableStateFlow(getActiveLanguageCode())
@@ -79,6 +81,7 @@ class AppSettingsViewModel @Inject constructor(
             LocaleListCompat.forLanguageTags(code)
         }
 
+        rulebookLoader.invalidateCache()
         AppCompatDelegate.setApplicationLocales(localeList)
 
         _language.value = code

@@ -13,6 +13,7 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -45,6 +46,8 @@ import com.yablonskyi.dndsheet.ui.spell.SpellEditScreen
 import com.yablonskyi.dndsheet.ui.spell.SpellEditViewModel
 import com.yablonskyi.dndsheet.ui.spell.SpellLibraryScreen
 import com.yablonskyi.dndsheet.ui.spell.SpellViewModel
+import com.yablonskyi.dndsheet.ui.wizard.CharacterCreationWizardScreen
+import com.yablonskyi.dndsheet.ui.wizard.CharacterCreationWizardViewModel
 
 @TraceRecomposition(tag = "DnDNavGraph")
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -130,7 +133,7 @@ fun DnDNavGraph(
                     val uiState by settingsViewModel.uiState.collectAsStateWithLifecycle()
 
                     val characterListState by viewModel.characterListState.collectAsStateWithLifecycle()
-                    val lastCharacterId by viewModel.lastCreatedId.collectAsStateWithLifecycle()
+//                    val lastCharacterId by viewModel.lastCreatedId.collectAsStateWithLifecycle()
 
                     val isSelectionMode by viewModel.isSelectionMode.collectAsStateWithLifecycle()
                     val selectedCharacters by viewModel.selectedCharacters.collectAsStateWithLifecycle()
@@ -140,14 +143,14 @@ fun DnDNavGraph(
 
                     val defaultName = stringResource(R.string.unknown_character)
 
-                    LaunchedEffect(lastCharacterId) {
+                    /*LaunchedEffect(lastCharacterId) {
                         lastCharacterId?.let {
                             navController.navigate(
                                 CharacterSheetRoute(id = it)
                             )
                             viewModel.clearLastCreatedId()
                         }
-                    }
+                    }*/
 
                     ListOfCharactersScreen(
                         uiState = CharacterListUiState(
@@ -167,7 +170,8 @@ fun DnDNavGraph(
                             onDeleteSelected = viewModel::deleteSelectedCharacters,
                             toggleSelection = viewModel::toggleSelection,
                             onAdd = {
-                                viewModel.createCharacter(Character(name = defaultName))
+//                                viewModel.createCharacter(Character(name = defaultName))
+                                navController.navigate(CharacterCreationWizardRoute)
                             },
                             onDelete = viewModel::deleteCharacter,
                             onImportSheets = viewModel::importSheets,
@@ -424,6 +428,22 @@ fun DnDNavGraph(
                 }
                 composable<AppSettingsRoute> {
                     AppSettingsScreen()
+                }
+                composable<CharacterCreationWizardRoute>{
+                    val viewModel: CharacterCreationWizardViewModel = hiltViewModel()
+
+                    val scope = rememberCoroutineScope()
+                    LaunchedEffect(Unit) {
+                        viewModel.createdId.collect { id ->
+                            navController.popBackStack()
+                            navController.navigate(CharacterSheetRoute(id = id))
+                        }
+                    }
+
+                    CharacterCreationWizardScreen(
+                        viewModel = viewModel,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
                 }
             }
         }
