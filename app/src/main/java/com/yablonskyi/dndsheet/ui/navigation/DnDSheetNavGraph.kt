@@ -13,9 +13,7 @@ import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -24,8 +22,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.window.core.layout.WindowSizeClass
 import com.skydoves.compose.stability.runtime.TraceRecomposition
-import com.yablonskyi.dndsheet.R
-import com.yablonskyi.dndsheet.data.model.character.Character
 import com.yablonskyi.dndsheet.ui.attack.AttackViewModel
 import com.yablonskyi.dndsheet.ui.character.CharacterDetailViewModel
 import com.yablonskyi.dndsheet.ui.character.CharacterEditScreen
@@ -140,17 +136,6 @@ fun DnDNavGraph(
                     val isAllSelected by viewModel.isAllSelected.collectAsStateWithLifecycle()
 
                     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
-
-                    val defaultName = stringResource(R.string.unknown_character)
-
-                    /*LaunchedEffect(lastCharacterId) {
-                        lastCharacterId?.let {
-                            navController.navigate(
-                                CharacterSheetRoute(id = it)
-                            )
-                            viewModel.clearLastCreatedId()
-                        }
-                    }*/
 
                     ListOfCharactersScreen(
                         uiState = CharacterListUiState(
@@ -409,7 +394,7 @@ fun DnDNavGraph(
                     )
                 }
 
-                composable<UpdateSpellRoute>{
+                composable<UpdateSpellRoute> {
                     val viewModel: SpellEditViewModel = hiltViewModel()
 
                     val spellState by viewModel.spell.collectAsStateWithLifecycle()
@@ -429,10 +414,9 @@ fun DnDNavGraph(
                 composable<AppSettingsRoute> {
                     AppSettingsScreen()
                 }
-                composable<CharacterCreationWizardRoute>{
+                composable<CharacterCreationWizardRoute> {
                     val viewModel: CharacterCreationWizardViewModel = hiltViewModel()
 
-                    val scope = rememberCoroutineScope()
                     LaunchedEffect(Unit) {
                         viewModel.createdId.collect { id ->
                             navController.popBackStack()

@@ -95,7 +95,8 @@ fun CharacterCreationWizardScreen(
                 onNext = viewModel::goNext,
                 onFinish = viewModel::finish,
             )
-        }
+        },
+        modifier = modifier
     ) { contentPadding ->
         AnimatedContent(
             targetState = currentStep,

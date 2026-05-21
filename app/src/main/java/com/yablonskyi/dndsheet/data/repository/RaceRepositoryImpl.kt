@@ -1,6 +1,5 @@
 package com.yablonskyi.dndsheet.data.repository
 
-import androidx.work.WorkContinuation.combine
 import com.yablonskyi.dndsheet.data.dao.RaceDao
 import com.yablonskyi.dndsheet.data.model.rulebook.Race
 import com.yablonskyi.dndsheet.data.rulebook.BuiltInRulebookLoader
@@ -13,7 +12,7 @@ import javax.inject.Inject
 class RaceRepositoryImpl @Inject constructor(
     private val loader: BuiltInRulebookLoader,
     private val dao: RaceDao
-): RaceRepository {
+) : RaceRepository {
     override suspend fun insert(race: Race) = dao.insert(race)
 
     override suspend fun insertAll(race: List<Race>) = dao.insertAll(race)
