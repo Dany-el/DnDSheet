@@ -7,7 +7,7 @@ import com.yablonskyi.dndsheet.data.model.character.Skill
 
 @Entity(tableName = "races")
 data class Race(
-    @PrimaryKey val id: String,           // e.g. "elf_high"
+    @PrimaryKey val id: String,
     val name: String,
     val size: String = "Medium",
     val speed: Int = 30,
