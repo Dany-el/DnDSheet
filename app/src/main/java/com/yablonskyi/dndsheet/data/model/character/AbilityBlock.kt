@@ -3,7 +3,6 @@ package com.yablonskyi.dndsheet.data.model.character
 import androidx.annotation.StringRes
 import androidx.room.ColumnInfo
 import com.yablonskyi.dndsheet.R
-import kotlin.enums.EnumEntries
 import kotlin.math.floor
 
 enum class Ability(@StringRes val nameRes: Int) {
