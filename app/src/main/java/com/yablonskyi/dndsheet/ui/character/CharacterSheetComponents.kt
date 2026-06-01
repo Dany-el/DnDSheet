@@ -17,27 +17,27 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalRippleConfiguration
@@ -58,7 +58,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -87,6 +87,8 @@ import com.yablonskyi.dndsheet.ui.character.slides.formatModifier
 import com.yablonskyi.dndsheet.ui.dice.DiceRollResultBox
 import com.yablonskyi.dndsheet.ui.dice.DiceRollState
 import com.yablonskyi.dndsheet.ui.spell.SpellInfoSheet
+import com.yablonskyi.dndsheet.ui.utils.SlicedDropdownMenu
+import com.yablonskyi.dndsheet.ui.utils.SlicedMenuItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -102,6 +104,8 @@ fun CharacterTopAppBar(
     imageModifier: Modifier,
     onNavigateBack: () -> Unit,
     onSettingsNavigate: () -> Unit,
+    lessDetails: Boolean,
+    onLessDetails: () -> Unit,
 ) {
     TopAppBar(
         modifier = modifier,
@@ -182,12 +186,27 @@ fun CharacterTopAppBar(
             }
         },
         actions = {
-            IconButton(
-                onClick = { onSettingsNavigate() }
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Settings,
-                    contentDescription = "Options",
+            var menuExpanded by remember { mutableStateOf(false) }
+            Box {
+                IconButton(onClick = { menuExpanded = true }) {
+                    Icon(Icons.Default.MoreVert, contentDescription = "More Options")
+                }
+                SlicedDropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false },
+                    items = listOf(
+                        SlicedMenuItem(
+                            text = if (!lessDetails) stringResource(R.string.expand_less)
+                            else stringResource(R.string.expand_more),
+                            icon = if (!lessDetails) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            onClick = { onLessDetails() }
+                        ),
+                        SlicedMenuItem(
+                            text = stringResource(R.string.settings),
+                            icon = Icons.Default.Settings,
+                            onClick = onSettingsNavigate
+                        ),
+                    )
                 )
             }
         }
@@ -295,17 +314,23 @@ fun DiceResultOverlay(
     onPinClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        SwipeToDismissBoxValue.Settled,
+        SwipeToDismissBoxDefaults.positionalThreshold
+    )
+
+    LaunchedEffect(diceState.showResult) {
+        if (diceState.showResult) {
+            dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+        }
+    }
+
     AnimatedVisibility(
         visible = diceState.showResult,
         enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
         exit = fadeOut() + slideOutVertically(targetOffsetY = { it }),
         modifier = modifier
     ) {
-        val dismissState = rememberSwipeToDismissBoxState(
-            SwipeToDismissBoxValue.Settled,
-            SwipeToDismissBoxDefaults.positionalThreshold
-        )
-
         SwipeToDismissBox(
             state = dismissState,
             backgroundContent = {},
@@ -392,115 +417,44 @@ fun SlideSelector(
 ) {
     val selectedTabIndex = tabs.indexOf(currentTab).coerceAtLeast(0)
 
+    PrimaryScrollableTabRow(
+        selectedTabIndex = selectedTabIndex,
+        modifier = modifier.fillMaxWidth(),
+        divider = {},
+        indicator = {
+            Box(
+                modifier = Modifier
+                    .tabIndicatorOffset(selectedTabIndex)
+                    .fillMaxHeight()
+                    .padding(vertical = 4.dp, horizontal = 4.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
+                    .zIndex(-1f)
+            )
+        },
+        edgePadding = 8.dp,
+        tabs = {
+            tabs.forEachIndexed { index, tab ->
+                val isSelected = selectedTabIndex == index
 
-    Surface(
-        shape = CircleShape,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-        modifier = modifier
-    ) {
-        PrimaryScrollableTabRow(
-            selectedTabIndex = selectedTabIndex,
-            modifier = Modifier.fillMaxWidth(),
-            divider = {},
-            indicator = {
-                Box(
-                    modifier = Modifier
-                        .tabIndicatorOffset(selectedTabIndex, matchContentSize = false)
-                        .fillMaxSize()
-                        .zIndex(-1f)
-                        .padding(vertical = 8.dp, horizontal = 4.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f))
-                )
-            },
-            edgePadding = 8.dp,
-            tabs = {
-                tabs.forEachIndexed { index, tab ->
-                    val isSelected = selectedTabIndex == index
-
-                    CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                        Tab(
-                            selected = isSelected,
-                            onClick = { onTabSelected(tab) },
-                            text = {
-                                Text(
-                                    text = stringResource(tab.titleRes),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
-                                )
-                            }
-                        )
-                    }
+                CompositionLocalProvider(LocalRippleConfiguration provides null) {
+                    Tab(
+                        selected = isSelected,
+                        onClick = { onTabSelected(tab) },
+                        selectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = {
+                            Text(
+                                text = stringResource(tab.titleRes),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            )
+                        },
+                    )
                 }
             }
-        )
-    }
-}
-
-@Composable
-fun VerticalCharacterLayout(
-    // HP
-    currentHp: Int,
-    maxHp: Int,
-    tempHp: Int,
-    // Initiative
-    initiativeBonus: Int,
-    // AC
-    armorClass: Int,
-    // Speed
-    speed: Int,
-    // Prof bonus
-    proficiencyBonus: Int,
-
-    tabs: List<CharacterTab>,
-    pagerState: PagerState,
-
-    onDiceButtonClick: (String) -> Unit,
-    onRestClick: () -> Unit,
-    onHealthClick: () -> Unit,
-    onTabSelected: (CharacterTab) -> Unit,
-    tabContent: @Composable (CharacterTab, Modifier) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.fillMaxSize()
-    ) {
-        CharacterDetailsRow(
-            currentHp = currentHp,
-            maxHp = maxHp,
-            tempHp = tempHp,
-            initiativeBonus = initiativeBonus,
-            armorClass = armorClass,
-            speed = speed,
-            proficiencyBonus = proficiencyBonus,
-            onRollClick = onDiceButtonClick,
-            onRestClick = onRestClick,
-            onHealthClick = onHealthClick,
-        )
-
-        val currentTab by remember {
-            derivedStateOf { CharacterTab.getByIndex(pagerState.currentPage) }
         }
-
-        SlideSelector(
-            tabs = tabs,
-            currentTab = currentTab,
-            onTabSelected = onTabSelected,
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(horizontal = 8.dp)
-        )
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize(),
-            overscrollEffect = null,
-            key = { pageIndex -> tabs[pageIndex].name }
-        ) { pageIndex ->
-            val tab = remember(pageIndex) { CharacterTab.getByIndex(pageIndex) }
-
-            tabContent(tab, Modifier.fillMaxSize())
-        }
-    }
+    )
 }
 
 @Composable
@@ -522,10 +476,6 @@ fun CharacterDetailsRow(
     onRestClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var isVisible by remember {
-        mutableStateOf(true)
-    }
-
     Column(
         modifier = modifier.padding(horizontal = 8.dp)
     ) {
@@ -549,37 +499,12 @@ fun CharacterDetailsRow(
                 modifier = Modifier.weight(0.4f)
             )
         }
-        AnimatedVisibility(
-            visible = isVisible,
-        ) {
-            CollapsibleDetails(
-                proficiencyBonus = proficiencyBonus,
-                initiativeBonus = initiativeBonus,
-                onRollClick = onRollClick,
-                onRestClick = onRestClick
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            TextButton(
-                onClick = { isVisible = !isVisible },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = MaterialTheme.colorScheme.secondary
-                )
-            ) {
-                HorizontalDivider(Modifier.weight(1f))
-                Text(
-                    text = if (isVisible) stringResource(R.string.collapse).uppercase()
-                    else stringResource(R.string.expand).uppercase(),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(1f)
-                )
-                HorizontalDivider(Modifier.weight(1f))
-            }
-        }
+        CollapsibleDetails(
+            proficiencyBonus = proficiencyBonus,
+            initiativeBonus = initiativeBonus,
+            onRollClick = onRollClick,
+            onRestClick = onRestClick
+        )
     }
 }
 
