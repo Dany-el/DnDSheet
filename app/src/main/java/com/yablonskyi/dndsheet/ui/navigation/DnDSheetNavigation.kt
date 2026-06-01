@@ -32,3 +32,30 @@ data class BottomNavItem<T : Any>(
     val route: T,
     val icon: ImageVector
 )
+
+@Serializable
+object CharacterCreationWizardRoute
+
+@Serializable
+sealed interface CompendiumRoute{
+    @Serializable
+    data object Home: CompendiumRoute
+    @Serializable
+    data object RacesScreen: CompendiumRoute
+    @Serializable
+    data class RaceDetailsScreen(val raceId: String = ""): CompendiumRoute
+    @Serializable
+    data class RaceUpdateScreen(val raceId: String = ""): CompendiumRoute
+    @Serializable
+    data class RaceCreateScreen(val raceId: String = ""): CompendiumRoute
+    @Serializable
+    data object ClassesScreen: CompendiumRoute
+    @Serializable
+    data class ClassDetailsScreen(val classId: String = ""): CompendiumRoute
+    @Serializable
+    data class ClassUpdateScreen(val classId: String = ""): CompendiumRoute
+    @Serializable
+    data class ClassCreateScreen(val classId: String = ""): CompendiumRoute
+    @Serializable
+    data object SpellsLibrary: CompendiumRoute
+}

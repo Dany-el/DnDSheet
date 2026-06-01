@@ -20,4 +20,8 @@ interface CharacterRepository {
     fun getAllCharacters(): Flow<List<Character>>
 
     suspend fun getCharacterSheetsByIds(characterIds: List<Long>): List<CharacterSheet>
+
+    suspend fun getCharacterSheetById(characterId: Long): CharacterSheet
+
+    suspend fun getAllCharacterSheets(): List<CharacterSheet>
 }

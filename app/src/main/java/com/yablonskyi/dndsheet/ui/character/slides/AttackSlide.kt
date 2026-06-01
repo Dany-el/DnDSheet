@@ -48,10 +48,15 @@ fun AttackSlide(
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
     ) {
         LazyColumn(
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(
+                start = 8.dp,
+                top = 8.dp,
+                end = 8.dp,
+                bottom = 120.dp
+            ),
             modifier = Modifier.fillMaxWidth()
         ) {
             item {
@@ -62,21 +67,21 @@ fun AttackSlide(
                     Text(
                         text = stringResource(R.string.attack_title).uppercase(),
                         textAlign = TextAlign.Left,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.weight(1.3f)
                     )
                     Text(
                         text = stringResource(R.string.attack_bonus_hit).uppercase(),
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(horizontal = 8.dp)
                     )
                     Text(
                         text = stringResource(R.string.attack_damage).uppercase(),
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier
                             .weight(1f, false)
@@ -120,7 +125,7 @@ fun InsertAttackRow(
         Surface(
             color = MaterialTheme.colorScheme.background.copy(alpha = 0f),
             shape = MaterialTheme.shapes.extraSmall,
-            border = BorderStroke(2.dp, color = MaterialTheme.colorScheme.outline),
+            border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.outline),
             modifier = Modifier
                 .clickable(
                     onClick = onAdd
@@ -129,12 +134,13 @@ fun InsertAttackRow(
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add",
-                    tint = MaterialTheme.colorScheme.primary
                 )
                 Text(
                     text = stringResource(R.string.add).uppercase(),
@@ -155,9 +161,11 @@ fun AttackRow(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = modifier.fillMaxWidth().clickable(
-            onClick = onUpdate
-        )
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(
+                onClick = onUpdate
+            )
     ) {
         Text(
             text = attack.name,
@@ -189,10 +197,10 @@ fun AttackButton(
 ) {
     TextButton(
         onClick = onClick,
-        shape = MaterialTheme.shapes.small,
+        shape = MaterialTheme.shapes.large,
         colors = ButtonDefaults.buttonColors().copy(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary
         ),
         modifier = modifier
     ) {
@@ -200,6 +208,8 @@ fun AttackButton(
             text = text,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

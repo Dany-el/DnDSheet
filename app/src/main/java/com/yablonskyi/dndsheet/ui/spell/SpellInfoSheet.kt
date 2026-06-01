@@ -1,25 +1,21 @@
 package com.yablonskyi.dndsheet.ui.spell
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -60,7 +56,7 @@ fun SpellInfoSheet(
                 text = spell.name,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
@@ -68,123 +64,92 @@ fun SpellInfoSheet(
                 Icon(Icons.Default.Close, contentDescription = "Close")
             }
         }
-
-        Text(
-            text = "${stringResource(spell.level.resId)}, ${
-                stringResource(spell.school.resId)
-            }",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        if (spell.isConcentration || spell.isRitual) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (spell.isConcentration) {
-                    SpellTag(
-                        stringResource(R.string.concentration)
-                    )
-                }
-                if (spell.isRitual) {
-                    SpellTag(
-                        stringResource(R.string.ritual)
-                    )
-                }
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            item {
+                Text(
+                    text = "${stringResource(spell.level.resId)}, ${
+                        stringResource(spell.school.resId)
+                    }",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-        }
-
-        HorizontalDivider()
-
-        StatRow(
-            label = stringResource(R.string.msg_casting_time),
-            value = stringResource(spell.castTime.resId)
-        )
-
-        val rangeStr = if (spell.rangeValue != null && spell.rangeValue > 0) {
-            "${spell.rangeValue} ${stringResource(R.string.feets)}"
-        } else {
-            stringResource(spell.rangeType.resId)
-        }
-        StatRow(label = stringResource(R.string.range_distance), value = rangeStr)
-
-        val compLetters = spell.components.map { component ->
-            stringResource(component.resId).first().uppercase()
-        }.joinToString(", ")
-
-        val componentsStr =
-            if (spell.components.contains(Component.MATERIAL) && !spell.material.isNullOrBlank()) {
-                "$compLetters (${spell.material})"
-            } else {
-                compLetters
-            }
-        StatRow(label = stringResource(R.string.msg_components), value = componentsStr)
-
-        HorizontalDivider()
-
-
-        if (spell.description.isNotBlank()) {
-            Text(
-                text = stringResource(R.string.spell_description),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Surface(
-                color = OutlinedTextFieldDefaults.colors().unfocusedContainerColor,
-                shape = MaterialTheme.shapes.extraSmall,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                val paragraphs = remember(spell.description) {
-                    spell.description.split("\n").filter { it.isNotBlank() }
-                }
-
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .heightIn(max = 200.dp)
-                ) {
-                    items(paragraphs) { paragraph ->
-                        Text(
-                            text = paragraph,
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Justify,
-                        )
+            item {
+                if (spell.isConcentration || spell.isRitual) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    ) {
+                        if (spell.isConcentration) {
+                            SpellTag(
+                                stringResource(R.string.concentration)
+                            )
+                        }
+                        if (spell.isRitual) {
+                            SpellTag(
+                                stringResource(R.string.ritual)
+                            )
+                        }
                     }
                 }
+                HorizontalDivider()
             }
-        }
-
-
-        if (!spell.higherLevels.isNullOrBlank()) {
-            Text(
-                text = stringResource(R.string.spell_higher_levels),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            Surface(
-                color = OutlinedTextFieldDefaults.colors().unfocusedContainerColor,
-                shape = MaterialTheme.shapes.extraSmall,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                val paragraphs = remember(spell.higherLevels) {
-                    spell.higherLevels.split("\n").filter { it.isNotBlank() }
+            item {
+                StatRow(
+                    label = stringResource(R.string.msg_casting_time),
+                    value = stringResource(spell.castTime.resId)
+                )
+            }
+            item {
+                val rangeStr = if (spell.rangeValue != null && spell.rangeValue > 0) {
+                    "${spell.rangeValue} ${stringResource(R.string.feets)}"
+                } else {
+                    stringResource(spell.rangeType.resId)
                 }
+                StatRow(label = stringResource(R.string.range_distance), value = rangeStr)
+            }
+            item {
+                val compLetters = spell.components.map { component ->
+                    stringResource(component.resId).first().uppercase()
+                }.joinToString(", ")
 
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                        .heightIn(max = 150.dp)
-                ) {
-                    items(paragraphs) { paragraph ->
-                        Text(
-                            text = paragraph,
-                            style = MaterialTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Justify,
-                        )
+                val componentsStr =
+                    if (spell.components.contains(Component.MATERIAL) && !spell.material.isNullOrBlank()) {
+                        "$compLetters (${spell.material})"
+                    } else {
+                        compLetters
                     }
+                StatRow(label = stringResource(R.string.msg_components), value = componentsStr)
+            }
+            item {
+                HorizontalDivider()
+            }
+            item {
+                if (spell.description.isNotBlank()) {
+                    Text(
+                        text = spell.description,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Justify,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                }
+            }
+            item {
+                if (!spell.higherLevels.isNullOrBlank()) {
+                    HorizontalDivider()
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.spell_higher_levels),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = spell.higherLevels,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Justify,
+                    )
                 }
             }
         }
@@ -209,7 +174,8 @@ fun StatRow(label: String, value: String) {
 private fun SpellInfoSheetPreview() {
     DnDSheetTheme {
         SpellInfoSheet(
-            spell = UiUtils.sampleSpells.first { it.higherLevels != null },
+            spell = UiUtils.sampleSpells.first { it.higherLevels != null }
+                .copy(name = "some long spell name [1234556]"),
             onDismiss = {}
         )
     }

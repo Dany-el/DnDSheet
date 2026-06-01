@@ -1,21 +1,45 @@
 package com.yablonskyi.dndsheet.ui
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import android.widget.Toast
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldLayout
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,6 +48,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -38,28 +63,31 @@ import com.yablonskyi.dndsheet.data.model.character.Spell
 import com.yablonskyi.dndsheet.ui.character.CharacterListViewModel
 import com.yablonskyi.dndsheet.ui.navigation.AppSettingsRoute
 import com.yablonskyi.dndsheet.ui.navigation.BottomNavItem
+import com.yablonskyi.dndsheet.ui.navigation.CompendiumRoute
 import com.yablonskyi.dndsheet.ui.navigation.DnDNavGraph
-import com.yablonskyi.dndsheet.ui.navigation.GlobalSpellLibraryRoute
 import com.yablonskyi.dndsheet.ui.navigation.ListOfCharactersRoute
+import com.yablonskyi.dndsheet.ui.settings.AppSettingsState
 import com.yablonskyi.dndsheet.ui.spell.GlobalSpellLibraryViewModel
 import com.yablonskyi.dndsheet.ui.utils.importSpellsFromJson
+import com.yablonskyi.dndsheet.ui.utils.rememberDebouncedClick
 
+@SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable
 fun MainScreen(
     incomingUri: Uri?,
+    appState: AppSettingsState,
     globalSpellLibraryViewModel: GlobalSpellLibraryViewModel = hiltViewModel(),
     characterListViewModel: CharacterListViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
+    val resources = LocalResources.current
 
     val isSpellSelectionMode by globalSpellLibraryViewModel.isSelectionMode.collectAsStateWithLifecycle()
     val isCharacterSelectionMode by characterListViewModel.isSelectionMode.collectAsStateWithLifecycle()
 
     var spellsToImport by remember { mutableStateOf<List<Spell>?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
-    val msgOnFailure = stringResource(R.string.failed_to_read_file)
-    val msgOnSuccess = stringResource(R.string.spells_imported_success)
 
     LaunchedEffect(incomingUri) {
         if (incomingUri != null) {
@@ -68,7 +96,11 @@ fun MainScreen(
                 spellsToImport = spells
                 showImportDialog = true
             }.onFailure { error ->
-                Toast.makeText(context, msgOnFailure, Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    resources.getString(R.string.failed_to_read_file),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -90,9 +122,13 @@ fun MainScreen(
                     Button(onClick = {
                         globalSpellLibraryViewModel.importSpells(spells)
                         showImportDialog = false
-                        Toast.makeText(context, msgOnSuccess, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            resources.getString(R.string.spells_imported_success),
+                            Toast.LENGTH_SHORT
+                        ).show()
 
-                        navController.navigate(GlobalSpellLibraryRoute) {
+                        navController.navigate(CompendiumRoute.SpellsLibrary) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
@@ -116,8 +152,8 @@ fun MainScreen(
         listOf(
             BottomNavItem(R.string.characters, ListOfCharactersRoute, Icons.Default.Person),
             BottomNavItem(
-                R.string.spells, GlobalSpellLibraryRoute,
-                Icons.AutoMirrored.Filled.LibraryBooks
+                R.string.compendium, CompendiumRoute.Home,
+                Icons.AutoMirrored.Filled.MenuBook
             ),
             BottomNavItem(R.string.settings, AppSettingsRoute, Icons.Default.Settings)
         )
@@ -126,49 +162,167 @@ fun MainScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    val isBottomBarVisible = currentDestination?.let { dest ->
-        topLevelRoutes.any { item ->
-            dest.hasRoute(item.route::class)
-        }
-    } == true && !isSpellSelectionMode && !isCharacterSelectionMode
+    val isTopLevelScreen = currentDestination?.let { dest ->
+        topLevelRoutes.any { item -> dest.hasRoute(item.route::class) }
+    } == true
 
-    Scaffold(
-        contentWindowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp),
-        bottomBar = {
-            if (isBottomBarVisible) {
-                NavigationBar {
-                    topLevelRoutes.forEach { item ->
-                        val isSelected = currentDestination.hierarchy.any {
-                            it.hasRoute(item.route::class)
-                        }
+    val isSelectionActive = isSpellSelectionMode || isCharacterSelectionMode
 
-                        NavigationBarItem(
-                            icon = {
-                                Icon(
-                                    item.icon,
-                                    contentDescription = stringResource(item.name)
+    val isNavVisible = isTopLevelScreen && !isSelectionActive
+
+    val adaptiveInfo = currentWindowAdaptiveInfo()
+
+    val navLayoutType = if (isSelectionActive) {
+        NavigationSuiteType.None
+    } else {
+        NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
+    }
+
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 4.dp
+    ) {
+        AnimatedContent(
+            targetState = appState,
+            transitionSpec = {
+                fadeIn().togetherWith(fadeOut())
+            },
+            label = "LanguageAndThemeTransition"
+        ) { _ ->
+            NavigationSuiteScaffoldLayout(
+                layoutType = navLayoutType,
+                navigationSuite = {
+                    when (navLayoutType) {
+                        NavigationSuiteType.NavigationBar -> {
+                            AnimatedVisibility(
+                                visible = isNavVisible,
+                                enter = slideInVertically(
+                                    animationSpec = tween(
+                                        durationMillis = 400,
+                                        easing = FastOutSlowInEasing
+                                    )
+                                ) { height -> height } + expandVertically(
+                                    animationSpec = tween(
+                                        durationMillis = 400,
+                                        easing = FastOutSlowInEasing
+                                    )
+                                ),
+                                exit = slideOutVertically(
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = FastOutSlowInEasing
+                                    )
+                                ) { height -> height } + shrinkVertically(
+                                    animationSpec = tween(
+                                        durationMillis = 300,
+                                        easing = FastOutSlowInEasing
+                                    )
                                 )
-                            },
-                            label = { Text(stringResource(item.name)) },
-                            selected = isSelected,
-                            onClick = {
-                                navController.navigate(item.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                            ) {
+                                NavigationBar {
+                                    topLevelRoutes.forEach { item ->
+                                        val isSelected =
+                                            currentDestination?.hierarchy?.any { it.hasRoute(item.route::class) } == true
+
+                                        val debouncedNavigate = rememberDebouncedClick {
+                                            navController.navigate(item.route) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        }
+
+                                        NavigationBarItem(
+                                            icon = {
+                                                Icon(
+                                                    item.icon,
+                                                    contentDescription = stringResource(item.name)
+                                                )
+                                            },
+                                            label = { Text(stringResource(item.name)) },
+                                            selected = isSelected,
+                                            onClick = debouncedNavigate
+                                        )
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
                                 }
                             }
-                        )
+                        }
+
+                        NavigationSuiteType.NavigationRail, NavigationSuiteType.NavigationDrawer -> {
+                            AnimatedVisibility(
+                                visible = isNavVisible,
+                                enter = slideInHorizontally(
+                                    animationSpec = tween(
+                                        durationMillis = 400,
+                                        easing = FastOutSlowInEasing
+                                    )
+                                ) { width -> -width } + expandHorizontally(
+                                    animationSpec = tween(
+                                        durationMillis = 400,
+                                        easing = FastOutSlowInEasing
+                                    )
+                                ),
+
+                                exit = slideOutHorizontally(
+                                    animationSpec = tween(
+                                        durationMillis = 400,
+                                        easing = FastOutSlowInEasing
+                                    )
+                                ) { width -> -width } + shrinkHorizontally(
+                                    animationSpec = tween(
+                                        durationMillis = 400,
+                                        easing = FastOutSlowInEasing
+                                    )
+                                )
+                            ) {
+                                NavigationRail(
+                                    containerColor = NavigationBarDefaults.containerColor,
+                                ) {
+                                    Spacer(modifier = Modifier.weight(1f))
+
+                                    topLevelRoutes.forEach { item ->
+                                        val isSelected =
+                                            currentDestination?.hierarchy?.any { it.hasRoute(item.route::class) } == true
+
+                                        val debouncedNavigate = rememberDebouncedClick {
+                                            navController.navigate(item.route) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        }
+
+                                        NavigationRailItem(
+                                            icon = {
+                                                Icon(
+                                                    item.icon,
+                                                    contentDescription = stringResource(item.name)
+                                                )
+                                            },
+                                            label = { Text(stringResource(item.name)) },
+                                            selected = isSelected,
+                                            onClick = debouncedNavigate,
+                                            modifier = Modifier.padding(8.dp)
+                                        )
+                                    }
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                            }
+                        }
+
+                        NavigationSuiteType.None -> {
+                        }
                     }
                 }
+            ) {
+                DnDNavGraph(
+                    navController = navController,
+                )
             }
         }
-    ) { outerPadding ->
-        DnDNavGraph(
-            navController = navController,
-            modifier = Modifier.padding(outerPadding)
-        )
     }
 }

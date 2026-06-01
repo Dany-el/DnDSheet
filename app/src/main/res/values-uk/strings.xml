@@ -177,9 +177,9 @@
     <string name="spell_settings">Налаштування Чарунків</string>
     <string name="jack_of_all_trades">Майстер на всі руки</string>
     <string name="spell_ability">Характеристика</string>
-    <string name="spell_saving_throw_bonus">Бонус Влучання</string>
+    <string name="spell_saving_throw_bonus">Бонус Ряткидка</string>
     <string name="spell_attack_bonus">Бонус Атаки</string>
-    <string name="spell_selection">Підготовка чарунків</string>
+    <string name="spell_selection">Підготовка</string>
     <string name="search_spells">Вогнекуля…</string>
     <string name="msg_spell_library">Чарунки</string>
     <string name="add_spell">Нова чарунка</string>
@@ -207,7 +207,7 @@
     <string name="q_delete_spell">Видалення чарунка</string>
     <string name="edit">Редагувати</string>
     <string name="placeholder_dice">1к12</string>
-    <string name="btn_full_heal">Герої Не Вмирають</string>
+    <string name="btn_full_heal">Ви Живий</string>
     <string name="btn_you_are_dead">Ви Мрець</string>
     <string name="confirm_import">Імпорт</string>
     <string name="export_spells">Експорт</string>
@@ -230,8 +230,8 @@
     <string name="range_value">Дальність</string>
     <string name="feets">ф.</string>
     <string name="spell_slots">Кількість комірок</string>
-    <string name="proficiency_bonus">Бонус майстерності</string>
-    <string name="long_rest">Довгий відпочинок</string>
+    <string name="proficiency_bonus">Володіння</string>
+    <string name="long_rest">Відпочинок</string>
     <string name="rest">Відпочинок</string>
     <string name="msg_long_rest">Це відновить всі ПЗ і скине всі комірки заклинань.</string>
     <string name="label_long_rest">Почати повноцінний відпочинок?</string>
@@ -251,4 +251,145 @@
     <string name="loading_please_wait">Зачекайте, будь ласка…</string>
     <string name="collapse">Згорнути</string>
     <string name="expand">Розширити</string>
+    <string name="skills">Навички</string>
+    <string name="list_view_title">Вигляд списку</string>
+    <string name="list">Список</string>
+    <string name="grid">Сітка</string>
+    <string name="share_as_pdf">Поширити PDF</string>
+    <string name="search">Пошук</string>
+    <string name="initiative">Ініціатива</string>
+    <string name="backup_and_sync">Резервне копіювання та синхронізація</string>
+    <string name="google_account">Обліковий запис</string>
+    <string name="syncing">Синхронізація</string>
+    <string name="sync_now">Синхронізувати</string>
+    <string name="sign_out">Вийти</string>
+    <string name="sign_in">Увійти</string>
+    <string name="backup">Зберегти копію</string>
+    <string name="restore">Відновити</string>
+    <string name="last_sync">Остання синхронізація</string>
+    <string name="never_synced">Без синхронізації</string>
+    <string name="not_signed_in">Не авторизовано</string>
+    <string name="delete_backup">Видалити копію</string>
+    <string name="dialog_delete_backup_title">Видалити копію?</string>
+    <string name="dialog_delete_backup_text">Ви впевненні?</string>
+    <string name="tap_to_edit">Натисніть, щоб редагувати</string>
+    <string name="back">Назад</string>
+    <string name="next">Далі</string>
+    <string name="wizard_step_name">Ім\'я персонажа</string>
+    <string name="wizard_step_race">Вибір раси</string>
+    <string name="wizard_step_class">Вибір класу</string>
+    <string name="wizard_step_skills">Вибір навичок</string>
+    <string name="wizard_step_counter">Крок %1$d з %2$d</string>
+    <string name="wizard_name_title">Як звати вашого персонажа?</string>
+    <string name="wizard_name_subtitle">Ви завжди зможете змінити це пізніше в налаштуваннях персонажа.</string>
+    <string name="wizard_name_label">Ім\'я персонажа</string>
+    <string name="wizard_name_error">Ім\'я не може бути порожнім</string>
+    <string name="wizard_race_subtitle">Виберіть расу, щоб побачити її бонуси до характеристик та риси.</string>
+    <string name="wizard_class_subtitle">Виберіть клас, щоб побачити його кістку здоров\'я, рятівні кидки та доступні навички.</string>
+    <string name="wizard_granted_skills">Навички: %s</string>
+    <string name="wizard_saving_throws">Ряткидки: %s</string>
+    <string name="wizard_spellcaster">Заклинач</string>
+    <string name="wizard_skills_subtitle">Ці володіння будуть автоматично додані до вашого аркуша.</string>
+    <string name="wizard_skills_selected">Обрано %1$d / %2$d</string>
+    <string name="wizard_create">Створити</string>
+    <string name="homebrew">Хоумбрю</string>
+    <string name="ability_method_standard">Стандартний набір</string>
+    <string name="ability_method_pointbuy">Купівля очок</string>
+    <string name="ability_method_roll">Кидок</string>
+    <string name="ability_pool_hint">Натисніть на значення, а потім на характеристику, щоб призначити його.</string>
+    <string name="tap_to_assign">Натисніть, щоб призначити</string>
+    <string name="unassign">Прибрати</string>
+    <string name="points_remaining">Залишилось очок: %d</string>
+    <string name="roll_abilities">Кинути характеристики</string>
+    <string name="reroll_all">Перекинути все</string>
+    <string name="roll_select_hint">Натисніть на результат, а потім на рядок характеристики, щоб призначити його.</string>
+    <string name="wizard_set_level">Початковий рівень</string>
+    <string name="wizard_set_level_hint">За замовчуванням буде рівень 1, якщо пропустити. Увімкніть, якщо хочете вибрати власний рівень.</string>
+    <string name="wizard_level_label">Рівень</string>
+    <string name="wizard_starting_hp">Початкові хіти</string>
+    <string name="wizard_prof_bonus_preview">Бонус майстерності на цьому рівні: +%d</string>
+    <string name="wizard_step_abilities">Характеристики</string>
+    <string name="wizard_step_level">Вибір рівня</string>
+    <string name="races">Раси</string>
+    <string name="classes">Класи</string>
+    <string name="compendium">Компендіум</string>
+    <string name="player_handbook">Книга гравця</string>
+    <string name="size">Розмір</string>
+    <string name="error_empty">Це поле не може бути порожнім</string>
+    <string name="error_range">Макс.: %1$d, мін.: %2$d</string>
+    <string name="edit_race">Редагування раси</string>
+    <string name="creating">Створення</string>
+    <string name="race_name">Назва</string>
+    <string name="race_size">Розмір</string>
+    <string name="race_speed">Швидкість</string>
+    <string name="description">Опис</string>
+    <string name="error_traits">Будь ласка, використовуйте формат: Риса, Інша риса,</string>
+    <string name="ability_score_bonuses">Бонуси до характеристик</string>
+    <string name="bonus">Бонус</string>
+    <string name="add_ability_bonus">Додати бонус до характеристики</string>
+    <string name="remove">Видалити</string>
+    <string name="granted_skills">Навички, що надаються</string>
+    <string name="add_skill">Додати володіння навичкою</string>
+    <string name="share_as_json">Поділитися як .json</string>
+    <string name="q_delete_race">Видалити расу</string>
+    <string name="wizard_no_homebrew_classes">Поки що немає хоумбрю класів. Створіть один у Компендіум.</string>
+    <string name="expand_less">Згорнути</string>
+    <string name="expand_more">Розгорнути</string>
+    <string name="saving_throw_short">Ряткид.</string>
+    <string name="wizard_no_homebrew_races">Поки що немає хоумбрю рас. Створіть один у Компендіум.</string>
+    <string name="no_results">Результатів не знайдено.</string>
+    <string name="sheets">Листи</string>
+    <string name="hit_dice">Кубики Хітів</string>
+    <string name="primary_ability">Основна характеристика</string>
+    <string name="skill_choices">Кіл-ть навичок</string>
+    <string name="saving_throws">Ряткидки</string>
+    <string name="spellcasting_ability">Заклинальна характеристика</string>
+    <string name="spellcasting_ability_shorted">Закл. хар-ка</string>
+    <string name="available_skills">Доступні навички</string>
+    <string name="add_saving_throw">Додати рятівний кидок</string>
+    <string name="edit_class">Редагування класу</string>
+    <string name="class_name">Назва</string>
+    <string name="q_delete_class">Видалити клас</string>
+
+    <plurals name="wizard_skill_choices">
+        <item quantity="one">%d навичка</item>
+        <item quantity="few">%d навички</item>
+        <item quantity="many">%d навичок</item>
+        <item quantity="other">%d навичок</item>
+    </plurals>
+
+    <plurals name="class_skill_count">
+        <item quantity="one">%d навичка</item>
+        <item quantity="few">%d навички</item>
+        <item quantity="many">%d навичок</item>
+        <item quantity="other">%d навичок</item>
+    </plurals>
+
+    <plurals name="q_confirm_text_races">
+        <item quantity="one">Видалити %d обрану расу?</item>
+        <item quantity="few">Видалити %d обрані раси?</item>
+        <item quantity="many">Видалити %d обраних рас?</item>
+        <item quantity="other">Видалити %d обраних рас?</item>
+    </plurals>
+
+    <plurals name="races_count">
+        <item quantity="one">%d раса</item>
+        <item quantity="few">%d раси</item>
+        <item quantity="many">%d рас</item>
+        <item quantity="other">%d раси</item>
+    </plurals>
+
+    <plurals name="classes_count">
+        <item quantity="one">%d клас</item>
+        <item quantity="few">%d класи</item>
+        <item quantity="many">%d класів</item>
+        <item quantity="other">%d класи</item>
+    </plurals>
+
+    <plurals name="spells_count">
+        <item quantity="one">%d заклинання</item>
+        <item quantity="few">%d заклинання</item>
+        <item quantity="many">%d заклинань</item>
+        <item quantity="other">%d заклинання</item>
+    </plurals>
 </resources>

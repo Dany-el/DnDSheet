@@ -25,6 +25,9 @@ class CharacterRepositoryImpl @Inject constructor(
 
     override suspend fun insertCharacters(sheets: List<CharacterSheet>) {
         database.withTransaction {
+
+            characterDao.deleteAllCharacters()
+
             sheets.forEach { sheet ->
 
                 val newCharacter = sheet.character.copy(id = 0)
@@ -76,5 +79,13 @@ class CharacterRepositoryImpl @Inject constructor(
 
     override suspend fun getCharacterSheetsByIds(characterIds: List<Long>): List<CharacterSheet> {
         return characterDao.getCharacterSheetsByIds(characterIds)
+    }
+
+    override suspend fun getCharacterSheetById(characterId: Long): CharacterSheet {
+        return characterDao.getCharacterSheetById(characterId)
+    }
+
+    override suspend fun getAllCharacterSheets(): List<CharacterSheet> {
+        return characterDao.getAllCharacterSheets()
     }
 }

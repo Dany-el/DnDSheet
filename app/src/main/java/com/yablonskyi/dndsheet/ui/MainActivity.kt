@@ -8,6 +8,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -49,10 +53,9 @@ class MainActivity : AppCompatActivity() {
                     AppTheme.SYSTEM -> isSystemInDarkTheme()
                 }
             ) {
-                if (!appState.isLoading)
-                    MainScreen(
-                        incomingUri
-                    )
+                if (!appState.isLoading) {
+                    MainScreen(incomingUri, appState)
+                }
             }
         }
     }

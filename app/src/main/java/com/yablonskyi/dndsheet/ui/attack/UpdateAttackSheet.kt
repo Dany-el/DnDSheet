@@ -9,9 +9,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
@@ -43,6 +42,7 @@ import com.yablonskyi.dndsheet.data.model.character.AttackType
 import com.yablonskyi.dndsheet.data.model.character.DamageType
 import com.yablonskyi.dndsheet.ui.utils.EnumDropdown
 import com.yablonskyi.dndsheet.ui.utils.IntTextField
+import com.yablonskyi.dndsheet.ui.utils.NumbersTextField
 
 @Composable
 fun UpdateAttackSheet(
@@ -81,7 +81,6 @@ fun UpdateAttackSheet(
             .padding(horizontal = 24.dp)
             .padding(bottom = 48.dp)
     ) {
-        // Header
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -96,77 +95,81 @@ fun UpdateAttackSheet(
                 Icon(Icons.Default.Close, contentDescription = "Close")
             }
         }
-
         Spacer(modifier = Modifier.height(16.dp))
-
-        AttackFormContent(
-            name, { name = it },
-            attackType, { attackType = it },
-            ability, { ability = it },
-            isProficient, { isProficient = it },
-            bonusToHit, { bonusToHit = it },
-            bonusToDamage, { bonusToDamage = it },
-            damageDice, { damageDice = it },
-            damageType, { damageType = it },
-            range, { range = it },
-            notes, { notes = it }
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Button(
-                onClick = {
-                    val finalAttack = attack.copy(
-                        name = name.trim(),
-                        attackType = attackType,
-                        ability = ability,
-                        isProficient = isProficient,
-                        bonusToHit = bonusToHit,
-                        bonusToDamage = bonusToDamage,
-                        damageDice = damageDice,
-                        damageType = damageType,
-                        range = range,
-                        notes = notes.trim()
-                    )
-                    onSave(finalAttack)
-                    onDismiss()
-                },
-                enabled = isFormValid,
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Text(
-                    text = (
-                            if (isCreateMode)
-                                stringResource(R.string.add)
-                            else
-                                stringResource(R.string.save)
-                            ).uppercase()
+        LazyColumn{
+            item {
+                AttackFormContent(
+                    name, { name = it },
+                    attackType, { attackType = it },
+                    ability, { ability = it },
+                    isProficient, { isProficient = it },
+                    bonusToHit, { bonusToHit = it },
+                    bonusToDamage, { bonusToDamage = it },
+                    damageDice, { damageDice = it },
+                    damageType, { damageType = it },
+                    range, { range = it },
+                    notes, { notes = it }
                 )
+                Spacer(modifier = Modifier.height(24.dp))
             }
-            if (!isCreateMode) {
-                OutlinedButton(
-                    onClick = {
-                        onDelete(attack)
-                        onDismiss()
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error,
-                        containerColor = Color.Transparent
-                    )
+
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Text(stringResource(R.string.delete).uppercase())
+                    Button(
+                        onClick = {
+                            val finalAttack = attack.copy(
+                                name = name.trim(),
+                                attackType = attackType,
+                                ability = ability,
+                                isProficient = isProficient,
+                                bonusToHit = bonusToHit,
+                                bonusToDamage = bonusToDamage,
+                                damageDice = damageDice,
+                                damageType = damageType,
+                                range = range,
+                                notes = notes.trim()
+                            )
+                            onSave(finalAttack)
+                            onDismiss()
+                        },
+                        enabled = isFormValid,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = (
+                                    if (isCreateMode)
+                                        stringResource(R.string.add)
+                                    else
+                                        stringResource(R.string.save)
+                                    ).uppercase()
+                        )
+                    }
+                    if (!isCreateMode) {
+                        OutlinedButton(
+                            onClick = {
+                                onDelete(attack)
+                                onDismiss()
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error,
+                                containerColor = Color.Transparent
+                            )
+                        ) {
+                            Text(stringResource(R.string.delete).uppercase())
+                        }
+                    }
                 }
             }
         }
     }
+
 }
 
 @Composable
@@ -185,7 +188,6 @@ fun AttackFormContent(
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
-            .verticalScroll(rememberScrollState())
             .padding(bottom = 16.dp)
     ) {
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -292,19 +294,19 @@ fun AttackFormContent(
         }
 
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            IntTextField(
+            NumbersTextField(
                 value = bonusToHit,
                 label = stringResource(R.string.bonus_hit),
-                validate = { input -> (input.toIntOrNull() ?: 0) < 100 },
+                validate = { input -> (input.toIntOrNull() ?: 0) in (-100..100) },
                 onValueChange = {
                     onBonusHitChange(it)
                 },
                 modifier = Modifier.weight(1f)
             )
-            IntTextField(
+            NumbersTextField(
                 value = bonusToDamage,
                 label = stringResource(R.string.bonus_damage),
-                validate = { input -> (input.toIntOrNull() ?: 0) < 100 },
+                validate = { input -> (input.toIntOrNull() ?: 0) in (-100..100) },
                 onValueChange = {
                     onBonusDamageChange(it)
                 },

@@ -79,7 +79,7 @@ fun <T> MultiSelectDropdownChip(
                             onCheckedChange = { onToggle(option) }
                         )
                     },
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 16.dp)
                 )
             }
         }

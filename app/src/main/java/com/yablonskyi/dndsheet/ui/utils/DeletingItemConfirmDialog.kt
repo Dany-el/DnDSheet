@@ -10,6 +10,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import com.yablonskyi.dndsheet.R
 
 @Composable
@@ -23,7 +24,7 @@ fun DeletingItemConfirmDialog(
     AlertDialog(
         onDismissRequest = onDiscard,
         title = { Text(title) },
-        text = { Text(text) },
+        text = { Text(text = text, textAlign = TextAlign.Justify) },
         confirmButton = {
             TextButton(
                 onClick = {

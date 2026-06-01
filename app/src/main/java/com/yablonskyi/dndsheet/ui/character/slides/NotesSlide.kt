@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.yablonskyi.dndsheet.R
+import com.yablonskyi.dndsheet.ui.character.utils.TextFieldWithSheet
 
 @Composable
 fun NotesSlide(
@@ -33,19 +34,21 @@ fun NotesSlide(
             }
     ) {
         LazyColumn(
-            contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 32.dp),
+            contentPadding = PaddingValues(
+                start = 8.dp,
+                top = 8.dp,
+                end = 8.dp,
+                bottom = 120.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxSize()
         ) {
             // Notes
             item {
-                OutlinedTextFieldWithValue(
+                TextFieldWithSheet(
                     label = stringResource(R.string.notes),
                     value = notes,
-                    maxLines = 8,
-                    onSaveText = {
-                        onSaveText(it)
-                    },
+                    onSave = onSaveText
                 )
             }
         }

@@ -8,9 +8,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -18,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,17 +43,10 @@ fun DiceRollResultBox(
     result: Int,
     modifier: Modifier = Modifier,
     hasRegularDice: Boolean = false,
+    isPinned: Boolean,
+    onPinClick: () -> Unit,
     diceChar: String = stringResource(R.string.dice_first_letter),
 ) {
-    /*    val context = LocalContext.current
-
-        val uri = if (numbers.any { it == 1 } && hasRegularDice) "https://www.youtube.com/watch?v=L8XbI9aJOXk" else null
-
-        uri?.let {
-            val intent = Intent(Intent.ACTION_VIEW, it.toUri())
-            context.startActivity(intent)
-        }*/
-
     val color = if (numbers.any { it == 20 } && hasRegularDice) Color.Green
     else if (numbers.any { it == 1 } && hasRegularDice) Color.Red
     else null
@@ -60,6 +58,7 @@ fun DiceRollResultBox(
     } ?: fallbackSurface
 
     Card(
+        onClick = onPinClick,
         colors = CardDefaults.cardColors().copy(
             containerColor = solidDimColor,
         ),
@@ -70,66 +69,82 @@ fun DiceRollResultBox(
             .width(250.dp)
             .height(120.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp)
+        Box(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Box(
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
-                    .weight(1f)
                     .fillMaxSize()
+                    .padding(8.dp)
             ) {
-                Text(
-                    text = numbers.run {
-                        if (diceMod == null)
-                            this.joinToString(" + ")
-                        else {
-                            val sign = if (diceMod >= 0) "+" else "-"
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxSize()
+                ) {
+                    Text(
+                        text = numbers.run {
+                            if (diceMod == null)
+                                this.joinToString(" + ")
+                            else {
+                                val sign = if (diceMod >= 0) "+" else "-"
 
-                            "${this.joinToString(" + ")} $sign ${abs(diceMod)}"
-                        }
-                    },
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.MiddleEllipsis,
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.align(Alignment.CenterStart)
-                )
+                                "${this.joinToString(" + ")} $sign ${abs(diceMod)}"
+                            }
+                        },
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.MiddleEllipsis,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    )
+                    Text(
+                        text = strings.joinToString(", ") { it.replace("d", diceChar) },
+                        maxLines = 2,
+                        style = MaterialTheme.typography.labelMedium,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.align(Alignment.BottomStart)
+                    )
+                }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    VerticalDivider(
+                        thickness = 2.dp,
+                        color = Color.Gray,
+                        modifier = Modifier.weight(0.3f)
+                    )
+                    Text("=", fontSize = 24.sp)
+                    VerticalDivider(
+                        thickness = 2.dp,
+                        color = Color.Gray,
+                        modifier = Modifier.weight(0.3f)
+                    )
+                }
                 Text(
-                    text = strings.joinToString(", ") { it.replace("d", diceChar) },
-                    maxLines = 2,
-                    style = MaterialTheme.typography.labelMedium,
+                    text = result.toString(),
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.align(Alignment.BottomStart)
+                    modifier = Modifier.weight(0.5f)
                 )
             }
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                VerticalDivider(
-                    thickness = 2.dp,
-                    color = Color.Gray,
-                    modifier = Modifier.weight(0.3f)
-                )
-                Text("=", fontSize = 24.sp)
-                VerticalDivider(
-                    thickness = 2.dp,
-                    color = Color.Gray,
-                    modifier = Modifier.weight(0.3f)
+            if (isPinned) {
+                Icon(
+                    imageVector = Icons.Default.PushPin,
+                    contentDescription = "Result pinned",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(16.dp)
+                        .graphicsLayer { rotationZ = 45f }
                 )
             }
-            Text(
-                text = result.toString(),
-                fontWeight = FontWeight.SemiBold,
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(0.5f)
-            )
         }
     }
 }
@@ -140,14 +155,16 @@ private fun ResultBoxPreview() {
     DnDSheetTheme {
         DiceRollResultBox(
             numbers = listOf(
-                17, 5, 1
+                17, 20, 5
             ),
             diceMod = 2,
             hasRegularDice = true,
             result = 1000,
             strings = listOf(
                 "3d20"
-            )
+            ),
+            isPinned = true,
+            onPinClick = {}
         )
     }
 }

@@ -3,84 +3,89 @@ package com.yablonskyi.dndsheet.ui.spell
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass
 import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.data.model.character.MagicSchool
 import com.yablonskyi.dndsheet.data.model.character.Spell
 import com.yablonskyi.dndsheet.data.model.character.SpellCastTime
 import com.yablonskyi.dndsheet.data.model.character.SpellDuration
 import com.yablonskyi.dndsheet.data.model.character.SpellLevel
-import com.yablonskyi.dndsheet.ui.character.slides.SpellFiltersRow
 import com.yablonskyi.dndsheet.ui.spell.launchers.rememberExportLauncher
 import com.yablonskyi.dndsheet.ui.spell.launchers.rememberImportLauncher
 import com.yablonskyi.dndsheet.ui.theme.DnDSheetTheme
 import com.yablonskyi.dndsheet.ui.utils.DeletingItemConfirmDialog
 import com.yablonskyi.dndsheet.ui.utils.LoadingDialog
+import com.yablonskyi.dndsheet.ui.utils.MultiSelectDropdownChip
 import com.yablonskyi.dndsheet.ui.utils.SlicedDropdownMenu
 import com.yablonskyi.dndsheet.ui.utils.SlicedMenuItem
 import com.yablonskyi.dndsheet.ui.utils.UiUtils
@@ -123,16 +128,15 @@ fun SpellLibraryScreen(
     onToggleSelectAll: () -> Unit,
     selectedSpells: Set<Spell>,
     toggleSelection: (Spell) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
+    val listState = rememberLazyListState()
 
     val groupedSpells = remember(spells) {
         spells.groupBy { it.spell.level }.toSortedMap()
     }
-
-    val keyboardController = LocalSoftwareKeyboardController.current
-
-    // ------------ USER SCROLL ------------
 
     // ------------ EXPORT & IMPORT OF SPELLS ------------
 
@@ -145,7 +149,6 @@ fun SpellLibraryScreen(
     var isLoading by remember { mutableStateOf(false) }
 
     var pendingImportSpells by remember { mutableStateOf<List<Spell>?>(null) }
-    val importMessage = stringResource(R.string.import_file_empty)
 
     // Export Launcher
     val exportLauncher = rememberExportLauncher(
@@ -163,19 +166,40 @@ fun SpellLibraryScreen(
             } else {
                 Toast.makeText(
                     context,
-                    importMessage,
+                    resources.getText(R.string.import_file_empty),
                     Toast.LENGTH_SHORT
                 ).show()
             }
         }
     )
 
+    // filters
+    var isFiltersExpanded by rememberSaveable { mutableStateOf(false) }
+
     BackHandler(enabled = isSelectionMode) {
         onClearSelection()
     }
 
+    val fabSpacing = 72.dp
+
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    val isWideScreen =
+        windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+
+    val screenInsets = if (isWideScreen) {
+        ScaffoldDefaults.contentWindowInsets
+    } else {
+        WindowInsets(bottom = 0.dp)
+    }
+
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
+    // Bottom sheet for details
+    var showBottomSheet: Spell? by remember { mutableStateOf(null) }
+
     Scaffold(
-        contentWindowInsets = WindowInsets(bottom = 0.dp),
+        contentWindowInsets = screenInsets,
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             SpellLibraryTopBar(
                 isLearnMode = isLearnMode,
@@ -183,6 +207,8 @@ fun SpellLibraryScreen(
                 selectedCount = selectedSpells.size,
                 onClearSelection = onClearSelection,
                 onNavigateBack = onNavigateBack,
+                searchQuery = searchQuery,
+                onSearchQueryChange = onSearchQueryChange,
                 onActionClick = { action ->
                     when (action) {
                         LibraryMenuAction.IMPORT -> {
@@ -193,19 +219,20 @@ fun SpellLibraryScreen(
                             exportLauncher.launch("spells_backup.json")
                         }
                     }
-                }
+                },
+                onToggleFilters = { isFiltersExpanded = !isFiltersExpanded },
+                isFiltersExpanded = isFiltersExpanded,
+                scrollBehavior = scrollBehavior
             )
         },
         floatingActionButton = {
             AnimatedVisibility(
                 visible = !isLearnMode && !isSelectionMode,
-                enter = scaleIn() + fadeIn(),
-                exit = scaleOut() + fadeOut()
+                enter = scaleIn(),
+                exit = scaleOut()
             ) {
                 FloatingActionButton(
                     onClick = onAddSpell,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(64.dp)
                 ) {
                     Icon(
@@ -230,128 +257,112 @@ fun SpellLibraryScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
+        Box(
+            modifier = modifier
                 .fillMaxSize()
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding),
+            contentAlignment = Alignment.TopCenter
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = onSearchQueryChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text(stringResource(R.string.search_spells)) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                trailingIcon = if (searchQuery.isNotEmpty()) {
-                    {
-                        IconButton(onClick = { onSearchQueryChange("") }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Clear")
-                        }
-                    }
-                } else null,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(onDone = { keyboardController?.hide() }),
-                shape = RoundedCornerShape(24.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                    focusedContainerColor = MaterialTheme.colorScheme.surface
-                )
-            )
+            Column(
+                modifier = Modifier.widthIn(max = 840.dp)
+            ) {
+                AnimatedVisibility(isFiltersExpanded) {
+                    SpellFiltersRow(
+                        // Filters
+                        selectedSchool = selectedSchool,
+                        selectedLevels = selectedLevels,
+                        selectedDurations = selectedDurations,
+                        selectedCastTimes = selectedCastTimes,
+                        selectedConcentration = selectedConcentration,
+                        selectedRitual = selectedRitual,
+                        // Toggles
+                        toggleSchoolFilter = toggleSchoolFilter,
+                        toggleLevelFilter = toggleLevelFilter,
+                        toggleDurationFilter = toggleDurationFilter,
+                        toggleCastTimeFilter = toggleCastTimeFilter,
+                        toggleRitual = toggleRitual,
+                        toggleConcentration = toggleConcentration,
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
+                    )
+                }
 
-            SpellFiltersRow(
-                // Filters
-                selectedSchool = selectedSchool,
-                selectedLevels = selectedLevels,
-                selectedDurations = selectedDurations,
-                selectedCastTimes = selectedCastTimes,
-                selectedConcentration = selectedConcentration,
-                selectedRitual = selectedRitual,
-                // Toggles
-                toggleSchoolFilter = toggleSchoolFilter,
-                toggleLevelFilter = toggleLevelFilter,
-                toggleDurationFilter = toggleDurationFilter,
-                toggleCastTimeFilter = toggleCastTimeFilter,
-                toggleRitual = toggleRitual,
-                toggleConcentration = toggleConcentration,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 8.dp)
-            )
-
-            if (!loadingState) {
-                LazyColumn(
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    groupedSpells.forEach { (level, spells) ->
-                        stickyHeader {
-                            Surface(
-                                color = MaterialTheme.colorScheme.background,
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.Start,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(top = 8.dp)
+                if (!loadingState) {
+                    LazyColumn(
+                        state = listState,
+                        contentPadding = PaddingValues(
+                            start = 8.dp,
+                            end = 8.dp,
+                            bottom = 8.dp + fabSpacing
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        groupedSpells.forEach { (level, spells) ->
+                            stickyHeader {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.background,
                                 ) {
-                                    Text(
-                                        text = stringResource(level.resId),
-                                        style = MaterialTheme.typography.headlineSmall,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold,
-                                    )
+                                    Column(
+                                        horizontalAlignment = Alignment.Start,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 8.dp)
+                                    ) {
+                                        Text(
+                                            text = stringResource(level.resId),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            fontWeight = FontWeight.SemiBold,
+                                        )
+                                    }
                                 }
                             }
-                        }
-                        itemsIndexed(
-                            items = spells, key = { _, item -> item.spell.spellId }
-                        ) { index, item ->
+                            itemsIndexed(
+                                items = spells, key = { _, item -> item.spell.spellId }
+                            ) { index, item ->
 
-                            val itemShape = when {
-                                spells.size == 1 -> RoundedCornerShape(16.dp)
-                                index == 0 -> RoundedCornerShape(
-                                    topStart = 16.dp, topEnd = 16.dp,
-                                    bottomStart = 4.dp, bottomEnd = 4.dp
+                                val topCorners =
+                                    if (spells.size == 1 || index == 0) 16.dp else 4.dp
+                                val bottomCorners =
+                                    if (spells.size == 1 || index == spells.lastIndex) 16.dp else 4.dp
+
+                                SpellLibraryRow(
+                                    item = item,
+                                    defaultTopCorners = topCorners,
+                                    defaultBottomCorners = bottomCorners,
+                                    isLearnMode = isLearnMode,
+                                    isSelected = selectedSpells.contains(item.spell),
+                                    isSelectionMode = isSelectionMode,
+                                    onToggle = { onToggleSpell(item.spell) },
+                                    onEdit = { onEditSpell(item.spell.spellId) },
+                                    onDelete = { onDeleteSpell(item.spell) },
+                                    onToggleSelection = { toggleSelection(item.spell) },
+                                    onShowDetails = { showBottomSheet = item.spell },
+                                    modifier = Modifier.animateItem()
                                 )
-
-                                index == spells.lastIndex -> RoundedCornerShape(
-                                    topStart = 4.dp, topEnd = 4.dp,
-                                    bottomStart = 16.dp, bottomEnd = 16.dp
-                                )
-
-                                else -> MaterialTheme.shapes.extraSmall
                             }
-
-                            SpellLibraryRow(
-                                item = item,
-                                shape = itemShape,
-                                isLearnMode = isLearnMode,
-                                isSelected = selectedSpells.contains(item.spell),
-                                isSelectionMode = isSelectionMode,
-                                onToggle = { onToggleSpell(item.spell) },
-                                onEdit = { onEditSpell(item.spell.spellId) },
-                                onDelete = { onDeleteSpell(item.spell) },
-                                onToggleSelection = { toggleSelection(item.spell) },
-                                modifier = Modifier.animateItem()
-                            )
                         }
                     }
-                    item {
-                        Spacer(modifier = Modifier.height(72.dp))
+                } else {
+                    Box(
+                        Modifier.fillMaxSize()
+                    ) {
+                        CircularProgressIndicator(Modifier.align(Alignment.Center))
                     }
-                }
-            } else {
-                Box(
-                    Modifier.fillMaxSize()
-                ) {
-                    CircularProgressIndicator(Modifier.align(Alignment.Center))
                 }
             }
+        }
+    }
+
+    showBottomSheet?.let { spell ->
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = null }
+        ) {
+            SpellInfoSheet(
+                spell = spell,
+                onDismiss = { showBottomSheet = null }
+            )
         }
     }
 
@@ -395,9 +406,166 @@ fun SpellLibraryScreen(
 }
 
 @Composable
+fun SpellFiltersRow(
+    // Filters
+    selectedSchool: Set<MagicSchool>,
+    selectedLevels: Set<SpellLevel>,
+    selectedDurations: Set<SpellDuration>,
+    selectedCastTimes: Set<SpellCastTime>,
+    selectedConcentration: Boolean,
+    selectedRitual: Boolean,
+    // Toggles
+    toggleSchoolFilter: (MagicSchool) -> Unit,
+    toggleLevelFilter: (SpellLevel) -> Unit,
+    toggleDurationFilter: (SpellDuration) -> Unit,
+    toggleCastTimeFilter: (SpellCastTime) -> Unit,
+    toggleRitual: () -> Unit,
+    toggleConcentration: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+    val isWideScreen =
+        windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+
+    if (isWideScreen) {
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = modifier
+        ) {
+            item {
+                MultiSelectDropdownChip(
+                    title = stringResource(R.string.spell_level),
+                    options = SpellLevel.entries,
+                    selectedOptions = selectedLevels,
+                    onToggle = { toggleLevelFilter(it) },
+                    labelMapper = { stringResource(it.resId) }
+                )
+            }
+            item {
+                MultiSelectDropdownChip(
+                    title = stringResource(R.string.msg_school),
+                    options = MagicSchool.entries,
+                    selectedOptions = selectedSchool,
+                    onToggle = { toggleSchoolFilter(it) },
+                    labelMapper = { stringResource(it.resId) }
+                )
+            }
+            item {
+                MultiSelectDropdownChip(
+                    title = stringResource(R.string.msg_duration),
+                    options = SpellDuration.entries,
+                    selectedOptions = selectedDurations,
+                    onToggle = { toggleDurationFilter(it) },
+                    labelMapper = { stringResource(it.resId) }
+                )
+            }
+            item {
+                MultiSelectDropdownChip(
+                    title = stringResource(R.string.msg_casting_time),
+                    options = SpellCastTime.entries,
+                    selectedOptions = selectedCastTimes,
+                    onToggle = { toggleCastTimeFilter(it) },
+                    labelMapper = { stringResource(it.resId) }
+                )
+            }
+            item {
+                FilterChip(
+                    selected = selectedConcentration,
+                    onClick = toggleConcentration,
+                    label = { Text(stringResource(R.string.concentration)) },
+                    leadingIcon = {
+                        if (selectedConcentration) Icon(Icons.Default.Check, null)
+                    }
+                )
+            }
+            item {
+                FilterChip(
+                    selected = selectedRitual,
+                    onClick = toggleRitual,
+                    label = { Text(stringResource(R.string.ritual)) },
+                    leadingIcon = {
+                        if (selectedRitual) Icon(Icons.Default.Check, null)
+                    }
+                )
+            }
+        }
+    } else {
+        Column(
+            modifier = modifier
+        ) {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                item {
+                    MultiSelectDropdownChip(
+                        title = stringResource(R.string.spell_level),
+                        options = SpellLevel.entries,
+                        selectedOptions = selectedLevels,
+                        onToggle = { toggleLevelFilter(it) },
+                        labelMapper = { stringResource(it.resId) }
+                    )
+                }
+                item {
+                    MultiSelectDropdownChip(
+                        title = stringResource(R.string.msg_school),
+                        options = MagicSchool.entries,
+                        selectedOptions = selectedSchool,
+                        onToggle = { toggleSchoolFilter(it) },
+                        labelMapper = { stringResource(it.resId) }
+                    )
+                }
+                item {
+                    MultiSelectDropdownChip(
+                        title = stringResource(R.string.msg_duration),
+                        options = SpellDuration.entries,
+                        selectedOptions = selectedDurations,
+                        onToggle = { toggleDurationFilter(it) },
+                        labelMapper = { stringResource(it.resId) }
+                    )
+                }
+            }
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                item {
+                    MultiSelectDropdownChip(
+                        title = stringResource(R.string.msg_casting_time),
+                        options = SpellCastTime.entries,
+                        selectedOptions = selectedCastTimes,
+                        onToggle = { toggleCastTimeFilter(it) },
+                        labelMapper = { stringResource(it.resId) }
+                    )
+                }
+                item {
+                    FilterChip(
+                        selected = selectedConcentration,
+                        onClick = toggleConcentration,
+                        label = { Text(stringResource(R.string.concentration)) },
+                        leadingIcon = {
+                            if (selectedConcentration) Icon(Icons.Default.Check, null)
+                        }
+                    )
+                }
+                item {
+                    FilterChip(
+                        selected = selectedRitual,
+                        onClick = toggleRitual,
+                        label = { Text(stringResource(R.string.ritual)) },
+                        leadingIcon = {
+                            if (selectedRitual) Icon(Icons.Default.Check, null)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun SpellLibraryRow(
     item: SpellLibraryItem,
-    shape: Shape,
+    defaultTopCorners: Dp,
+    defaultBottomCorners: Dp,
     isLearnMode: Boolean,
     isSelected: Boolean,
     isSelectionMode: Boolean,
@@ -405,76 +573,105 @@ fun SpellLibraryRow(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onToggleSelection: () -> Unit,
+    onShowDetails: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val spell = item.spell
-
-    val haptics = LocalHapticFeedback.current
     val context = LocalContext.current
 
-    var showConfirmDialog by remember {
-        mutableStateOf(false)
-    }
+    val animatedColor by animateColorAsState(
+        targetValue = if (isSelected || (item.isLearned && isLearnMode))
+            MaterialTheme.colorScheme.secondaryContainer
+        else MaterialTheme.colorScheme.surfaceContainer,
+        label = "cardColorAnimation"
+    )
 
+    val animatedBorderWidth by animateDpAsState(
+        targetValue = if (isSelected || (item.isLearned && isLearnMode)) 1.5.dp else 0.7.dp,
+        label = "cardBorderWidth"
+    )
+
+    val topCorners by animateDpAsState(
+        targetValue = if (isSelected || (item.isLearned && isLearnMode)) 16.dp else defaultTopCorners,
+        label = "topCornersAnimation"
+    )
+
+    val bottomCorners by animateDpAsState(
+        targetValue = if (isSelected || (item.isLearned && isLearnMode)) 16.dp else defaultBottomCorners,
+        label = "bottomCornersAnimation"
+    )
+
+    val animatedShape = RoundedCornerShape(
+        topStart = topCorners,
+        topEnd = topCorners,
+        bottomStart = bottomCorners,
+        bottomEnd = bottomCorners
+    )
+
+    var showConfirmDialog by remember { mutableStateOf(false) }
     var menuExpanded by remember { mutableStateOf(false) }
 
     if (showConfirmDialog) {
         DeletingItemConfirmDialog(
             title = stringResource(R.string.q_delete_spell),
-            text = stringResource(R.string.q_confirm_text, item.spell.name),
+            text = stringResource(R.string.q_confirm_text, spell.name),
             onConfirm = onDelete,
-            onDiscard = { showConfirmDialog = false },
+            onDiscard = { showConfirmDialog = false }
         )
     }
 
-    ListItem(
+    OutlinedCard(
+        shape = animatedShape,
+        colors = CardDefaults.outlinedCardColors(containerColor = animatedColor),
+        border = BorderStroke(animatedBorderWidth, MaterialTheme.colorScheme.outlineVariant),
         modifier = modifier
-            .clip(shape)
+            .fillMaxWidth()
+            .clip(animatedShape)
             .combinedClickable(
                 onClick = {
-                    if (isSelectionMode) {
-                        onToggleSelection()
-                    } else if (isLearnMode) {
-                        onToggle()
-                    } else {
-                        onEdit()
+                    when {
+                        isSelectionMode -> onToggleSelection()
+                        isLearnMode -> onToggle()
+                        else -> onShowDetails()
                     }
                 },
-                onLongClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onToggleSelection()
-                }
-            ),
-        tonalElevation = 6.dp,
-        shadowElevation = 2.dp,
-        overlineContent = {
-            Text(
-                text = stringResource(spell.school.resId),
-                modifier = Modifier.padding(bottom = 4.dp)
+                onLongClick = { onToggleSelection() }
             )
-        },
-        headlineContent = {
-            Text(
-                text = spell.name,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.SemiBold,
-            )
-        },
-        trailingContent = {
-            if (isLearnMode) {
-                Switch(
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(spell.school.resId),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = spell.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+
+            when {
+                isLearnMode -> Switch(
                     checked = item.isLearned,
                     onCheckedChange = { onToggle() }
                 )
-            } else if (isSelectionMode) {
-                Checkbox(
+
+                isSelectionMode -> Checkbox(
                     checked = isSelected,
                     onCheckedChange = { onToggleSelection() }
                 )
-            } else {
-                Box {
+
+                else -> Box {
                     IconButton(onClick = { menuExpanded = true }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
@@ -482,7 +679,6 @@ fun SpellLibraryRow(
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
-
                     SlicedDropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
@@ -508,7 +704,7 @@ fun SpellLibraryRow(
                 }
             }
         }
-    )
+    }
 }
 
 @Preview

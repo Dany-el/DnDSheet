@@ -14,8 +14,10 @@ import com.yablonskyi.dndsheet.data.model.character.SpellSlot
 import com.yablonskyi.dndsheet.domain.repository.CharacterRepository
 import com.yablonskyi.dndsheet.ui.navigation.CharacterSheetRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -34,6 +36,29 @@ class CharacterDetailViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = null
         )
+
+    private val _leftSelectedTab = MutableStateFlow(CharacterTab.ABILITIES)
+    val leftSelectedTab: StateFlow<CharacterTab> = _leftSelectedTab.asStateFlow()
+
+    private val _rightSelectedTab = MutableStateFlow(CharacterTab.SPELLS)
+    val rightSelectedTab: StateFlow<CharacterTab> = _rightSelectedTab.asStateFlow()
+
+    private val _lessDetails = MutableStateFlow(false)
+    val lessDetails = _lessDetails.asStateFlow()
+
+    fun onLeftTabSelected(newTab: CharacterTab) {
+        if (newTab == _rightSelectedTab.value) {
+            _rightSelectedTab.value = _leftSelectedTab.value
+        }
+        _leftSelectedTab.value = newTab
+    }
+
+    fun onRightTabSelected(newTab: CharacterTab) {
+        if (newTab == _leftSelectedTab.value) {
+            _leftSelectedTab.value = _rightSelectedTab.value
+        }
+        _rightSelectedTab.value = newTab
+    }
 
     fun updateCharacter(character: Character) {
         viewModelScope.launch {
@@ -124,5 +149,9 @@ class CharacterDetailViewModel @Inject constructor(
         )
 
         updateCharacter(restedCharacter)
+    }
+
+    fun toggleDetails() {
+        _lessDetails.value = !_lessDetails.value
     }
 }

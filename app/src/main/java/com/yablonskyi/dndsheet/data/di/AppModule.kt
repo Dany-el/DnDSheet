@@ -7,12 +7,19 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.yablonskyi.dndsheet.data.AppDatabase
 import com.yablonskyi.dndsheet.data.dao.AttackDao
 import com.yablonskyi.dndsheet.data.dao.CharacterDao
+import com.yablonskyi.dndsheet.data.dao.ClassDao
+import com.yablonskyi.dndsheet.data.dao.RaceDao
 import com.yablonskyi.dndsheet.data.dao.SpellDao
 import com.yablonskyi.dndsheet.data.repository.AttackRepositoryImpl
 import com.yablonskyi.dndsheet.data.repository.CharacterRepositoryImpl
+import com.yablonskyi.dndsheet.data.repository.ClassRepositoryImpl
+import com.yablonskyi.dndsheet.data.repository.RaceRepositoryImpl
 import com.yablonskyi.dndsheet.data.repository.SpellRepositoryImpl
+import com.yablonskyi.dndsheet.data.rulebook.BuiltInRulebookLoader
 import com.yablonskyi.dndsheet.domain.repository.AttackRepository
 import com.yablonskyi.dndsheet.domain.repository.CharacterRepository
+import com.yablonskyi.dndsheet.domain.repository.ClassRepository
+import com.yablonskyi.dndsheet.domain.repository.RaceRepository
 import com.yablonskyi.dndsheet.domain.repository.SpellRepository
 import dagger.Module
 import dagger.Provides
@@ -37,7 +44,8 @@ object AppModule {
                 MIGRATION_2_3,
                 MIGRATION_3_4,
                 MIGRATION_4_5,
-                MIGRATION_5_6
+                MIGRATION_5_6,
+                MIGRATION_6_7,
             )
             .build()
     }
@@ -52,6 +60,12 @@ object AppModule {
 
     @Provides
     fun provideAttackDao(db: AppDatabase) = db.attackDao()
+
+    @Provides
+    fun provideRaceDao(db: AppDatabase) = db.raceDao()
+
+    @Provides
+    fun provideClassDao(db: AppDatabase) = db.classDao()
 
     // REPOSITORY
 
@@ -81,6 +95,26 @@ object AppModule {
     ): AttackRepository {
         return AttackRepositoryImpl(attackDao)
     }
+
+    @Provides
+    @Singleton
+    fun provideBuiltInRulebookLoader(
+        @ApplicationContext context: Context
+    ) = BuiltInRulebookLoader(context)
+
+    @Provides
+    @Singleton
+    fun provideRaceRepository(
+        loader: BuiltInRulebookLoader,
+        dao: RaceDao
+    ): RaceRepository = RaceRepositoryImpl(loader, dao)
+
+    @Provides
+    @Singleton
+    fun provideClassRepository(
+        loader: BuiltInRulebookLoader,
+        dao: ClassDao
+    ): ClassRepository = ClassRepositoryImpl(loader, dao)
 }
 
 val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -271,6 +305,42 @@ val MIGRATION_5_6 = object : Migration(5, 6) {
             """
             ALTER TABLE character ADD COLUMN notes TEXT NOT NULL DEFAULT ''
         """.trimIndent()
+        )
+    }
+}
+
+val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `races` (
+                `id` TEXT NOT NULL PRIMARY KEY,
+                `name` TEXT NOT NULL,
+                `size` TEXT NOT NULL,
+                `speed` INTEGER NOT NULL,
+                `abilityBonuses` TEXT NOT NULL,
+                `grantedSkills` TEXT NOT NULL,
+                `traits` TEXT NOT NULL,
+                `description` TEXT NOT NULL,
+                `isHomebrew` INTEGER NOT NULL DEFAULT 0
+            )
+        """
+        )
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `classes` (
+                `id` TEXT NOT NULL PRIMARY KEY,
+                `name` TEXT NOT NULL,
+                `hitDice` TEXT NOT NULL,
+                `primaryAbility` TEXT NOT NULL,
+                `savingThrows` TEXT NOT NULL,
+                `skillChoiceCount` INTEGER NOT NULL,
+                `availableSkills` TEXT NOT NULL,
+                `spellcastingAbility` TEXT,
+                `description` TEXT NOT NULL,
+                `isHomebrew` INTEGER NOT NULL DEFAULT 0
+            )
+        """
         )
     }
 }

@@ -12,7 +12,11 @@ enum class Ability(@StringRes val nameRes: Int) {
     INT(R.string.ability_int),
     WIS(R.string.ability_wis),
     CHA(R.string.ability_cha),
-    NONE(R.string.ability_none)
+    NONE(R.string.ability_none);
+
+    companion object {
+        val playableAbilities: List<Ability> = entries.filterNot { it == NONE }
+    }
 }
 
 enum class ProficiencyLevel(val multiplier: Double) {

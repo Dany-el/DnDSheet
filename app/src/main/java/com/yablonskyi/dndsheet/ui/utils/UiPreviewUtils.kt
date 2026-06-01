@@ -19,6 +19,8 @@ import com.yablonskyi.dndsheet.data.model.character.SpellLevel
 import com.yablonskyi.dndsheet.data.model.character.SpellRangeType
 import com.yablonskyi.dndsheet.data.model.character.SpellSettings
 import com.yablonskyi.dndsheet.data.model.character.SpellSlot
+import com.yablonskyi.dndsheet.data.model.rulebook.CharacterClass
+import com.yablonskyi.dndsheet.data.model.rulebook.Race
 import com.yablonskyi.dndsheet.ui.attack.AttackCalculator
 import com.yablonskyi.dndsheet.ui.attack.AttackUiModel
 import com.yablonskyi.dndsheet.ui.spell.SpellFilter
@@ -319,6 +321,156 @@ object UiUtils {
             attackType = AttackType.RANGED_ATTACK,
             range = "100/400ft",
             notes = "Loading, Two-handed"
+        )
+    )
+
+    val sampleRaces = listOf(
+        Race(
+            id = "dwarf-srd-id-001",
+            name = "Dwarf",
+            size = "Medium",
+            speed = 25,
+            abilityBonuses = mapOf(
+                Ability.CON to 2
+            ),
+            grantedSkills = emptyList(),
+            traits = listOf("Darkvision", "Dwarven Resilience", "Stonecunning"),
+            description = "Bold and hardy, dwarves are known as skilled warriors, miners, and workers of stone and metal.",
+            isHomebrew = false
+        ),
+        Race(
+            id = "elf-srd-id-002",
+            name = "Elf",
+            size = "Medium",
+            speed = 30,
+            abilityBonuses = mapOf(
+                Ability.DEX to 2
+            ),
+            grantedSkills = listOf(Skill.PERCEPTION),
+            traits = listOf("Darkvision", "Fey Ancestry", "Trance"),
+            description = "Elves are a magical people of supernatural grace, living in the world but not entirely part of it.",
+            isHomebrew = false
+        ),
+        Race(
+            id = "halfling-srd-id-003",
+            name = "Halfling",
+            size = "Small",
+            speed = 25,
+            abilityBonuses = mapOf(
+                Ability.DEX to 2
+            ),
+            grantedSkills = emptyList(),
+            traits = listOf("Lucky", "Brave", "Halfling Nimbleness"),
+            description = "The diminutive halflings survive in a world full of larger creatures by avoiding notice or, barring that, avoiding offense.",
+            isHomebrew = false
+        ),
+        Race(
+            id = "homebrew-id-004",
+            name = "Astral Merfolk",
+            size = "Medium",
+            speed = 30,
+            abilityBonuses = mapOf(
+                Ability.INT to 2,
+                Ability.CHA to 1
+            ),
+            grantedSkills = listOf(Skill.ARCANA, Skill.HISTORY),
+            traits = listOf("Cosmic Float", "Amphibious", "Telepathic Echo"),
+            description = "A localized tribe of coastal humanoids exposed to a tear in the Astral Plane, giving them shimmering skin and minor psionic capabilities.",
+            isHomebrew = true
+        ),
+        Race(
+            id = "homebrew-id-005",
+            name = "Vulcanite",
+            size = "Medium",
+            speed = 30,
+            abilityBonuses = mapOf(
+                Ability.STR to 2,
+                Ability.CON to 1
+            ),
+            grantedSkills = listOf(Skill.ATHLETICS),
+            traits = listOf("Fire Resistance", "Forge Born", "Thermal Sight"),
+            description = "Born from the active volcanic ridges of the Ashlands, these stony-skinned humanoids can channel tectonic heat through their hands.",
+            isHomebrew = true
+        )
+    )
+
+    val sampleClasses = listOf(
+        CharacterClass(
+            id = "fighter-srd-id-001",
+            name = "Fighter",
+            hitDice = "d10",
+            primaryAbility = Ability.STR,
+            savingThrows = setOf(Ability.STR, Ability.CON),
+            skillChoiceCount = 2,
+            availableSkills = listOf(
+                Skill.ACROBATICS, Skill.ANIMAL_HANDLING, Skill.ATHLETICS,
+                Skill.HISTORY, Skill.INSIGHT, Skill.INTIMIDATION,
+                Skill.PERCEPTION, Skill.SURVIVAL
+            ),
+            spellcastingAbility = null,
+            description = "A master of martial combat, skilled with a variety of weapons and armor.",
+            isHomebrew = false
+        ),
+        CharacterClass(
+            id = "wizard-srd-id-002",
+            name = "Wizard",
+            hitDice = "d6",
+            primaryAbility = Ability.INT,
+            savingThrows = setOf(Ability.INT, Ability.WIS),
+            skillChoiceCount = 2,
+            availableSkills = listOf(
+                Skill.ARCANA, Skill.HISTORY, Skill.INSIGHT,
+                Skill.INVESTIGATION, Skill.MEDICINE, Skill.RELIGION
+            ),
+            spellcastingAbility = Ability.INT,
+            description = "A scholarly magic-user capable of manipulating the structures of reality.",
+            isHomebrew = false
+        ),
+        CharacterClass(
+            id = "rogue-srd-id-003",
+            name = "Rogue",
+            hitDice = "d8",
+            primaryAbility = Ability.DEX,
+            savingThrows = setOf(Ability.DEX, Ability.INT),
+            skillChoiceCount = 4, // Rogues get extra skill proficiencies
+            availableSkills = listOf(
+                Skill.ACROBATICS, Skill.ATHLETICS, Skill.DECEPTION, Skill.INSIGHT,
+                Skill.INTIMIDATION, Skill.INVESTIGATION, Skill.PERCEPTION,
+                Skill.PERFORMANCE, Skill.PERSUASION, Skill.SLEIGHT_OF_HAND, Skill.STEALTH
+            ),
+            spellcastingAbility = null,
+            description = "A scoundrel who uses stealth and trickery to overcome obstacles and enemies.",
+            isHomebrew = false
+        ),
+        CharacterClass(
+            id = "homebrew-class-id-004",
+            name = "Blood Hunter",
+            hitDice = "d10",
+            primaryAbility = Ability.DEX,
+            savingThrows = setOf(Ability.DEX, Ability.INT),
+            skillChoiceCount = 2,
+            availableSkills = listOf(
+                Skill.ATHLETICS, Skill.ARCANA, Skill.INSIGHT,
+                Skill.INVESTIGATION, Skill.SURVIVAL, Skill.INTIMIDATION
+            ),
+            spellcastingAbility = Ability.INT,
+            description = "Marrying dark alchemical magic with fierce martial prowess, these warriors track down and purge foul monsters.",
+            isHomebrew = true
+        ),
+        CharacterClass(
+            id = "homebrew-class-id-005",
+            name = "Mechanist",
+            hitDice = "d8",
+            primaryAbility = Ability.INT,
+            savingThrows = setOf(Ability.CON, Ability.INT),
+            skillChoiceCount = 3,
+            availableSkills = listOf(
+                Skill.ARCANA, Skill.INVESTIGATION, Skill.HISTORY,
+                Skill.SLEIGHT_OF_HAND, Skill.PERCEPTION
+            ),
+            spellcastingAbility = Ability.INT,
+            description = "Masters of clockwork, gearsmithing, and steam-driven technology who fight alongside a mechanical companion.",
+            isHomebrew = true
         )
     )
 

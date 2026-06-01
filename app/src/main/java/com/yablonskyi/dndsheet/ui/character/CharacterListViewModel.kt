@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,18 +24,30 @@ class CharacterListViewModel @Inject constructor(
     private val _lastCreatedId = MutableStateFlow<Long?>(null)
     val lastCreatedId = _lastCreatedId.asStateFlow()
 
-    val characterListState: StateFlow<CharacterListState> = repository.getAllCharacters()
-        .map { characterList ->
-            CharacterListState(
-                characters = characterList,
-                isLoading = false
-            )
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery = _searchQuery.asStateFlow()
+
+    val characterListState: StateFlow<CharacterListState> = combine(
+        repository.getAllCharacters(),
+        _searchQuery
+    ) { characters, query ->
+        val filteredList = if (query.isBlank()) {
+            characters
+        } else {
+            characters.filter { char ->
+                char.name.contains(query, ignoreCase = true)
+            }
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = CharacterListState(isLoading = true)
+
+        CharacterListState(
+            characters = filteredList,
+            isLoading = false
         )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = CharacterListState(isLoading = true)
+    )
 
     private val _isSelectionMode = MutableStateFlow(false)
     val isSelectionMode = _isSelectionMode.asStateFlow()
@@ -47,7 +58,15 @@ class CharacterListViewModel @Inject constructor(
     val isAllSelected: StateFlow<Boolean> =
         combine(_selectedCharacters, characterListState) { selected, state ->
             selected.size == state.characters.size && state.characters.isNotEmpty()
-        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
 
     fun createCharacter(character: Character) {
         _lastCreatedId.value = null
@@ -72,6 +91,10 @@ class CharacterListViewModel @Inject constructor(
         if (selectedIds.isEmpty()) return emptyList()
 
         return repository.getCharacterSheetsByIds(selectedIds)
+    }
+
+    suspend fun getCharacterSheetForExport(character: Character): CharacterSheet {
+        return repository.getCharacterSheetById(character.id)
     }
 
     fun clearLastCreatedId() {

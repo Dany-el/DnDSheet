@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.data.model.character.Money
+import com.yablonskyi.dndsheet.ui.character.utils.TextFieldWithSheet
 import com.yablonskyi.dndsheet.ui.theme.DnDSheetTheme
 import com.yablonskyi.dndsheet.ui.utils.IntTextField
 
@@ -65,7 +66,12 @@ fun InventorySlide(
             }
     ) {
         LazyColumn(
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(
+                start = 8.dp,
+                top = 8.dp,
+                end = 8.dp,
+                bottom = 120.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier
                 .fillMaxSize()
@@ -79,13 +85,10 @@ fun InventorySlide(
             }
             // Inventory
             item {
-                OutlinedTextFieldWithValue(
+                TextFieldWithSheet(
                     label = stringResource(R.string.inventory),
                     value = inventory,
-                    onSaveText = {
-                        onSaveText(it)
-                    },
-                    maxLines = 5
+                    onSave = onSaveText,
                 )
             }
         }
@@ -186,7 +189,6 @@ fun MoneyPouch(
         modifier = modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-
             CoinRow(
                 name = stringResource(R.string.gold),
                 amount = money.gold,

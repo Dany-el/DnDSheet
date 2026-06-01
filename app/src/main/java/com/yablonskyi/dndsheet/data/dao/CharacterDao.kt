@@ -39,4 +39,15 @@ interface CharacterDao {
     @Transaction
     @Query("SELECT * FROM character WHERE id IN (:characterIds)")
     suspend fun getCharacterSheetsByIds(characterIds: List<Long>): List<CharacterSheet>
+
+    @Transaction
+    @Query("SELECT * FROM character WHERE id = :characterId")
+    suspend fun getCharacterSheetById(characterId: Long): CharacterSheet
+
+    @Transaction
+    @Query("SELECT * FROM character")
+    suspend fun getAllCharacterSheets(): List<CharacterSheet>
+
+    @Query("DELETE FROM character")
+    suspend fun deleteAllCharacters()
 }
