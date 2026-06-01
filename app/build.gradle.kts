@@ -58,10 +58,7 @@ android {
 
 dependencies {
 
-    implementation(libs.androidx.animation)
-    implementation(libs.androidx.compose.animation.core)
     implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.exifinterface)
     implementation(libs.androidx.compose.animation)
