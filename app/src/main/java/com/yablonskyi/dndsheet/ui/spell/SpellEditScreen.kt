@@ -437,7 +437,7 @@ fun SpellEditScreen(
                             EnumDropdown(
                                 value = saveStat,
                                 labelRes = R.string.spell_save_stat,
-                                options = Ability.entries.filter { it != Ability.NONE },
+                                options = Ability.playableAbilities,
                                 nameMapper = {
                                     it?.let { stringResource(it.nameRes) } ?: ""
                                 },
@@ -453,7 +453,7 @@ fun SpellEditScreen(
                         EnumDropdown(
                             value = damageType,
                             labelRes = R.string.spell_damage_type,
-                            options = listOf(null) + DamageType.entries,
+                            options = DamageType.entries + null,
                             nameMapper = {
                                 it?.let { stringResource(it.resId) }
                                     ?: stringResource(R.string.none)
