@@ -97,6 +97,15 @@ class AppSettingsViewModel @Inject constructor(
         }
     }
 
+    fun toggleListView() {
+        val view = when (uiState.value.listView) {
+            ListView.LIST -> ListView.GRID
+            ListView.GRID -> ListView.LIST
+        }
+
+        updateListView(view)
+    }
+
     fun setLoggedInUser(email: String?) {
         if (email != null) {
             viewModelScope.launch {
