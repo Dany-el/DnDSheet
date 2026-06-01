@@ -16,9 +16,12 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
@@ -30,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -81,6 +85,7 @@ data class CharacterSheetUiState(
     val currentFilter: SpellFilter = SpellFilter.All,
     val diceState: DiceRollState = DiceRollState(),
     val availableFilters: List<SpellFilter> = emptyList(),
+    val lessDetails: Boolean = false,
     val rightSelectedTab: CharacterTab = CharacterTab.SPELLS,
     val leftSelectedTab: CharacterTab = CharacterTab.ABILITIES,
 )
@@ -103,6 +108,7 @@ data class CharacterSheetActions(
     val onManageClick: (Long) -> Unit = {},
     val onSlotClick: (SpellLevel, Int) -> Unit = { _, _ -> },
     val onRestClick: () -> Unit = {},
+    val onLessDetails: () -> Unit = {},
     val onLeftTabSelected: (CharacterTab) -> Unit = {},
     val onRightTabSelected: (CharacterTab) -> Unit = {},
 )
@@ -323,6 +329,8 @@ fun SharedTransitionScope.CharacterSheetScreen(
                                 nameModifier = nameModifier,
                                 classRaceModifier = classRaceModifier,
                                 imageModifier = imageModifier,
+                                lessDetails = uiState.lessDetails,
+                                onLessDetails = actions.onLessDetails
                             )
                         }
                     },
@@ -368,6 +376,7 @@ fun SharedTransitionScope.CharacterSheetScreen(
                                 onTabSelected = { newTab ->
                                     scope.launch { pagerState.animateScrollToPage(newTab.ordinal) }
                                 },
+                                lessDetails = uiState.lessDetails,
                                 tabContent = movableTabContent
                             )
                         }
@@ -391,6 +400,77 @@ fun SharedTransitionScope.CharacterSheetScreen(
                     deleteAttack = actions.deleteAttack
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun VerticalCharacterLayout(
+    // HP
+    currentHp: Int,
+    maxHp: Int,
+    tempHp: Int,
+    // Initiative
+    initiativeBonus: Int,
+    // AC
+    armorClass: Int,
+    // Speed
+    speed: Int,
+    // Prof bonus
+    proficiencyBonus: Int,
+    tabs: List<CharacterTab>,
+    pagerState: PagerState,
+    lessDetails: Boolean,
+    onDiceButtonClick: (String) -> Unit,
+    onRestClick: () -> Unit,
+    onHealthClick: () -> Unit,
+    onTabSelected: (CharacterTab) -> Unit,
+    tabContent: @Composable (CharacterTab, Modifier) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
+        AnimatedVisibility(
+            visible = !lessDetails
+        ) {
+            CharacterDetailsRow(
+                currentHp = currentHp,
+                maxHp = maxHp,
+                tempHp = tempHp,
+                initiativeBonus = initiativeBonus,
+                armorClass = armorClass,
+                speed = speed,
+                proficiencyBonus = proficiencyBonus,
+                onRollClick = onDiceButtonClick,
+                onRestClick = onRestClick,
+                onHealthClick = onHealthClick,
+            )
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        val currentTab by remember {
+            derivedStateOf { CharacterTab.getByIndex(pagerState.currentPage) }
+        }
+
+        SlideSelector(
+            tabs = tabs,
+            currentTab = currentTab,
+            onTabSelected = onTabSelected,
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+        )
+
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize(),
+            overscrollEffect = null,
+            key = { pageIndex -> tabs[pageIndex].name }
+        ) { pageIndex ->
+            val tab = remember(pageIndex) { CharacterTab.getByIndex(pageIndex) }
+
+            tabContent(tab, Modifier.fillMaxSize())
         }
     }
 }
