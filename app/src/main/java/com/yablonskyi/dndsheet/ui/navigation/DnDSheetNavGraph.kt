@@ -1,6 +1,7 @@
 package com.yablonskyi.dndsheet.ui.navigation
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -14,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,6 +25,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.window.core.layout.WindowSizeClass
 import com.skydoves.compose.stability.runtime.TraceRecomposition
+import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.ui.attack.AttackViewModel
 import com.yablonskyi.dndsheet.ui.character.CharacterDetailViewModel
 import com.yablonskyi.dndsheet.ui.character.CharacterEditScreen
@@ -33,6 +37,26 @@ import com.yablonskyi.dndsheet.ui.character.CharacterSheetActions
 import com.yablonskyi.dndsheet.ui.character.CharacterSheetScreen
 import com.yablonskyi.dndsheet.ui.character.CharacterSheetUiState
 import com.yablonskyi.dndsheet.ui.character.ListOfCharactersScreen
+import com.yablonskyi.dndsheet.ui.compendium.CompendiumScreen
+import com.yablonskyi.dndsheet.ui.compendium.CompendiumViewModel
+import com.yablonskyi.dndsheet.ui.compendium.classes.CharacterClassesViewModel
+import com.yablonskyi.dndsheet.ui.compendium.classes.ClassCreateScreen
+import com.yablonskyi.dndsheet.ui.compendium.classes.ClassCreateViewModel
+import com.yablonskyi.dndsheet.ui.compendium.classes.ClassDetailsScreen
+import com.yablonskyi.dndsheet.ui.compendium.classes.ClassUpdateViewModel
+import com.yablonskyi.dndsheet.ui.compendium.classes.ClassesActions
+import com.yablonskyi.dndsheet.ui.compendium.classes.ClassesScreen
+import com.yablonskyi.dndsheet.ui.compendium.classes.ClassesUiState
+import com.yablonskyi.dndsheet.ui.compendium.classes.toCharacterClass
+import com.yablonskyi.dndsheet.ui.compendium.races.RaceCreateScreen
+import com.yablonskyi.dndsheet.ui.compendium.races.RaceCreateViewModel
+import com.yablonskyi.dndsheet.ui.compendium.races.RaceDetailsScreen
+import com.yablonskyi.dndsheet.ui.compendium.races.RaceUpdateViewModel
+import com.yablonskyi.dndsheet.ui.compendium.races.RacesActions
+import com.yablonskyi.dndsheet.ui.compendium.races.RacesScreen
+import com.yablonskyi.dndsheet.ui.compendium.races.RacesUiState
+import com.yablonskyi.dndsheet.ui.compendium.races.RacesViewModel
+import com.yablonskyi.dndsheet.ui.compendium.races.toRace
 import com.yablonskyi.dndsheet.ui.dice.DiceViewModel
 import com.yablonskyi.dndsheet.ui.settings.AppSettingsScreen
 import com.yablonskyi.dndsheet.ui.settings.AppSettingsViewModel
@@ -42,6 +66,7 @@ import com.yablonskyi.dndsheet.ui.spell.SpellEditScreen
 import com.yablonskyi.dndsheet.ui.spell.SpellEditViewModel
 import com.yablonskyi.dndsheet.ui.spell.SpellLibraryScreen
 import com.yablonskyi.dndsheet.ui.spell.SpellViewModel
+import com.yablonskyi.dndsheet.ui.utils.LoadingDialog
 import com.yablonskyi.dndsheet.ui.wizard.CharacterCreationWizardScreen
 import com.yablonskyi.dndsheet.ui.wizard.CharacterCreationWizardViewModel
 
@@ -129,7 +154,6 @@ fun DnDNavGraph(
                     val uiState by settingsViewModel.uiState.collectAsStateWithLifecycle()
 
                     val characterListState by viewModel.characterListState.collectAsStateWithLifecycle()
-//                    val lastCharacterId by viewModel.lastCreatedId.collectAsStateWithLifecycle()
 
                     val isSelectionMode by viewModel.isSelectionMode.collectAsStateWithLifecycle()
                     val selectedCharacters by viewModel.selectedCharacters.collectAsStateWithLifecycle()
@@ -151,11 +175,11 @@ fun DnDNavGraph(
                         actions = CharacterListActions(
                             onSearchQueryChange = viewModel::updateSearchQuery,
                             onClearSelection = viewModel::closeSelection,
+                            onToggleListView = settingsViewModel::toggleListView,
                             onToggleSelectAll = viewModel::toggleSelectAll,
                             onDeleteSelected = viewModel::deleteSelectedCharacters,
                             toggleSelection = viewModel::toggleSelection,
                             onAdd = {
-//                                viewModel.createCharacter(Character(name = defaultName))
                                 navController.navigate(CharacterCreationWizardRoute)
                             },
                             onDelete = viewModel::deleteCharacter,
@@ -183,6 +207,8 @@ fun DnDNavGraph(
                     val availableFilters by spellViewModel.availableFilters.collectAsStateWithLifecycle()
                     val characterAttacks by attackViewModel.attackList.collectAsStateWithLifecycle()
 
+                    val lessDetails by charViewModel.lessDetails.collectAsStateWithLifecycle()
+
                     val rightSelectedTab by charViewModel.rightSelectedTab.collectAsStateWithLifecycle()
                     val leftSelectedTab by charViewModel.leftSelectedTab.collectAsStateWithLifecycle()
 
@@ -194,6 +220,7 @@ fun DnDNavGraph(
                             currentFilter = currentFilter,
                             diceState = diceState,
                             availableFilters = availableFilters,
+                            lessDetails = lessDetails,
                             rightSelectedTab = rightSelectedTab,
                             leftSelectedTab = leftSelectedTab
                         ),
@@ -222,6 +249,7 @@ fun DnDNavGraph(
                             },
                             onSlotClick = charViewModel::useSpellSlot,
                             onRestClick = charViewModel::performLongRest,
+                            onLessDetails = charViewModel::toggleDetails,
                             onRightTabSelected = charViewModel::onRightTabSelected,
                             onLeftTabSelected = charViewModel::onLeftTabSelected
                         ),
@@ -272,7 +300,7 @@ fun DnDNavGraph(
                     }
                 }
 
-                composable<GlobalSpellLibraryRoute> {
+                composable<CompendiumRoute.SpellsLibrary> {
                     val activity = LocalActivity.current as ComponentActivity
 
                     val viewModel: GlobalSpellLibraryViewModel = hiltViewModel(activity)
@@ -429,12 +457,242 @@ fun DnDNavGraph(
                         onNavigateBack = { navController.popBackStack() }
                     )
                 }
+                composable<CompendiumRoute.Home> {
+                    val viewModel = hiltViewModel<CompendiumViewModel>()
+
+                    val racesCount by viewModel.racesCount.collectAsStateWithLifecycle()
+                    val classesCount by viewModel.classesCount.collectAsStateWithLifecycle()
+                    val spellsCount by viewModel.spellsCount.collectAsStateWithLifecycle()
+
+                    CompendiumScreen(
+                        racesCount = racesCount,
+                        classesCount = classesCount,
+                        spellsCount = spellsCount,
+                        onRacesClick = { navController.navigate(CompendiumRoute.RacesScreen) },
+                        onClassesClick = { navController.navigate(CompendiumRoute.ClassesScreen) },
+                        onSpellsClick = { navController.navigate(CompendiumRoute.SpellsLibrary) },
+                    )
+                }
+                composable<CompendiumRoute.RacesScreen> {
+                    val viewModel = hiltViewModel<RacesViewModel>()
+
+                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                    val context = LocalContext.current
+                    val res = LocalResources.current
+
+                    RacesScreen(
+                        uiState = RacesUiState(
+                            origRaces = uiState.origRaces,
+                            homebrewRaces = uiState.homebrewRaces,
+                            origSectionState = uiState.origRacesSectionState,
+                            homebrewSectionState = uiState.homebrewRacesSectionState,
+                            isSelectionMode = uiState.isSelectionMode,
+                            isAllSelected = uiState.isAllSelected,
+                            searchQuery = uiState.searchQuery,
+                            selectedRaceIds = uiState.selectedRaceIds
+                        ),
+                        actions = RacesActions(
+                            onSearchQueryChange = viewModel::onSearchQueryChange,
+                            onClearSelection = viewModel::clearSelection,
+                            onDeleteSelected = viewModel::deleteSelected,
+                            onToggleSelectAll = viewModel::toggleSelectAll,
+                            onToggleRaceSelection = viewModel::toggleRaceSelection,
+                            onExportRequested = viewModel::generateExportJson,
+                            onExportAllSelected = { viewModel.generateExportJson(targetRaceId = null) },
+                            onImportRequested = { json ->
+                                viewModel.importRacesFromJson(json) {
+                                    Toast.makeText(
+                                        context,
+                                        res.getString(R.string.success_import),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            },
+                            onEdit = { navController.navigate(CompendiumRoute.RaceUpdateScreen(it)) },
+                            onDelete = viewModel::delete,
+                            onCreateRace = { navController.navigate(CompendiumRoute.RaceCreateScreen()) },
+                            onDetails = {
+                                navController.navigate(
+                                    CompendiumRoute.RaceDetailsScreen(
+                                        it
+                                    )
+                                )
+                            },
+                            onNavigateBack = { navController.popBackStack() },
+                            onCollapseOrigSection = viewModel::collapseOrigRacesSection,
+                            onCollapseHomebrewSection = viewModel::collapseHomebrewRacesSection,
+                        )
+                    )
+                }
+                composable<CompendiumRoute.RaceDetailsScreen> {
+                    val viewModel = hiltViewModel<RacesViewModel>()
+
+                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+                    if (uiState.isLoading) {
+                        LoadingDialog()
+                    } else {
+                        RaceDetailsScreen(
+                            race = uiState.selectedRace!!,
+                            onEdit = { navController.navigate(CompendiumRoute.RaceUpdateScreen(it)) },
+                            onExportRequested = { viewModel.generateExportJson(it) },
+                            onNavigateBack = { navController.popBackStack() },
+                        )
+                    }
+                }
+
+                composable<CompendiumRoute.RaceUpdateScreen> {
+                    val viewModel = hiltViewModel<RaceUpdateViewModel>()
+
+                    val race by viewModel.race.collectAsStateWithLifecycle()
+
+                    LaunchedEffect(Unit) {
+                        viewModel.updateDone.collect {
+                            navController.popBackStack()
+                        }
+                    }
+
+                    if (race == null) {
+                        LoadingDialog()
+                    } else {
+                        RaceCreateScreen(
+                            race = race,
+                            onCreate = { raceState ->
+                                viewModel.updateRace(raceState.toRace())
+                            },
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                }
+
+                composable<CompendiumRoute.RaceCreateScreen> {
+                    val viewModel = hiltViewModel<RaceCreateViewModel>()
+
+                    RaceCreateScreen(
+                        race = null,
+                        onCreate = { raceState ->
+                            viewModel.createRace(raceState.toRace())
+                            navController.popBackStack()
+                        },
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+
+                composable<CompendiumRoute.ClassesScreen> {
+                    val viewModel = hiltViewModel<CharacterClassesViewModel>()
+
+                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                    val context = LocalContext.current
+                    val res = LocalResources.current
+
+                    ClassesScreen(
+                        uiState = ClassesUiState(
+                            origClasses = uiState.origClasses,
+                            homebrewClasses = uiState.homebrewClasses,
+                            selectedClassesIds = uiState.selectedClassesIds,
+                            isSelectionMode = uiState.isSelectionMode,
+                            isAllSelected = uiState.isAllSelected,
+                            searchQuery = uiState.searchQuery,
+                            origSectionState = uiState.origClassesSectionState,
+                            homebrewSectionState = uiState.homebrewClassesSectionState
+                        ),
+                        actions = ClassesActions(
+                            onSearchQueryChange = viewModel::onSearchQueryChange,
+                            onClearSelection = viewModel::clearSelection,
+                            onDeleteSelected = viewModel::deleteSelected,
+                            onToggleSelectAll = viewModel::toggleSelectAll,
+                            onToggleRaceSelection = viewModel::toggleClassSelection,
+                            onExportRequested = viewModel::generateExportJson,
+                            onExportAllSelected = { viewModel.generateExportJson(targetClassId = null) },
+                            onImportRequested = { json ->
+                                viewModel.importClassesFromJson(json) {
+                                    Toast.makeText(
+                                        context,
+                                        res.getString(R.string.success_import),
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            },
+                            onDelete = viewModel::delete,
+                            onEdit = {
+                                navController.navigate(
+                                    CompendiumRoute.ClassUpdateScreen(it)
+                                )
+                            },
+                            onCreateClass = { navController.navigate(CompendiumRoute.ClassCreateScreen()) },
+                            onDetails = {
+                                navController.navigate(
+                                    CompendiumRoute.ClassDetailsScreen(
+                                        it
+                                    )
+                                )
+                            },
+                            onNavigateBack = { navController.popBackStack() },
+                            onCollapseOrigSection = viewModel::collapseOrigClassesSection,
+                            onCollapseHomebrewSection = viewModel::collapseHomebrewClassesSection,
+                        )
+                    )
+                }
+
+                composable<CompendiumRoute.ClassDetailsScreen> {
+                    val viewModel = hiltViewModel<CharacterClassesViewModel>()
+
+                    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+                    if (uiState.isLoading) {
+                        LoadingDialog()
+                    } else {
+                        ClassDetailsScreen(
+                            characterClass = uiState.selectedClass!!,
+                            onEdit = { navController.navigate(CompendiumRoute.ClassUpdateScreen(it)) },
+                            onExportRequested = { viewModel.generateExportJson(it) },
+                            onNavigateBack = { navController.popBackStack() },
+                        )
+                    }
+                }
+
+                composable<CompendiumRoute.ClassCreateScreen> {
+                    val viewModel = hiltViewModel<ClassCreateViewModel>()
+
+                    ClassCreateScreen(
+                        characterClass = null,
+                        onCreate = { clsState ->
+                            viewModel.createClass((clsState.toCharacterClass()))
+                            navController.popBackStack()
+                        },
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+
+                composable<CompendiumRoute.ClassUpdateScreen> {
+                    val viewModel = hiltViewModel<ClassUpdateViewModel>()
+
+                    val cls by viewModel.characterClass.collectAsStateWithLifecycle()
+
+                    LaunchedEffect(Unit) {
+                        viewModel.updateDone.collect {
+                            navController.popBackStack()
+                        }
+                    }
+
+                    if (cls == null) {
+                        LoadingDialog()
+                    } else {
+                        ClassCreateScreen(
+                            characterClass = cls,
+                            onCreate = { clsState ->
+                                viewModel.updateClass((clsState.toCharacterClass()))
+                                navController.popBackStack()
+                            },
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                }
             }
         }
     }
 }
 
-// Helper function to determine the visual order of the tabs
 private fun getTabIndex(route: String?): Int {
     if (route == null) return -1
     return when {
