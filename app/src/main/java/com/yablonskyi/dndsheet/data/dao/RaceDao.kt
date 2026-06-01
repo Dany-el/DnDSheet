@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.yablonskyi.dndsheet.data.model.rulebook.Race
 import kotlinx.coroutines.flow.Flow
 
@@ -16,11 +17,17 @@ interface RaceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(race: Race)
 
+    @Update
+    suspend fun update(race: Race)
+
     @Delete
     suspend fun delete(race: Race)
 
     @Delete
     suspend fun deleteRaces(races: List<Race>)
+
+    @Query("SELECT * FROM races WHERE id = :raceId")
+    fun getRaceById(raceId: String): Flow<Race?>
 
     @Query("SELECT * FROM races ORDER BY isHomebrew ASC, name ASC")
     fun getAllRaces(): Flow<List<Race>>

@@ -4,10 +4,13 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.yablonskyi.dndsheet.data.model.character.Ability
 import com.yablonskyi.dndsheet.data.model.character.Skill
+import kotlinx.serialization.Serializable
+import java.util.UUID
 
+@Serializable
 @Entity(tableName = "races")
 data class Race(
-    @PrimaryKey val id: String,
+    @PrimaryKey val id: String = UUID.randomUUID().toString(),
     val name: String,
     val size: String = "Medium",
     val speed: Int = 30,

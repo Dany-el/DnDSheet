@@ -16,10 +16,12 @@ class RaceRepositoryImpl @Inject constructor(
     override suspend fun insert(race: Race) = dao.insert(race)
 
     override suspend fun insertAll(race: List<Race>) = dao.insertAll(race)
+    override suspend fun update(race: Race) = dao.update(race)
 
     override suspend fun delete(race: Race) = dao.delete(race)
 
     override suspend fun deleteRaces(races: List<Race>) = dao.deleteRaces(races)
+    override fun getRaceById(raceId: String): Flow<Race?> = dao.getRaceById(raceId)
 
     override fun getAllRaces(): Flow<List<Race>> = combine(
         flow { emit(loader.getRaces()) },
