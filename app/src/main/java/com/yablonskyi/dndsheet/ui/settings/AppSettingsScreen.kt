@@ -187,16 +187,7 @@ fun AppSettingsScreen(
 
                 HorizontalDivider()
 
-                // LIST VIEW
-                SettingsActionRow(
-                    title = stringResource(R.string.list_view_title),
-                    currentValue = stringResource(state.listView.label),
-                    onClick = { activeSheet = ActiveSettingsSheet.LIST_VIEW }
-                )
-
-                HorizontalDivider()
-
-                // --- BACKUP & SYNC SECTION ---
+                // BACKUP & SYNC SECTION
                 Text(
                     text = stringResource(R.string.backup_and_sync),
                     style = MaterialTheme.typography.titleMedium,
@@ -347,7 +338,7 @@ fun AppSettingsScreen(
         )
     }
 
-    // --- BOTTOM SHEETS ---
+    // BOTTOM SHEETS
     when (activeSheet) {
         ActiveSettingsSheet.THEME -> {
             SelectionBottomSheet(
