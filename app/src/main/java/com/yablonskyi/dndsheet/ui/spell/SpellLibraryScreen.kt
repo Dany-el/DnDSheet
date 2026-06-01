@@ -7,11 +7,13 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +35,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,9 +43,9 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Surface
@@ -63,6 +66,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -127,27 +131,8 @@ fun SpellLibraryScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val listState = rememberLazyListState()
-
-    /*    var isFabVisible by remember { mutableStateOf(true) }
-
-        val nestedScrollConnection = remember {
-            object : NestedScrollConnection {
-                override fun onPostScroll(
-                    consumed: Offset,
-                    available: Offset,
-                    source: NestedScrollSource
-                ): Offset {
-                    val actualScrollAmount = consumed.y
-                    if (actualScrollAmount < -10f) {
-                        isFabVisible = false
-                    } else if (actualScrollAmount > 10f) {
-                        isFabVisible = true
-                    }
-                    return Offset.Zero
-                }
-            }
-        }*/
 
     val groupedSpells = remember(spells) {
         spells.groupBy { it.spell.level }.toSortedMap()
@@ -181,7 +166,7 @@ fun SpellLibraryScreen(
             } else {
                 Toast.makeText(
                     context,
-                    context.getString(R.string.import_file_empty),
+                    resources.getText(R.string.import_file_empty),
                     Toast.LENGTH_SHORT
                 ).show()
             }
@@ -208,6 +193,9 @@ fun SpellLibraryScreen(
     }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+
+    // Bottom sheet for details
+    var showBottomSheet: Spell? by remember { mutableStateOf(null) }
 
     Scaffold(
         contentWindowInsets = screenInsets,
@@ -303,7 +291,6 @@ fun SpellLibraryScreen(
                 if (!loadingState) {
                     LazyColumn(
                         state = listState,
-//                        modifier = Modifier.nestedScroll(nestedScrollConnection),
                         contentPadding = PaddingValues(
                             start = 8.dp,
                             end = 8.dp,
@@ -351,6 +338,7 @@ fun SpellLibraryScreen(
                                     onEdit = { onEditSpell(item.spell.spellId) },
                                     onDelete = { onDeleteSpell(item.spell) },
                                     onToggleSelection = { toggleSelection(item.spell) },
+                                    onShowDetails = { showBottomSheet = item.spell },
                                     modifier = Modifier.animateItem()
                                 )
                             }
@@ -364,6 +352,17 @@ fun SpellLibraryScreen(
                     }
                 }
             }
+        }
+    }
+
+    showBottomSheet?.let { spell ->
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = null }
+        ) {
+            SpellInfoSheet(
+                spell = spell,
+                onDismiss = { showBottomSheet = null }
+            )
         }
     }
 
@@ -574,19 +573,22 @@ fun SpellLibraryRow(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     onToggleSelection: () -> Unit,
+    onShowDetails: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val spell = item.spell
-
     val context = LocalContext.current
 
     val animatedColor by animateColorAsState(
-        targetValue = if (isSelected || (item.isLearned && isLearnMode)) {
+        targetValue = if (isSelected || (item.isLearned && isLearnMode))
             MaterialTheme.colorScheme.secondaryContainer
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerLowest
-        },
+        else MaterialTheme.colorScheme.surfaceContainer,
         label = "cardColorAnimation"
+    )
+
+    val animatedBorderWidth by animateDpAsState(
+        targetValue = if (isSelected || (item.isLearned && isLearnMode)) 1.5.dp else 0.7.dp,
+        label = "cardBorderWidth"
     )
 
     val topCorners by animateDpAsState(
@@ -606,70 +608,70 @@ fun SpellLibraryRow(
         bottomEnd = bottomCorners
     )
 
-    var showConfirmDialog by remember {
-        mutableStateOf(false)
-    }
-
+    var showConfirmDialog by remember { mutableStateOf(false) }
     var menuExpanded by remember { mutableStateOf(false) }
 
     if (showConfirmDialog) {
         DeletingItemConfirmDialog(
             title = stringResource(R.string.q_delete_spell),
-            text = stringResource(R.string.q_confirm_text, item.spell.name),
+            text = stringResource(R.string.q_confirm_text, spell.name),
             onConfirm = onDelete,
-            onDiscard = { showConfirmDialog = false },
+            onDiscard = { showConfirmDialog = false }
         )
     }
 
-    ListItem(
-        colors = ListItemDefaults.colors(
-            containerColor = animatedColor,
-        ),
+    OutlinedCard(
+        shape = animatedShape,
+        colors = CardDefaults.outlinedCardColors(containerColor = animatedColor),
+        border = BorderStroke(animatedBorderWidth, MaterialTheme.colorScheme.outlineVariant),
         modifier = modifier
+            .fillMaxWidth()
             .clip(animatedShape)
             .combinedClickable(
                 onClick = {
-                    if (isSelectionMode) {
-                        onToggleSelection()
-                    } else if (isLearnMode) {
-                        onToggle()
-                    } else {
-                        onEdit()
+                    when {
+                        isSelectionMode -> onToggleSelection()
+                        isLearnMode -> onToggle()
+                        else -> onShowDetails()
                     }
                 },
-                onLongClick = {
-                    onToggleSelection()
-                }
-            ),
-        tonalElevation = 6.dp,
-        overlineContent = {
-            Text(
-                text = stringResource(spell.school.resId),
-                modifier = Modifier.padding(bottom = 4.dp)
+                onLongClick = { onToggleSelection() }
             )
-        },
-        headlineContent = {
-            Text(
-                text = spell.name,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.SemiBold,
-            )
-        },
-        trailingContent = {
-            if (isLearnMode) {
-                Switch(
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(spell.school.resId),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = spell.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+
+            when {
+                isLearnMode -> Switch(
                     checked = item.isLearned,
                     onCheckedChange = { onToggle() }
                 )
-            } else if (isSelectionMode) {
-                Checkbox(
+
+                isSelectionMode -> Checkbox(
                     checked = isSelected,
                     onCheckedChange = { onToggleSelection() }
                 )
-            } else {
-                Box {
+
+                else -> Box {
                     IconButton(onClick = { menuExpanded = true }) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
@@ -677,7 +679,6 @@ fun SpellLibraryRow(
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
-
                     SlicedDropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
@@ -703,7 +704,7 @@ fun SpellLibraryRow(
                 }
             }
         }
-    )
+    }
 }
 
 @Preview
