@@ -21,7 +21,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -58,14 +58,13 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.window.core.layout.WindowSizeClass
 import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.data.model.character.Spell
 import com.yablonskyi.dndsheet.ui.character.CharacterListViewModel
 import com.yablonskyi.dndsheet.ui.navigation.AppSettingsRoute
 import com.yablonskyi.dndsheet.ui.navigation.BottomNavItem
+import com.yablonskyi.dndsheet.ui.navigation.CompendiumRoute
 import com.yablonskyi.dndsheet.ui.navigation.DnDNavGraph
-import com.yablonskyi.dndsheet.ui.navigation.GlobalSpellLibraryRoute
 import com.yablonskyi.dndsheet.ui.navigation.ListOfCharactersRoute
 import com.yablonskyi.dndsheet.ui.settings.AppSettingsState
 import com.yablonskyi.dndsheet.ui.spell.GlobalSpellLibraryViewModel
@@ -129,7 +128,7 @@ fun MainScreen(
                             Toast.LENGTH_SHORT
                         ).show()
 
-                        navController.navigate(GlobalSpellLibraryRoute) {
+                        navController.navigate(CompendiumRoute.SpellsLibrary) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
@@ -153,8 +152,8 @@ fun MainScreen(
         listOf(
             BottomNavItem(R.string.characters, ListOfCharactersRoute, Icons.Default.Person),
             BottomNavItem(
-                R.string.spells, GlobalSpellLibraryRoute,
-                Icons.AutoMirrored.Filled.LibraryBooks
+                R.string.compendium, CompendiumRoute.Home,
+                Icons.AutoMirrored.Filled.MenuBook
             ),
             BottomNavItem(R.string.settings, AppSettingsRoute, Icons.Default.Settings)
         )
