@@ -200,7 +200,7 @@
     <string name="q_delete_spell">Удаление заклинания</string>
     <string name="edit">Изменить</string>
     <string name="placeholder_dice">1к12</string>
-    <string name="btn_full_heal">Герои Не Умирают</string>
+    <string name="btn_full_heal">Вы Живой</string>
     <string name="btn_you_are_dead">Вы Мертвы</string>
     <string name="confirm_import">Импорт</string>
     <string name="export_spells">Экспорт</string>
@@ -249,7 +249,7 @@
     <string name="list">Список</string>
     <string name="grid">Сетка</string>
     <string name="share_as_pdf">Поделиться PDF</string>
-    <string name="search">Антон Чигур</string>
+    <string name="search">Поиск</string>
     <string name="initiative">Инициатива</string>
     <string name="backup_and_sync">Резервное копирование и синхронизация</string>
     <string name="google_account">Учетная запись</string>
@@ -279,7 +279,7 @@
     <string name="wizard_name_error">Имя не может быть пустым</string>
     <string name="wizard_race_subtitle">Выберите расу, чтобы увидеть ее бонусы к характеристикам и особенности.</string>
     <string name="wizard_class_subtitle">Выберите класс, чтобы увидеть его кость хитов, спасброски и доступные навыки.</string>
-    <string name="wizard_granted_skills">Дает: %s</string>
+    <string name="wizard_granted_skills">Навыки: %s</string>
     <string name="wizard_saving_throws">Спасброски: %s</string>
     <string name="wizard_spellcaster">Заклинатель</string>
     <string name="wizard_skills_subtitle">Эти владения будут автоматически добавлены в ваш лист.</string>
@@ -297,16 +297,93 @@
     <string name="reroll_all">Перебросить все</string>
     <string name="roll_select_hint">Нажмите на результат, а затем на строку характеристики, чтобы назначить его.</string>
     <string name="wizard_set_level">Начальный уровень</string>
-    <string name="wizard_set_level_hint">По умолчанию будет уровень 1, если пропустить.</string>
+    <string name="wizard_set_level_hint">По умолчанию будет уровень 1, если пропустить. Включите, если хотите выбрать собственный уровень.</string>
     <string name="wizard_level_label">Уровень</string>
     <string name="wizard_starting_hp">Начальные хиты</string>
     <string name="wizard_prof_bonus_preview">Бонус мастерства на этом уровне: +%d</string>
     <string name="wizard_step_abilities">Характеристики</string>
     <string name="wizard_step_level">Выбор уровня</string>
+    <string name="races">Расы</string>
+    <string name="classes">Классы</string>
+    <string name="compendium">Компендиум</string>
+    <string name="player_handbook">Книга игрока</string>
+    <string name="size">Размер</string>
+    <string name="error_empty">Это поле не может быть пустым</string>
+    <string name="error_range">Макс.: %1$d, мин.: %2$d</string>
+    <string name="edit_race">Редактирование расы</string>
+    <string name="creating">Создание</string>
+    <string name="race_name">Название</string>
+    <string name="race_size">Размер</string>
+    <string name="race_speed">Скорость</string>
+    <string name="description">Описание</string>
+    <string name="error_traits">Пожалуйста, используйте формат: Черта, Другая черта,</string>
+    <string name="ability_score_bonuses">Бонусы к характеристикам</string>
+    <string name="bonus">Бонус</string>
+    <string name="add_ability_bonus">Добавить бонус к характеристике</string>
+    <string name="remove">Удалить</string>
+    <string name="granted_skills">Предоставляемые навыки</string>
+    <string name="add_skill">Добавить владение навыком</string>
+    <string name="share_as_json">Поделиться как .json</string>
+    <string name="q_delete_race">Удалить расу</string>
+    <string name="wizard_no_homebrew_classes">Пока нет хоумбрю классов. Создайте один в Компендиум.</string>
+    <string name="expand_less">Свернуть</string>
+    <string name="expand_more">Развернуть</string>
+    <string name="saving_throw_short">Спасброс.</string>
+    <string name="wizard_no_homebrew_races">Пока нет хоумбрю рас. Создайте одну в Компендиум.</string>
+    <string name="no_results">Результаты не найдены.</string>
+    <string name="sheets">Листы</string>
+    <string name="hit_dice">Кости Хитов</string>
+    <string name="primary_ability">Основная характеристика</string>
+    <string name="skill_choices">Кол-во навыков</string>
+    <string name="saving_throws">Спасброски</string>
+    <string name="spellcasting_ability">Заклинательная характеристика</string>
+    <string name="spellcasting_ability_shorted">Закл. хар-ка</string>
+    <string name="available_skills">Доступные навыки</string>
+    <string name="add_saving_throw">Добавить спасбросок</string>
+    <string name="edit_class">Редактирование класса</string>
+    <string name="class_name">Название</string>
+    <string name="q_delete_class">Удалить класс</string>
+
     <plurals name="wizard_skill_choices">
         <item quantity="one">%d навык</item>
         <item quantity="few">%d навыка</item>
         <item quantity="many">%d навыков</item>
         <item quantity="other">%d навыков</item>
     </plurals>
+
+    <plurals name="q_confirm_text_races">
+        <item quantity="one">Удалить %d выбранную расу?</item>
+        <item quantity="few">Удалить %d выбранные расы?</item>
+        <item quantity="many">Удалить %d выбранных рас?</item>
+        <item quantity="other">Удалить %d выбранных рас?</item>
+    </plurals>
+
+    <plurals name="class_skill_count">
+        <item quantity="one">%d навык</item>
+        <item quantity="few">%d навыка</item>
+        <item quantity="many">%d навыков</item>
+        <item quantity="other">%d навыков</item>
+    </plurals>
+
+    <plurals name="races_count">
+        <item quantity="one">%d раса</item>
+        <item quantity="few">%d расы</item>
+        <item quantity="many">%d рас</item>
+        <item quantity="other">%d расы</item>
+    </plurals>
+
+    <plurals name="classes_count">
+        <item quantity="one">%d класс</item>
+        <item quantity="few">%d класса</item>
+        <item quantity="many">%d классов</item>
+        <item quantity="other">%d класса</item>
+    </plurals>
+
+    <plurals name="spells_count">
+        <item quantity="one">%d заклинание</item>
+        <item quantity="few">%d заклинания</item>
+        <item quantity="many">%d заклинаний</item>
+        <item quantity="other">%d заклинания</item>
+    </plurals>
+
 </resources>

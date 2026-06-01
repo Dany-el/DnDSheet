@@ -210,7 +210,7 @@
     <string name="q_delete_spell">Removing a spell</string>
     <string name="edit">Edit</string>
     <string name="placeholder_dice">1d12</string>
-    <string name="btn_full_heal">Heroes Never Dies</string>
+    <string name="btn_full_heal">You Are Alive</string>
     <string name="btn_you_are_dead">You Are Dead</string>
     <string name="confirm_import">Import</string>
     <string name="export_spells">Export</string>
@@ -289,7 +289,7 @@
     <string name="wizard_name_error">Name cannot be empty</string>
     <string name="wizard_race_subtitle">Pick a race to see its ability bonuses and traits.</string>
     <string name="wizard_class_subtitle">Pick a class to see its hit dice, saving throws, and skill options.</string>
-    <string name="wizard_granted_skills">Grants: %s</string>
+    <string name="wizard_granted_skills">Skills: %s</string>
     <string name="wizard_saving_throws">Saves: %s</string>
     <string name="wizard_spellcaster">Spellcaster</string>
     <string name="wizard_skills_subtitle">These proficiencies will be applied to your sheet automatically.</string>
@@ -307,16 +307,79 @@
     <string name="reroll_all">Reroll All</string>
     <string name="roll_select_hint">Tap a result, then tap an ability row to assign it.</string>
     <string name="wizard_set_level">Starting Level</string>
-    <string name="wizard_set_level_hint">Defaults to level 1 if skipped.</string>
+    <string name="wizard_set_level_hint">Defaults to level 1 if skipped. Enable if you want to choose custom level.</string>
     <string name="wizard_level_label">Level</string>
     <string name="wizard_starting_hp">Starting HP</string>
     <string name="wizard_prof_bonus_preview">Proficiency Bonus at this level: +%d</string>
     <string name="wizard_step_abilities">Abilities</string>
     <string name="wizard_step_level">Choose Level</string>
+    <string name="races">Races</string>
+    <string name="classes">Classes</string>
+    <string name="compendium">Compendium</string>
+    <string name="player_handbook">Player\'s Handbook</string>
+    <string name="size">Size</string>
+    <string name="error_empty">This field cannot be empty</string>
+    <string name="error_range">Max: %1$d, min: %2$d</string>
+    <string name="edit_race">Race Editing</string>
+    <string name="creating">Creating</string>
+    <string name="race_name">Name</string>
+    <string name="race_size">Size</string>
+    <string name="race_speed">Speed</string>
+    <string name="description">Description</string>
+    <string name="error_traits">Please use the format: Trait, Another Trait,</string>
+    <string name="ability_score_bonuses">Ability Score Bonuses</string>
+    <string name="bonus">Bonus</string>
+    <string name="add_ability_bonus">Add Ability Bonus</string>
+    <string name="remove">Remove</string>
+    <string name="granted_skills">Granted Skills</string>
+    <string name="add_skill">Add skill proficiency</string>
+    <string name="share_as_json">Share as .json</string>
+    <string name="q_delete_race">Delete Race</string>
+    <string name="wizard_no_homebrew_races">No homebrew races yet. Create one in the Compendium.</string>
+    <string name="no_results">No results found.</string>
+    <string name="wizard_no_homebrew_classes">No homebrew classes yet. Create one in Compendium.</string>
+    <string name="expand_less">Expand Less</string>
+    <string name="expand_more">Expand More</string>
+    <string name="saving_throw_short">Save</string>
+    <string name="sheets">Sheets</string>
+    <string name="hit_dice">Hit Dice</string>
+    <string name="primary_ability">Primary Ability</string>
+    <string name="skill_choices">Skills Amount</string>
+    <string name="saving_throws">Saving Throws</string>
+    <string name="spellcasting_ability">Spellcasting Ability</string>
+    <string name="spellcasting_ability_shorted">Spellcasting Ability</string>
+    <string name="available_skills">Available Skills</string>
+    <string name="add_saving_throw">Add saving throw</string>
+    <string name="edit_class">Class Editing</string>
+    <string name="class_name">Name</string>
+    <string name="q_delete_class">Delete Class</string>
 
     <plurals name="wizard_skill_choices">
         <item quantity="one">%d skill</item>
         <item quantity="other">%d skills</item>
+    </plurals>
+
+    <plurals name="q_confirm_text_races">
+        <item quantity="one">Delete %d selected race?</item>
+        <item quantity="other">Delete %d selected races?</item>
+    </plurals>
+
+    <plurals name="class_skill_count">
+        <item quantity="one">%d skill</item>
+        <item quantity="other">%d skills</item>
+    </plurals>
+
+    <plurals name="races_count">
+        <item quantity="one">%d race</item>
+        <item quantity="other">%d races</item>
+    </plurals>
+    <plurals name="classes_count">
+        <item quantity="one">%d class</item>
+        <item quantity="other">%d classes</item>
+    </plurals>
+    <plurals name="spells_count">
+        <item quantity="one">%d spell</item>
+        <item quantity="other">%d spells</item>
     </plurals>
 
 </resources>
