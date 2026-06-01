@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,8 +44,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yablonskyi.dndsheet.R
+import com.yablonskyi.dndsheet.data.model.rulebook.CharacterClass
+import com.yablonskyi.dndsheet.data.model.rulebook.Race
 import com.yablonskyi.dndsheet.ui.theme.DnDSheetTheme
 
 @Composable
@@ -57,8 +61,12 @@ fun CharacterCreationWizardScreen(
     val canProceed by viewModel.canProceed.collectAsStateWithLifecycle()
 
     val name by viewModel.name.collectAsStateWithLifecycle()
-    val races by viewModel.races.collectAsStateWithLifecycle()
-    val classes by viewModel.classes.collectAsStateWithLifecycle()
+    val origRaces by viewModel.origRaces.collectAsStateWithLifecycle()
+    val homebrewRaces by viewModel.homebrewRaces.collectAsStateWithLifecycle()
+    val homebrewRaceQuery by viewModel.raceQuery.collectAsStateWithLifecycle()
+    val origClasses by viewModel.origClasses.collectAsStateWithLifecycle()
+    val homebrewClasses by viewModel.homebrewClasses.collectAsStateWithLifecycle()
+    val homebrewClassQuery by viewModel.classQuery.collectAsStateWithLifecycle()
     val selectedRace by viewModel.selectedRace.collectAsStateWithLifecycle()
     val selectedClass by viewModel.selectedClass.collectAsStateWithLifecycle()
     val selectedSkills by viewModel.selectedSkills.collectAsStateWithLifecycle()
@@ -72,6 +80,7 @@ fun CharacterCreationWizardScreen(
     val rolledResults by viewModel.rolledResults.collectAsStateWithLifecycle()
     val rollIndexAssignments by viewModel.rollIndexAssignments.collectAsStateWithLifecycle()
     val pendingRollIndex by viewModel.pendingRollIndex.collectAsStateWithLifecycle()
+    val baseAbilityBlock by viewModel.baseAbilityBlock.collectAsStateWithLifecycle()
     val customLevelEnabled by viewModel.customLevelEnabled.collectAsStateWithLifecycle()
     val level by viewModel.level.collectAsStateWithLifecycle()
     val calculatedHp by viewModel.calculatedHp.collectAsStateWithLifecycle()
@@ -84,6 +93,8 @@ fun CharacterCreationWizardScreen(
         topBar = {
             CreationWizardTopBar(
                 step = currentStep,
+                selectedRace = selectedRace,
+                selectedClass = selectedClass,
                 onNavigateBack = onNavigateBack,
             )
         },
@@ -122,30 +133,14 @@ fun CharacterCreationWizardScreen(
                     )
                 }
 
-                WizardStep.RACE -> {
-                    WizardRaceStep(
-                        races = races,
-                        selectedRace = selectedRace,
-                        onRaceSelected = viewModel::selectRace
-                    )
-                }
-
-                WizardStep.CLASS -> {
-                    WizardClassStep(
-                        classes = classes,
-                        selectedClass = selectedClass,
-                        onClassSelected = viewModel::selectClass,
-                    )
-                }
-
-                WizardStep.SKILLS -> {
-                    WizardSkillsStep(
-                        availableSkills = availableSkills,
-                        selectedSkills = selectedSkills,
-                        maxSkills = maxSkills,
-                        onSkillToggle = viewModel::toggleSkill
-                    )
-                }
+                WizardStep.RACE -> WizardRaceStep(
+                    origRaces = origRaces,
+                    homebrewRaces = homebrewRaces,
+                    query = homebrewRaceQuery,
+                    onQueryChange = viewModel::setRaceQuery,
+                    selectedRace = selectedRace,
+                    onRaceSelected = viewModel::selectRace
+                )
 
                 WizardStep.ABILITIES -> WizardAbilitiesStep(
                     method = abilityMethod,
@@ -167,6 +162,25 @@ fun CharacterCreationWizardScreen(
                     onSelectRollIndex = viewModel::selectRollIndex,
                 )
 
+                WizardStep.CLASS -> WizardClassStep(
+                    origClasses = origClasses,
+                    homebrewClasses = homebrewClasses,
+                    query = homebrewClassQuery,
+                    onQueryChange = viewModel::setClassQuery,
+                    selectedClass = selectedClass,
+                    onClassSelected = viewModel::selectClass
+                )
+
+                WizardStep.SKILLS -> {
+                    WizardSkillsStep(
+                        availableSkills = availableSkills,
+                        selectedSkills = selectedSkills,
+                        abilityBlock = baseAbilityBlock,
+                        maxSkills = maxSkills,
+                        onSkillToggle = viewModel::toggleSkill
+                    )
+                }
+
                 WizardStep.LEVEL -> WizardLevelStep(
                     selectedClass = selectedClass,
                     customLevelEnabled = customLevelEnabled,
@@ -184,13 +198,15 @@ fun CharacterCreationWizardScreen(
 @Composable
 fun CreationWizardTopBar(
     step: WizardStep,
+    selectedRace: Race?,
+    selectedClass: CharacterClass?,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val title = when (step) {
         WizardStep.NAME -> stringResource(R.string.wizard_step_name)
-        WizardStep.RACE -> stringResource(R.string.wizard_step_race)
-        WizardStep.CLASS -> stringResource(R.string.wizard_step_class)
+        WizardStep.RACE -> selectedRace?.name ?: stringResource(R.string.wizard_step_race)
+        WizardStep.CLASS -> selectedClass?.name ?: stringResource(R.string.wizard_step_class)
         WizardStep.SKILLS -> stringResource(R.string.wizard_step_skills)
         WizardStep.ABILITIES -> stringResource(R.string.wizard_step_abilities)
         WizardStep.LEVEL -> stringResource(R.string.wizard_step_level)
@@ -337,6 +353,27 @@ fun WizardChip(
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp)
         )
+    }
+}
+
+@Composable
+fun WizardSectionHeader(
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp, bottom = 4.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Text(
+            text = title.uppercase(),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            letterSpacing = 1.sp
+        )
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
     }
 }
 

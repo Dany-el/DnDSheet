@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.collections.filter
 import kotlin.math.floor
 
 @HiltViewModel
@@ -106,12 +107,43 @@ class CharacterCreationWizardViewModel @Inject constructor(
     private val _selectedSkills = MutableStateFlow<Set<Skill>>(emptySet())
     val selectedSkills = _selectedSkills.asStateFlow()
 
-    // ── Data from DB ─────────────────────────────────────────────
-    val races = raceRepository.getAllRaces()
+    // ── Homebrew search queries ───────────────────────────────────────
+    private val _raceQuery = MutableStateFlow("")
+    val raceQuery = _raceQuery.asStateFlow()
+
+    private val _classQuery = MutableStateFlow("")
+    val classQuery = _classQuery.asStateFlow()
+
+    // ── Data from DB — split into original and homebrew ───────────────
+    private val _allRaces = raceRepository.getAllRaces()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val classes = classRepository.getAllClasses()
+    private val _allClasses = classRepository.getAllClasses()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val origRaces: StateFlow<List<Race>> = combine(_allRaces, _raceQuery) { races, query ->
+        races.filter { !it.isHomebrew }
+            .let { if (query.isBlank()) it else it.filter { r -> r.name.contains(query, ignoreCase = true) } }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val homebrewRaces: StateFlow<List<Race>> = combine(_allRaces, _raceQuery) { races, query ->
+        races.filter { it.isHomebrew }
+            .let { if (query.isBlank()) it else it.filter { r -> r.name.contains(query, ignoreCase = true) } }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val origClasses: StateFlow<List<CharacterClass>> = combine(_allClasses, _classQuery) { classes, query ->
+        classes.filter { !it.isHomebrew }
+            .let { if (query.isBlank()) it else it.filter { c -> c.name.contains(query, ignoreCase = true) } }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val homebrewClasses: StateFlow<List<CharacterClass>> = combine(_allClasses, _classQuery) { classes, query ->
+        classes.filter { it.isHomebrew }
+            .let { if (query.isBlank()) it else it.filter { c -> c.name.contains(query, ignoreCase = true) } }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun setRaceQuery(query: String) { _raceQuery.value = query }
+
+    fun setClassQuery(query: String) { _classQuery.value = query }
 
     // ── Derived: available skills for the chosen class ───────────
     val availableSkills: StateFlow<List<Skill>> = _selectedClass.map { cls ->
@@ -344,7 +376,7 @@ class CharacterCreationWizardViewModel @Inject constructor(
         }
 
         // HP: level 1 = max hit die + CON mod; each additional level = avg + CON mod
-        val sides = cls.hitDice.removePrefix("d").removePrefix("к").toIntOrNull() ?: 8
+        val sides = cls.hitDice.drop(1).toIntOrNull() ?: 8
         val conMod = finalAbilities.getModifier(Ability.CON)
         val hp = (sides + conMod) + (((sides / 2) + 1 + conMod) * (lvl - 1))
 
