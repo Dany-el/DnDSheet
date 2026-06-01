@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,9 +48,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewDynamicColors
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.data.model.character.Character
@@ -111,9 +111,7 @@ fun SpellSlide(
                                 "${DiceRoles.D20.roll}${formatModifier(character.getSpellAttackBonus())}"
                             )
                         },
-                    )
-                    ManageSpellRow(
-                        onManageSpellsClick = { onManageSpellsClick(character.id) }
+                        onNavigate = { onManageSpellsClick(character.id) }
                     )
                 }
             }
@@ -184,33 +182,42 @@ fun SpellCastingRow(
     savingThrow: Int,
     attackBonus: Int,
     onRollClick: () -> Unit,
+    onNavigate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = modifier
-            .fillMaxWidth()
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.fillMaxWidth()
     ) {
-        Surface(
-            shape = MaterialTheme.shapes.large,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-            color = Color.Transparent,
-            modifier = Modifier
-                .height(40.dp)
-                .defaultMinSize(minWidth = 170.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.padding(start = 8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.saving_throw).uppercase(),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
+        SpellStatPill(
+            label = stringResource(R.string.msg_attack),
+            modifier = Modifier.weight(1f),
+            trailingContent = {
+                TextButton(
+                    onClick = onRollClick,
+                    shape = MaterialTheme.shapes.large.copy(
+                        topStart = CornerSize(4.dp),
+                        bottomStart = CornerSize(4.dp)
+                    ),
+                    colors = ButtonDefaults.buttonColors().copy(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary
+                    )
+                ) {
+                    Text(
+                        text = formatModifier(attackBonus),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            }
+        )
+
+        SpellStatPill(
+            label = stringResource(R.string.saving_throw_short),
+            modifier = Modifier.weight(1f),
+            trailingContent = {
                 TextButton(
                     onClick = { },
                     border = BorderStroke(
@@ -237,81 +244,48 @@ fun SpellCastingRow(
                     )
                 }
             }
-        }
-        Spacer(Modifier.width(8.dp))
-        Box(
-            modifier = Modifier
-                .height(40.dp)
-                .defaultMinSize(minWidth = 170.dp)
-        ) {
-            Surface(
-                shape = MaterialTheme.shapes.large,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                color = Color.Transparent,
-                modifier = Modifier.matchParentSize()
-            ) { }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier
-                    .matchParentSize()
-                    .padding(start = 8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.msg_attack).uppercase(),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(end = 8.dp)
-                )
-                TextButton(
-                    onClick = onRollClick,
-                    shape = MaterialTheme.shapes.large.copy(
-                        topStart = CornerSize(4.dp),
-                        bottomStart = CornerSize(4.dp)
-                    ),
-                    colors = ButtonDefaults.buttonColors().copy(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary
-                    ),
-                ) {
-                    Text(
-                        text = formatModifier(attackBonus),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                }
-            }
+        )
 
+        OutlinedIconButton(
+            onClick = onNavigate,
+            shape = RoundedCornerShape(8.dp),
+            modifier = Modifier.size(40.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = stringResource(R.string.manage_spells),
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
 
 @Composable
-fun ManageSpellRow(
-    onManageSpellsClick: () -> Unit,
+private fun SpellStatPill(
+    label: String,
+    modifier: Modifier = Modifier,
+    trailingContent: @Composable (() -> Unit)? = null,
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        color = Color.Transparent,
+        modifier = modifier.height(40.dp)
     ) {
-        TextButton(
-            onClick = onManageSpellsClick,
-            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
-            shape = MaterialTheme.shapes.extraSmall,
-            colors = ButtonDefaults.buttonColors().copy(
-                containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-            ),
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .defaultMinSize(200.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.padding(start = 12.dp)
         ) {
             Text(
-                text = stringResource(R.string.manage_spells).uppercase(),
-                style = MaterialTheme.typography.titleMedium,
+                text = label.uppercase(),
+                style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f)
             )
+            if (trailingContent != null) {
+                trailingContent()
+            }
         }
     }
 }
@@ -598,20 +572,61 @@ fun SpellTag(
 
 @PreviewLightDark
 @PreviewDynamicColors
-@PreviewScreenSizes
 @Composable
-private fun SpellSlidePreview_Light() {
+private fun SpellSlidePreview() {
     DnDSheetTheme {
-        SpellSlide(
-            character = UiUtils.sampleCharacters.first(),
-            spells = UiUtils.sampleSpells,
-            availableFilters = UiUtils.availableFilters,
-            currentFilter = UiUtils.currentFilter,
-            onFilterChange = {},
-            onRollClick = {},
-            onSlotClick = { _, _ -> },
-            onManageSpellsClick = {},
-            onSpellClick = {}
-        )
+        Surface {
+            SpellSlide(
+                character = UiUtils.sampleCharacters.first(),
+                spells = UiUtils.sampleSpells,
+                availableFilters = UiUtils.availableFilters,
+                currentFilter = UiUtils.currentFilter,
+                onFilterChange = {},
+                onRollClick = {},
+                onSlotClick = { _, _ -> },
+                onManageSpellsClick = {},
+                onSpellClick = {}
+            )
+        }
+    }
+}
+
+@Preview(locale = "ru", group = "language")
+@Composable
+private fun SpellSlidePreview_RU() {
+    DnDSheetTheme {
+        Surface {
+            SpellSlide(
+                character = UiUtils.sampleCharacters.first(),
+                spells = UiUtils.sampleSpells,
+                availableFilters = UiUtils.availableFilters,
+                currentFilter = UiUtils.currentFilter,
+                onFilterChange = {},
+                onRollClick = {},
+                onSlotClick = { _, _ -> },
+                onManageSpellsClick = {},
+                onSpellClick = {}
+            )
+        }
+    }
+}
+
+@Preview(locale = "uk", group = "language")
+@Composable
+private fun SpellSlidePreview_UK() {
+    DnDSheetTheme {
+        Surface {
+            SpellSlide(
+                character = UiUtils.sampleCharacters.first(),
+                spells = UiUtils.sampleSpells,
+                availableFilters = UiUtils.availableFilters,
+                currentFilter = UiUtils.currentFilter,
+                onFilterChange = {},
+                onRollClick = {},
+                onSlotClick = { _, _ -> },
+                onManageSpellsClick = {},
+                onSpellClick = {}
+            )
+        }
     }
 }
