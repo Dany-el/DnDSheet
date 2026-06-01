@@ -54,7 +54,7 @@ fun WizardLevelStep(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
                 Text(
                     text = stringResource(R.string.wizard_set_level),
                     style = MaterialTheme.typography.bodyLarge
