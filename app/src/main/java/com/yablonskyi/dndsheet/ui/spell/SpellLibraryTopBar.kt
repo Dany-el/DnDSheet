@@ -120,6 +120,10 @@ fun SpellLibraryTopBar(
                 isLearnMode -> IconButton(onClick = onNavigateBack) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Navigate back")
                 }
+
+                else -> IconButton(onClick = onNavigateBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Navigate back")
+                }
             }
         },
         title = {
