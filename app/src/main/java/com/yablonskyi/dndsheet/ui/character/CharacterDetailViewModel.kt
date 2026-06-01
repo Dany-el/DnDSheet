@@ -43,6 +43,9 @@ class CharacterDetailViewModel @Inject constructor(
     private val _rightSelectedTab = MutableStateFlow(CharacterTab.SPELLS)
     val rightSelectedTab: StateFlow<CharacterTab> = _rightSelectedTab.asStateFlow()
 
+    private val _lessDetails = MutableStateFlow(false)
+    val lessDetails = _lessDetails.asStateFlow()
+
     fun onLeftTabSelected(newTab: CharacterTab) {
         if (newTab == _rightSelectedTab.value) {
             _rightSelectedTab.value = _leftSelectedTab.value
@@ -146,5 +149,9 @@ class CharacterDetailViewModel @Inject constructor(
         )
 
         updateCharacter(restedCharacter)
+    }
+
+    fun toggleDetails() {
+        _lessDetails.value = !_lessDetails.value
     }
 }
