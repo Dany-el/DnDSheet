@@ -11,6 +11,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,10 +37,12 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -51,11 +54,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Surface
@@ -83,11 +88,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -132,6 +135,7 @@ data class CharacterListUiState(
 @Immutable
 data class CharacterListActions(
     val onSearchQueryChange: (String) -> Unit = {},
+    val onToggleListView: () -> Unit = {},
     val onClearSelection: () -> Unit = {},
     val onDeleteSelected: () -> Unit = {},
     val onToggleSelectAll: () -> Unit = {},
@@ -201,8 +205,9 @@ fun SharedTransitionScope.ListOfCharactersScreen(
                         if (pdfFile != null) {
                             sharePdfIntent(context, pdfFile)
                         } else {
-                            Toast.makeText(context, "Failed to generate PDF", Toast.LENGTH_SHORT)
-                                .show()
+                            Toast.makeText(
+                                context, "Failed to generate PDF", Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 } catch (e: Exception) {
@@ -395,7 +400,7 @@ fun CharactersTopAppBar(
                 LaunchedEffect(Unit) { searchFocusRequester.requestFocus() }
             } else if (!uiState.isSelectionMode) {
                 Text(
-                    stringResource(R.string.characters),
+                    stringResource(R.string.sheets),
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Medium),
                     textAlign = if (isWideScreen) TextAlign.Center else TextAlign.Left,
                     modifier = Modifier.fillMaxWidth()
@@ -418,6 +423,17 @@ fun CharactersTopAppBar(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
                         items = listOf(
+                            SlicedMenuItem(
+                                text = when (uiState.listView) {
+                                    ListView.LIST -> stringResource(R.string.grid)
+                                    ListView.GRID -> stringResource(R.string.list)
+                                },
+                                icon = when (uiState.listView) {
+                                    ListView.LIST -> Icons.Default.GridView
+                                    ListView.GRID -> Icons.AutoMirrored.Default.List
+                                },
+                                onClick = actions.onToggleListView
+                            ),
                             SlicedMenuItem(
                                 text = stringResource(R.string.confirm_import),
                                 icon = Icons.Default.Download,
@@ -575,7 +591,6 @@ fun rememberCharacterItemActions(
     actions: CharacterListActions,
     onExportPdf: (Character) -> Unit
 ): CharacterItemActions {
-    val haptics = LocalHapticFeedback.current
     return remember(character, uiState.isSelectionMode, actions, onExportPdf) {
         CharacterItemActions(
             onClick = {
@@ -583,7 +598,6 @@ fun rememberCharacterItemActions(
                 else actions.onCharacterClick(character.id)
             },
             onLongClick = {
-                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                 actions.toggleSelection(character)
             },
             onToggleSelection = { actions.toggleSelection(character) },
@@ -604,10 +618,21 @@ fun SharedTransitionScope.CharacterListItem(
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier
 ) {
-    val animatedColor by animateColorAsState(
+    val animatedContainerColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer
-        else MaterialTheme.colorScheme.surfaceContainerLowest,
+        else MaterialTheme.colorScheme.surfaceVariant,
         label = "cardColorAnimation"
+    )
+
+    val animatedBorderColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
+        else MaterialTheme.colorScheme.onSurfaceVariant,
+        label = "cardColorAnimation"
+    )
+
+    val animatedBorderWidth by animateDpAsState(
+        targetValue = if (isSelected) 1.5.dp else 0.7.dp,
+        label = "cardBorderWidth"
     )
 
     val topCorners by animateDpAsState(
@@ -633,9 +658,13 @@ fun SharedTransitionScope.CharacterListItem(
         bottomEnd = 0.dp
     )
 
-    Card(
-        colors = CardDefaults.cardColors(containerColor = animatedColor),
+    OutlinedCard (
+        colors = CardDefaults.cardColors(containerColor = animatedContainerColor),
         shape = animatedShape,
+        border = BorderStroke(
+            width = animatedBorderWidth,
+            color = animatedBorderColor
+        ),
         modifier = modifier
             .heightIn(min = 120.dp)
             .wrapContentHeight()
@@ -718,10 +747,21 @@ fun SharedTransitionScope.CharacterGridItem(
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier
 ) {
-    val animatedColor by animateColorAsState(
+    val animatedContainerColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer
-        else MaterialTheme.colorScheme.surfaceContainerLowest,
+        else MaterialTheme.colorScheme.surfaceVariant,
         label = "cardColorAnimation"
+    )
+
+    val animatedBorderColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
+        else MaterialTheme.colorScheme.onSurfaceVariant,
+        label = "cardColorAnimation"
+    )
+
+    val animatedBorderWidth by animateDpAsState(
+        targetValue = if (isSelected) 1.5.dp else 0.7.dp,
+        label = "cardBorderWidth"
     )
 
     val imageShape = RoundedCornerShape(
@@ -731,8 +771,12 @@ fun SharedTransitionScope.CharacterGridItem(
         bottomEnd = 0.dp
     )
 
-    Card(
-        colors = CardDefaults.cardColors(containerColor = animatedColor),
+    OutlinedCard (
+        colors = CardDefaults.cardColors(containerColor = animatedContainerColor),
+        border = BorderStroke(
+            width = animatedBorderWidth,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        ),
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
             .combinedClickable(
@@ -923,6 +967,7 @@ private fun ListOfCharactersRoutePreview_LIST() {
                         loadingState = false,
                         searchQuery = "",
                         listView = ListView.LIST,
+                        selectedCharacters = setOf(UiUtils.sampleCharacters.first()),
                         windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
                     ),
                     actions = CharacterListActions(),
