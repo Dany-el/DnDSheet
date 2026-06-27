@@ -17,7 +17,7 @@ android {
         minSdk = 28
         targetSdk = 36
         versionCode = 1
-        versionName = "1.1.0"
+        versionName = "0.1.1-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -90,7 +90,6 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.kotlinx.serialization.json)
 
-//    implementation(libs.pdfbox.android)
     implementation(libs.itextpdf.kernel)
     implementation(libs.itextpdf.io)
     implementation(libs.itextpdf.layout)
