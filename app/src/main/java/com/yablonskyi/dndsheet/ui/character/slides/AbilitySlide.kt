@@ -369,18 +369,6 @@ fun SkillRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(shape)
-                .clickable(
-                    onClick = {
-                        val nextLevel = when (proficiencyLevel) {
-                            ProficiencyLevel.NONE -> ProficiencyLevel.PROFICIENT
-                            ProficiencyLevel.PROFICIENT -> ProficiencyLevel.EXPERT
-                            ProficiencyLevel.EXPERT -> ProficiencyLevel.NONE
-                            else -> ProficiencyLevel.PROFICIENT
-                        }
-
-                        onProficiencyChange(nextLevel)
-                    }
-                )
         ) {
             ProficiencyToggle(
                 level = proficiencyLevel,
