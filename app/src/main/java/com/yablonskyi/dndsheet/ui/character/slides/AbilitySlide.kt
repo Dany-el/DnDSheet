@@ -289,13 +289,7 @@ fun ModifierRow(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.medium)
-                    .clickable(
-                        onClick = {
-                            onProficiencyChange(!isProficient)
-                        }
-                    )
+                modifier = Modifier.clip(MaterialTheme.shapes.medium)
             ) {
                 IconButton(
                     onClick = { onProficiencyChange(!isProficient) },
