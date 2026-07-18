@@ -114,6 +114,8 @@ dependencies {
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.google.http.client.gson)
 
+    implementation(libs.androidx.compose.ui.text.google.fonts)
+
     // Test
     testImplementation(libs.kotlinx.coroutines.test)
 
