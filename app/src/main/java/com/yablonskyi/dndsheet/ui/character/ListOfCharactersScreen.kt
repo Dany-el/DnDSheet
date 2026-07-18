@@ -631,20 +631,9 @@ fun SharedTransitionScope.CharacterListItem(
     modifier: Modifier = Modifier
 ) {
     val animatedContainerColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer
-        else MaterialTheme.colorScheme.surfaceVariant,
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.surfaceContainer,
         label = "cardColorAnimation"
-    )
-
-    val animatedBorderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
-        else MaterialTheme.colorScheme.onSurfaceVariant,
-        label = "cardColorAnimation"
-    )
-
-    val animatedBorderWidth by animateDpAsState(
-        targetValue = if (isSelected) 1.5.dp else 0.dp,
-        label = "cardBorderWidth"
     )
 
     val topCorners by animateDpAsState(
@@ -671,12 +660,8 @@ fun SharedTransitionScope.CharacterListItem(
     )
 
     OutlinedCard (
-        colors = CardDefaults.cardColors(containerColor = animatedContainerColor),
+        colors = CardDefaults.outlinedCardColors(containerColor = animatedContainerColor),
         shape = animatedShape,
-        border = BorderStroke(
-            width = animatedBorderWidth,
-            color = animatedBorderColor
-        ),
         modifier = modifier
             .heightIn(min = 120.dp)
             .wrapContentHeight()
@@ -861,7 +846,7 @@ fun CharacterItemImage(
 ) {
     Surface(
         modifier = modifier.then(if (shape != null) Modifier.clip(shape) else Modifier),
-        color = MaterialTheme.colorScheme.surfaceContainer
+        color = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         if (imagePath != null) {
             AsyncImage(

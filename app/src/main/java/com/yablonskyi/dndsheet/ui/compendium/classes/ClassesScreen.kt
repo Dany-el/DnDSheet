@@ -7,9 +7,6 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.LinearOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.combinedClickable
@@ -26,7 +23,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -47,6 +44,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -401,8 +399,7 @@ fun LazyStaggeredGridScope.CollapsibleClassesList(
     }
 
     if (state.isExpanded) {
-        itemsIndexed(items = classes, key = { _, cls -> cls.id }) { index, cls ->
-            val staggeredDelay = remember(index) { index * 25 }
+        items(items = classes, key = { cls -> cls.id }) { cls ->
 
             ClassCard(
                 cls = cls,
@@ -420,14 +417,6 @@ fun LazyStaggeredGridScope.CollapsibleClassesList(
                 onExport = { onExport(cls) },
                 onDelete = { onDelete(cls) },
                 onToggleSelection = { onToggleSelection(cls.id) },
-                modifier = Modifier.animateItem(
-                    fadeInSpec = tween(
-                        durationMillis = 200,
-                        delayMillis = staggeredDelay,
-                        easing = LinearEasing
-                    ),
-                    placementSpec = tween(durationMillis = 200, easing = LinearOutSlowInEasing)
-                )
             )
         }
     }
@@ -448,13 +437,13 @@ fun ClassCard(
     modifier: Modifier = Modifier
 ) {
     val animatedColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer
-        else MaterialTheme.colorScheme.surfaceContainerLowest,
-        label = "raceCardColor"
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.surfaceContainer,
+        label = "classCardColor"
     )
 
-    Card(
-        colors = CardDefaults.cardColors(containerColor = animatedColor),
+    OutlinedCard (
+        colors = CardDefaults.outlinedCardColors(containerColor = animatedColor),
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
             .combinedClickable(

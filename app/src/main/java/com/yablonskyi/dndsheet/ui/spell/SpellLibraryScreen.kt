@@ -581,14 +581,9 @@ fun SpellLibraryRow(
 
     val animatedColor by animateColorAsState(
         targetValue = if (isSelected || (item.isLearned && isLearnMode))
-            MaterialTheme.colorScheme.secondaryContainer
+            MaterialTheme.colorScheme.primaryContainer
         else MaterialTheme.colorScheme.surfaceContainer,
         label = "cardColorAnimation"
-    )
-
-    val animatedBorderWidth by animateDpAsState(
-        targetValue = if (isSelected || (item.isLearned && isLearnMode)) 1.5.dp else 0.7.dp,
-        label = "cardBorderWidth"
     )
 
     val topCorners by animateDpAsState(
@@ -623,7 +618,6 @@ fun SpellLibraryRow(
     OutlinedCard(
         shape = animatedShape,
         colors = CardDefaults.outlinedCardColors(containerColor = animatedColor),
-        border = BorderStroke(animatedBorderWidth, MaterialTheme.colorScheme.outlineVariant),
         modifier = modifier
             .fillMaxWidth()
             .clip(animatedShape)
