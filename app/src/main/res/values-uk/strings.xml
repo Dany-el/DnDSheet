@@ -350,6 +350,16 @@
     <string name="edit_class">Редагування класу</string>
     <string name="class_name">Назва</string>
     <string name="q_delete_class">Видалити клас</string>
+    <string name="update_available">Доступне оновлення %s</string>
+    <string name="update_now">Оновити зараз</string>
+    <string name="later">Пізніше</string>
+    <string name="downloading_update">Завантаження оновлення…</string>
+    <string name="update_failed">Помилка оновлення</string>
+    <string name="update_failed_message">Не вдалося завантажити оновлення. Перевірте підключення та спробуйте ще раз.</string>
+    <string name="ok">ОК</string>
+    <string name="check_for_updates">Перевірити наявність оновлень</string>
+    <string name="update_ready">Готово до встановлення</string>
+    <string name="retry">Повторити</string>
 
     <plurals name="wizard_skill_choices">
         <item quantity="one">%d навичка</item>

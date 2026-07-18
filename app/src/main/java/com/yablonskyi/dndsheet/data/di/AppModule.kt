@@ -16,6 +16,7 @@ import com.yablonskyi.dndsheet.data.repository.ClassRepositoryImpl
 import com.yablonskyi.dndsheet.data.repository.RaceRepositoryImpl
 import com.yablonskyi.dndsheet.data.repository.SpellRepositoryImpl
 import com.yablonskyi.dndsheet.data.rulebook.BuiltInRulebookLoader
+import com.yablonskyi.dndsheet.data.update.UpdateRepository
 import com.yablonskyi.dndsheet.domain.repository.AttackRepository
 import com.yablonskyi.dndsheet.domain.repository.CharacterRepository
 import com.yablonskyi.dndsheet.domain.repository.ClassRepository
@@ -115,6 +116,12 @@ object AppModule {
         loader: BuiltInRulebookLoader,
         dao: ClassDao
     ): ClassRepository = ClassRepositoryImpl(loader, dao)
+
+    @Provides
+    @Singleton
+    fun provideUpdateRepository(
+        @ApplicationContext context: Context
+    ) = UpdateRepository(context)
 }
 
 val MIGRATION_1_2 = object : Migration(1, 2) {

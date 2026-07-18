@@ -16,10 +16,14 @@ android {
         applicationId = "com.yablonskyi.dndsheet"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.1-beta"
+        versionCode = 3
+        versionName = "0.1.2-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     signingConfigs {

@@ -353,6 +353,16 @@
     <string name="edit_class">Class Editing</string>
     <string name="class_name">Name</string>
     <string name="q_delete_class">Delete Class</string>
+    <string name="update_available">Update %s available</string>
+    <string name="update_now">Update now</string>
+    <string name="later">Later</string>
+    <string name="downloading_update">Downloading update…</string>
+    <string name="update_failed">Update failed</string>
+    <string name="update_failed_message">Could not download the update. Check your connection and try again.</string>
+    <string name="ok">Ok</string>
+    <string name="check_for_updates">Check for updates</string>
+    <string name="update_ready">Ready to install</string>
+    <string name="retry">Retry</string>
 
     <plurals name="wizard_skill_choices">
         <item quantity="one">%d skill</item>

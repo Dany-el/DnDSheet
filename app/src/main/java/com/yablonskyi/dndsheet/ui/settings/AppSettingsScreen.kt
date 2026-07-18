@@ -7,6 +7,7 @@ import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,13 +23,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SystemUpdate
+import androidx.compose.material.icons.filled.Update
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -37,6 +45,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -56,12 +66,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -70,8 +82,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.api.services.drive.DriveScopes
+import com.yablonskyi.dndsheet.BuildConfig
 import com.yablonskyi.dndsheet.R
+import com.yablonskyi.dndsheet.data.update.AppUpdate
 import com.yablonskyi.dndsheet.data.worker.scheduleDailyBackup
+import com.yablonskyi.dndsheet.ui.update.UpdateViewModel
 import com.yablonskyi.dndsheet.ui.utils.AppLanguage
 import com.yablonskyi.dndsheet.ui.utils.AppTheme
 import kotlinx.coroutines.launch
@@ -90,10 +105,13 @@ enum class ActiveSettingsSheet {
 @Composable
 fun AppSettingsScreen(
     viewModel: AppSettingsViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
+    updateViewModel: UpdateViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val currentLanguageState by viewModel.language.collectAsStateWithLifecycle()
     val isBackupAvailable by viewModel.isBackupAvailable.collectAsStateWithLifecycle()
+
+    val updateState by updateViewModel.state.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
 
@@ -142,7 +160,6 @@ fun AppSettingsScreen(
                 title = {
                     Text(
                         stringResource(R.string.settings),
-                        fontWeight = FontWeight.SemiBold,
                         textAlign = if (isWideScreen) TextAlign.Center else TextAlign.Left,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -183,6 +200,16 @@ fun AppSettingsScreen(
                     title = stringResource(R.string.language),
                     currentValue = stringResource(language.label),
                     onClick = { activeSheet = ActiveSettingsSheet.LANGUAGE }
+                )
+
+                HorizontalDivider()
+
+                // UPDATES
+                UpdatesRow(
+                    updateState = updateState,
+                    onDismiss = updateViewModel::dismiss,
+                    onDownload = { update -> updateViewModel.download(update) },
+                    onCheckUpdate = updateViewModel::checkForUpdate
                 )
 
                 HorizontalDivider()
@@ -323,6 +350,13 @@ fun AppSettingsScreen(
                     }
                 }
                 HorizontalDivider()
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = BuildConfig.VERSION_NAME,
+                    style = MaterialTheme.typography.labelMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
@@ -495,6 +529,143 @@ fun <T> SelectionBottomSheet(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+fun UpdatesRow(
+    updateState: UpdateViewModel.UpdateState,
+    onCheckUpdate: () -> Unit,
+    onDownload: (AppUpdate) -> Unit,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .animateContentSize()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(
+                    imageVector = when (updateState) {
+                        is UpdateViewModel.UpdateState.Available -> Icons.Default.SystemUpdate
+                        is UpdateViewModel.UpdateState.Error -> Icons.Default.ErrorOutline
+                        is UpdateViewModel.UpdateState.ReadyToInstall -> Icons.Default.CheckCircle
+                        else -> Icons.Default.Update
+                    },
+                    contentDescription = null,
+                    tint = when (updateState) {
+                        is UpdateViewModel.UpdateState.Available -> MaterialTheme.colorScheme.primary
+                        is UpdateViewModel.UpdateState.Error -> MaterialTheme.colorScheme.error
+                        is UpdateViewModel.UpdateState.ReadyToInstall -> Color(0xff529c64)
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+
+                Column {
+                    Text(
+                        text = when (updateState) {
+                            is UpdateViewModel.UpdateState.Idle -> stringResource(R.string.check_for_updates)
+                            is UpdateViewModel.UpdateState.Available -> stringResource(
+                                R.string.update_available,
+                                updateState.update.versionName
+                            )
+
+                            is UpdateViewModel.UpdateState.Downloading -> stringResource(R.string.downloading_update)
+                            is UpdateViewModel.UpdateState.ReadyToInstall -> stringResource(R.string.update_ready)
+                            is UpdateViewModel.UpdateState.Error -> stringResource(R.string.update_failed)
+                        },
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    if (updateState is UpdateViewModel.UpdateState.Available) {
+                        Text(
+                            text = updateState.update.releaseNotes,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    if (updateState is UpdateViewModel.UpdateState.Downloading) {
+                        Text(
+                            text = "${(updateState.progress * 100).toInt()}%",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            // Trailing action
+            when (updateState) {
+                is UpdateViewModel.UpdateState.Idle -> {
+                    IconButton(onClick = onCheckUpdate) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = stringResource(R.string.check_for_updates)
+                        )
+                    }
+                }
+
+                is UpdateViewModel.UpdateState.Available -> {
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        IconButton(onClick = onDismiss) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = stringResource(R.string.later),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        IconButton(onClick = { onDownload(updateState.update) }) {
+                            Icon(
+                                Icons.Default.Download,
+                                contentDescription = stringResource(R.string.update_now),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+
+                is UpdateViewModel.UpdateState.Error -> {
+                    IconButton(onClick = onCheckUpdate) {
+                        Icon(
+                            Icons.Default.Refresh,
+                            contentDescription = stringResource(R.string.retry),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+
+                else -> {}
+            }
+        }
+
+        // Progress bar — only visible while downloading
+        if (updateState is UpdateViewModel.UpdateState.Downloading) {
+            LinearProgressIndicator(
+                progress = { updateState.progress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 12.dp)
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp))
+            )
         }
     }
 }

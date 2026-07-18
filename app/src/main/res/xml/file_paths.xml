@@ -6,4 +6,5 @@
     <cache-path
         name="shared_pdfs"
         path="pdf/" />
+    <external-files-path name="updates" path="updates/" />
 </paths>

@@ -74,7 +74,6 @@ import com.yablonskyi.dndsheet.ui.utils.rememberDebouncedClick
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable
 fun MainScreen(
-    incomingUri: Uri?,
     appState: AppSettingsState,
     globalSpellLibraryViewModel: GlobalSpellLibraryViewModel = hiltViewModel(),
     characterListViewModel: CharacterListViewModel = hiltViewModel()
@@ -88,22 +87,6 @@ fun MainScreen(
 
     var spellsToImport by remember { mutableStateOf<List<Spell>?>(null) }
     var showImportDialog by remember { mutableStateOf(false) }
-
-    LaunchedEffect(incomingUri) {
-        if (incomingUri != null) {
-            val result = importSpellsFromJson(context, incomingUri)
-            result.onSuccess { spells ->
-                spellsToImport = spells
-                showImportDialog = true
-            }.onFailure { error ->
-                Toast.makeText(
-                    context,
-                    resources.getString(R.string.failed_to_read_file),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
 
     if (showImportDialog) {
         spellsToImport?.let { spells ->
