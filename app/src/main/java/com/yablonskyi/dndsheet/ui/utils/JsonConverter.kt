@@ -71,7 +71,7 @@ fun shareSpellAsJsonFile(context: Context, spell: Spell) {
 
             file.writeText(jsonString)
 
-            val authority = "${context.packageName}.fileprovider"
+            val authority = "${context.packageName}.provider"
             val uri = FileProvider.getUriForFile(context, authority, file)
 
             withContext(Dispatchers.Main) {

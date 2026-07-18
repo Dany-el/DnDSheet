@@ -343,6 +343,16 @@
     <string name="edit_class">Редактирование класса</string>
     <string name="class_name">Название</string>
     <string name="q_delete_class">Удалить класс</string>
+    <string name="update_available">Доступно обновление %s</string>
+    <string name="update_now">Обновить сейчас</string>
+    <string name="later">Позже</string>
+    <string name="downloading_update">Загрузка обновления…</string>
+    <string name="update_failed">Ошибка обновления</string>
+    <string name="update_failed_message">Не удалось загрузить обновление. Проверьте подключение и повторите попытку.</string>
+    <string name="ok">ОК</string>
+    <string name="check_for_updates">Проверить наличие обновлений</string>
+    <string name="update_ready">Готово к установке</string>
+    <string name="retry">Повторить</string>
 
     <plurals name="wizard_skill_choices">
         <item quantity="one">%d навык</item>

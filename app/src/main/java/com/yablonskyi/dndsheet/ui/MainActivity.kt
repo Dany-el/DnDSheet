@@ -1,17 +1,11 @@
 package com.yablonskyi.dndsheet.ui
 
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -35,14 +29,6 @@ class MainActivity : AppCompatActivity() {
             viewModel.uiState.value.isLoading
         }
 
-        val incomingUri: Uri? =
-            intent.data ?: if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-            } else {
-                @Suppress("DEPRECATION")
-                intent.getParcelableExtra(Intent.EXTRA_STREAM)
-            }
-
         setContent {
             val appState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -54,7 +40,7 @@ class MainActivity : AppCompatActivity() {
                 }
             ) {
                 if (!appState.isLoading) {
-                    MainScreen(incomingUri, appState)
+                    MainScreen(appState)
                 }
             }
         }

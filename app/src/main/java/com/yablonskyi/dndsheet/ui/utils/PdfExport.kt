@@ -514,7 +514,7 @@ object PdfExporter {
 fun sharePdfIntent(context: Context, file: File) {
     val uri = FileProvider.getUriForFile(
         context,
-        "${context.packageName}.fileprovider",
+        "${context.packageName}.provider",
         file
     )
 
