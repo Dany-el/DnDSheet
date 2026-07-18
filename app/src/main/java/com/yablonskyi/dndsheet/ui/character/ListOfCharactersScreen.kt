@@ -91,6 +91,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -399,12 +400,23 @@ fun CharactersTopAppBar(
                 )
                 LaunchedEffect(Unit) { searchFocusRequester.requestFocus() }
             } else if (!uiState.isSelectionMode) {
-                Text(
-                    stringResource(R.string.sheets),
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Medium),
-                    textAlign = if (isWideScreen) TextAlign.Center else TextAlign.Left,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.mipmap.icon),
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp),
+                        tint = Color.Unspecified
+                    )
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Medium),
+                        textAlign = if (isWideScreen) TextAlign.Center else TextAlign.Left,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         },
         actions = {
@@ -631,7 +643,7 @@ fun SharedTransitionScope.CharacterListItem(
     )
 
     val animatedBorderWidth by animateDpAsState(
-        targetValue = if (isSelected) 1.5.dp else 0.7.dp,
+        targetValue = if (isSelected) 1.5.dp else 0.dp,
         label = "cardBorderWidth"
     )
 

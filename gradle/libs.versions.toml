@@ -35,6 +35,7 @@ ksp = "2.3.2"
 coil = "2.7.0"
 activity-ktx = "1.13.0"
 exifinterface = "1.4.2"
+uiTextGoogleFonts = "1.11.3"
 workRuntimeKtx = "2.11.2"
 animation = "1.10.6"
 material3 = "1.4.0"
@@ -44,6 +45,7 @@ foundation = "1.11.1"
 androidx-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout", version.ref = "adaptiveLayout" }
 androidx-adaptive = { module = "androidx.compose.material3.adaptive:adaptive", version.ref = "adaptive" }
 androidx-adaptive-navigation = { module = "androidx.compose.material3.adaptive:adaptive-navigation", version.ref = "adaptive" }
+androidx-compose-ui-text-google-fonts = { module = "androidx.compose.ui:ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
