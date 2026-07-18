@@ -1,7 +1,6 @@
 package com.yablonskyi.dndsheet.ui
 
 import android.annotation.SuppressLint
-import android.net.Uri
 import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -41,7 +40,6 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldLayout
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,7 +66,6 @@ import com.yablonskyi.dndsheet.ui.navigation.DnDNavGraph
 import com.yablonskyi.dndsheet.ui.navigation.ListOfCharactersRoute
 import com.yablonskyi.dndsheet.ui.settings.AppSettingsState
 import com.yablonskyi.dndsheet.ui.spell.GlobalSpellLibraryViewModel
-import com.yablonskyi.dndsheet.ui.utils.importSpellsFromJson
 import com.yablonskyi.dndsheet.ui.utils.rememberDebouncedClick
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")

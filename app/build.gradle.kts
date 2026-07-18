@@ -10,12 +10,12 @@ plugins {
 
 android {
     namespace = "com.yablonskyi.dndsheet"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.yablonskyi.dndsheet"
         minSdk = 28
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 3
         versionName = "0.1.2-beta"
 
@@ -58,6 +58,7 @@ android {
             excludes += "META-INF/DEPENDENCIES"
         }
     }
+    buildToolsVersion = "37.0.0"
 }
 
 dependencies {

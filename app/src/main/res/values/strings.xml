@@ -224,7 +224,7 @@
     <string name="alert_dialog_spell_confirm_msg">Do you want to import %1$d spells?</string>
     <string name="select_all_spells">Select All</string>
     <string name="unselect_all_spells">Unselect All</string>
-    <string name="q_confirm_text" >Are you sure you want to delete %1$s? This action cannot be undone.</string>
+    <string name="q_confirm_text">Are you sure you want to delete %1$s? This action cannot be undone.</string>
     <string name="range_self">Self</string>
     <string name="range_touch">Touch</string>
     <string name="range_distance">Distance</string>
@@ -359,7 +359,7 @@
     <string name="downloading_update">Downloading update…</string>
     <string name="update_failed">Update failed</string>
     <string name="update_failed_message">Could not download the update. Check your connection and try again.</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="check_for_updates">Check for updates</string>
     <string name="update_ready">Ready to install</string>
     <string name="retry">Retry</string>
