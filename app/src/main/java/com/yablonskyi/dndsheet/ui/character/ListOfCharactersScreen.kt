@@ -745,14 +745,8 @@ fun SharedTransitionScope.CharacterGridItem(
     modifier: Modifier = Modifier
 ) {
     val animatedContainerColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.secondaryContainer
-        else MaterialTheme.colorScheme.surfaceVariant,
-        label = "cardColorAnimation"
-    )
-
-    val animatedBorderColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
-        else MaterialTheme.colorScheme.onSurfaceVariant,
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer
+        else MaterialTheme.colorScheme.surfaceContainer,
         label = "cardColorAnimation"
     )
 
@@ -769,7 +763,7 @@ fun SharedTransitionScope.CharacterGridItem(
     )
 
     OutlinedCard (
-        colors = CardDefaults.cardColors(containerColor = animatedContainerColor),
+        colors = CardDefaults.outlinedCardColors(containerColor = animatedContainerColor),
         border = BorderStroke(
             width = animatedBorderWidth,
             color = MaterialTheme.colorScheme.onSurfaceVariant
