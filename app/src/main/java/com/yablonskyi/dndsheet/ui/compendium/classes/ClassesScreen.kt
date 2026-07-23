@@ -334,7 +334,7 @@ fun ClassesTopAppBar(
             } else if (!uiState.isSelectionMode) {
                 Text(
                     text = stringResource(R.string.classes),
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Medium),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
                     textAlign = if (isWideScreen) TextAlign.Center else TextAlign.Left,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -438,7 +438,7 @@ fun ClassCard(
 ) {
     val animatedColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceContainer,
+        else MaterialTheme.colorScheme.surfaceContainerHighest,
         label = "classCardColor"
     )
 
