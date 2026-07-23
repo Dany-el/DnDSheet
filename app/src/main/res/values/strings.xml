@@ -363,6 +363,7 @@
     <string name="check_for_updates">Check for updates</string>
     <string name="update_ready">Ready to install</string>
     <string name="retry">Retry</string>
+    <string name="placeholder_char_name">John Watson</string>
 
     <plurals name="wizard_skill_choices">
         <item quantity="one">%d skill</item>

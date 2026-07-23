@@ -360,6 +360,7 @@
     <string name="check_for_updates">Перевірити наявність оновлень</string>
     <string name="update_ready">Готово до встановлення</string>
     <string name="retry">Повторити</string>
+    <string name="placeholder_char_name">Джон Ватсон</string>
 
     <plurals name="wizard_skill_choices">
         <item quantity="one">%d навичка</item>

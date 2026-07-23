@@ -353,6 +353,7 @@
     <string name="check_for_updates">Проверить наличие обновлений</string>
     <string name="update_ready">Готово к установке</string>
     <string name="retry">Повторить</string>
+    <string name="placeholder_char_name">Джон Ватсон</string>
 
     <plurals name="wizard_skill_choices">
         <item quantity="one">%d навык</item>
