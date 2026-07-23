@@ -23,8 +23,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.yablonskyi.dndsheet.R
+import com.yablonskyi.dndsheet.ui.theme.DnDSheetTheme
 
 @Composable
 fun WizardNameStep(
@@ -65,16 +67,24 @@ fun WizardNameStep(
             value = name,
             onValueChange = onNameChange,
             label = { Text(stringResource(R.string.wizard_name_label)) },
+            placeholder = { Text(stringResource(R.string.placeholder_char_name))},
             singleLine = true,
-            isError = name.isBlank(),
-            supportingText = {
-                if (name.isBlank()) Text(stringResource(R.string.wizard_name_error))
-            },
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.Words,
                 imeAction = ImeAction.Done
             )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun WizardNameStepPreview() {
+    DnDSheetTheme {
+        WizardNameStep(
+            name = "",
+            onNameChange = {}
         )
     }
 }
