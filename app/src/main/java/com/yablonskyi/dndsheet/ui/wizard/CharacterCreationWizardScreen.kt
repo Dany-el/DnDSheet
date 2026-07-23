@@ -81,7 +81,6 @@ fun CharacterCreationWizardScreen(
     val rollIndexAssignments by viewModel.rollIndexAssignments.collectAsStateWithLifecycle()
     val pendingRollIndex by viewModel.pendingRollIndex.collectAsStateWithLifecycle()
     val baseAbilityBlock by viewModel.baseAbilityBlock.collectAsStateWithLifecycle()
-    val customLevelEnabled by viewModel.customLevelEnabled.collectAsStateWithLifecycle()
     val level by viewModel.level.collectAsStateWithLifecycle()
     val calculatedHp by viewModel.calculatedHp.collectAsStateWithLifecycle()
 
@@ -183,10 +182,8 @@ fun CharacterCreationWizardScreen(
 
                 WizardStep.LEVEL -> WizardLevelStep(
                     selectedClass = selectedClass,
-                    customLevelEnabled = customLevelEnabled,
                     level = level,
                     calculatedHp = calculatedHp,
-                    onToggleCustomLevel = viewModel::setCustomLevelEnabled,
                     onLevelChange = viewModel::setLevel,
                 )
             }
