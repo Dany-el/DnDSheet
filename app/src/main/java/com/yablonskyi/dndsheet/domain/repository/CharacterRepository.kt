@@ -9,6 +9,8 @@ interface CharacterRepository {
 
     suspend fun insertCharacters(sheets: List<CharacterSheet>)
 
+    suspend fun restoreCharacters(sheets: List<CharacterSheet>)
+
     suspend fun updateCharacter(character: Character)
 
     suspend fun deleteCharacter(character: Character)

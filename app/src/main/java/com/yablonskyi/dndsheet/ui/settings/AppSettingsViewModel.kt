@@ -196,7 +196,7 @@ class AppSettingsViewModel @Inject constructor(
                                 character = sheet.character.copy(imagePath = newLocalPath)
                             )
                         }
-                        charRepository.insertCharacters(restoredSheets)
+                        charRepository.restoreCharacters(restoredSheets)
                     }
                     val currentTime = LocalDateTime.now().format(
                         DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")

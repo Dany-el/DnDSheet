@@ -25,35 +25,14 @@ class CharacterRepositoryImpl @Inject constructor(
 
     override suspend fun insertCharacters(sheets: List<CharacterSheet>) {
         database.withTransaction {
+            insertSheetsInternal(sheets)
+        }
+    }
 
+    override suspend fun restoreCharacters(sheets: List<CharacterSheet>) {
+        database.withTransaction {
             characterDao.deleteAllCharacters()
-
-            sheets.forEach { sheet ->
-
-                val newCharacter = sheet.character.copy(id = 0)
-                val newCharId = characterDao.insertCharacter(newCharacter)
-
-                val newAttacks = sheet.attacks.map { oldAttack ->
-                    oldAttack.copy(attackId = 0, characterId = newCharId)
-                }
-                attackDao.insertAttacks(newAttacks)
-
-                sheet.spells.forEach { oldSpell ->
-                    val newSpell = oldSpell.copy(spellId = 0)
-                    var newSpellId = spellDao.insertSpell(newSpell)
-
-                    if (newSpellId == -1L) {
-                        newSpellId = spellDao.getSpellIdByName(newSpell.name)
-                            ?: throw IllegalStateException("Spell should exist but ID not found")
-                    }
-
-                    val crossRef = CharacterSpellCrossRef(
-                        characterId = newCharId,
-                        spellId = newSpellId
-                    )
-                    spellDao.assignSpellToCharacter(crossRef)
-                }
-            }
+            insertSheetsInternal(sheets)
         }
     }
 
@@ -87,5 +66,29 @@ class CharacterRepositoryImpl @Inject constructor(
 
     override suspend fun getAllCharacterSheets(): List<CharacterSheet> {
         return characterDao.getAllCharacterSheets()
+    }
+
+    private suspend fun insertSheetsInternal(sheets: List<CharacterSheet>) {
+        sheets.forEach { sheet ->
+            val newCharacter = sheet.character.copy(id = 0)
+            val newCharId = characterDao.insertCharacter(newCharacter)
+
+            val newAttacks = sheet.attacks.map { it.copy(attackId = 0, characterId = newCharId) }
+            attackDao.insertAttacks(newAttacks)
+
+            sheet.spells.forEach { oldSpell ->
+                val newSpell = oldSpell.copy(spellId = 0)
+                var newSpellId = spellDao.insertSpell(newSpell)
+
+                if (newSpellId == -1L) {
+                    newSpellId = spellDao.getSpellIdByName(newSpell.name)
+                        ?: throw IllegalStateException("Spell should exist but ID not found")
+                }
+
+                spellDao.assignSpellToCharacter(
+                    CharacterSpellCrossRef(characterId = newCharId, spellId = newSpellId)
+                )
+            }
+        }
     }
 }
