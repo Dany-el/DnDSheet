@@ -339,7 +339,7 @@ fun RacesTopAppBar(
             } else if (!uiState.isSelectionMode) {
                 Text(
                     text = stringResource(R.string.races),
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Medium),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
                     textAlign = if (isWideScreen) TextAlign.Center else TextAlign.Left,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -469,7 +469,6 @@ fun HeaderItem(
                     )
                 }
             }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         }
     }
 }
@@ -490,7 +489,7 @@ fun RaceCard(
 ) {
     val animatedColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceContainer,
+        else MaterialTheme.colorScheme.surfaceContainerHighest,
         label = "raceCardColor"
     )
 

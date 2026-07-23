@@ -27,7 +27,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.NoPhotography
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -561,10 +561,10 @@ fun CharacterProfilePicture(
             )
         } else {
             Icon(
-                imageVector = Icons.Default.Person,
+                imageVector = Icons.Default.NoPhotography,
                 contentDescription = "Add Photo",
                 modifier = Modifier
-                    .padding(24.dp)
+                    .padding(32.dp)
                     .fillMaxSize()
             )
         }

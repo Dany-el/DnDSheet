@@ -7,7 +7,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,6 +53,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -357,6 +357,7 @@ fun SpellLibraryScreen(
 
     showBottomSheet?.let { spell ->
         ModalBottomSheet(
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             onDismissRequest = { showBottomSheet = null }
         ) {
             SpellInfoSheet(
@@ -582,7 +583,7 @@ fun SpellLibraryRow(
     val animatedColor by animateColorAsState(
         targetValue = if (isSelected || (item.isLearned && isLearnMode))
             MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceContainer,
+        else MaterialTheme.colorScheme.surfaceContainerHighest,
         label = "cardColorAnimation"
     )
 

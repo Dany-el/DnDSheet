@@ -11,20 +11,22 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -44,7 +46,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.NoPhotography
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
@@ -54,13 +56,11 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Surface
@@ -412,6 +412,7 @@ fun CharactersTopAppBar(
                     )
                     Text(
                         text = stringResource(R.string.app_name),
+                        fontWeight = FontWeight.SemiBold,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Medium),
                         textAlign = if (isWideScreen) TextAlign.Center else TextAlign.Left,
                         modifier = Modifier.fillMaxWidth()
@@ -525,7 +526,7 @@ fun SharedTransitionScope.CharactersList(
             end = 8.dp,
             bottom = 8.dp + fabSpacing
         ),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier.widthIn(max = 840.dp)
     ) {
         itemsIndexed(uiState.characters, key = { _, item -> item.id }) { index, character ->
@@ -574,8 +575,8 @@ fun SharedTransitionScope.CharactersGrid(
             end = 8.dp,
             bottom = 8.dp + fabSpacing
         ),
-        verticalItemSpacing = 4.dp,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalItemSpacing = 8.dp,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier.widthIn(max = 840.dp)
     ) {
         items(uiState.characters, key = { it.id }) { character ->
@@ -632,7 +633,7 @@ fun SharedTransitionScope.CharacterListItem(
 ) {
     val animatedContainerColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceContainer,
+        else MaterialTheme.colorScheme.surfaceContainerHighest,
         label = "cardColorAnimation"
     )
 
@@ -659,11 +660,11 @@ fun SharedTransitionScope.CharacterListItem(
         bottomEnd = 0.dp
     )
 
-    OutlinedCard (
-        colors = CardDefaults.outlinedCardColors(containerColor = animatedContainerColor),
+    Card(
+        colors = CardDefaults.cardColors(containerColor = animatedContainerColor),
         shape = animatedShape,
         modifier = modifier
-            .heightIn(min = 120.dp)
+            .height(140.dp)
             .wrapContentHeight()
             .clip(animatedShape)
             .combinedClickable(
@@ -680,7 +681,8 @@ fun SharedTransitionScope.CharacterListItem(
                 imagePath = character.imagePath,
                 shape = imageShape,
                 modifier = Modifier
-                    .size(120.dp)
+                    .width(120.dp)
+                    .height(140.dp)
                     .sharedBounds(
                         sharedContentState = rememberSharedContentState(key = "image_${character.id}"),
                         animatedVisibilityScope = animatedVisibilityScope,
@@ -690,6 +692,7 @@ fun SharedTransitionScope.CharacterListItem(
             )
 
             Column(
+                verticalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(8.dp)
@@ -724,11 +727,12 @@ fun SharedTransitionScope.CharacterListItem(
                     race = character.race,
                     charClass = character.charClass,
                     level = character.level,
-                    classRaceModifier = Modifier.sharedBounds(
-                        sharedContentState = rememberSharedContentState(key = "class_${character.id}"),
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
-                    )
+                    classRaceModifier = Modifier
+                        .sharedBounds(
+                            sharedContentState = rememberSharedContentState(key = "class_${character.id}"),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
+                        )
                 )
             }
         }
@@ -746,13 +750,8 @@ fun SharedTransitionScope.CharacterGridItem(
 ) {
     val animatedContainerColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceContainer,
+        else MaterialTheme.colorScheme.surfaceContainerHighest,
         label = "cardColorAnimation"
-    )
-
-    val animatedBorderWidth by animateDpAsState(
-        targetValue = if (isSelected) 1.5.dp else 0.7.dp,
-        label = "cardBorderWidth"
     )
 
     val imageShape = RoundedCornerShape(
@@ -762,12 +761,8 @@ fun SharedTransitionScope.CharacterGridItem(
         bottomEnd = 0.dp
     )
 
-    OutlinedCard (
-        colors = CardDefaults.outlinedCardColors(containerColor = animatedContainerColor),
-        border = BorderStroke(
-            width = animatedBorderWidth,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        ),
+    Card(
+        colors = CardDefaults.cardColors(containerColor = animatedContainerColor),
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
             .combinedClickable(
@@ -817,6 +812,7 @@ fun SharedTransitionScope.CharacterGridItem(
                         resizeMode = SharedTransitionScope.ResizeMode.RemeasureToBounds
                     )
                 )
+                Spacer(Modifier.height(16.dp))
                 CharacterMetadata(
                     race = character.race,
                     charClass = character.charClass,
@@ -840,7 +836,7 @@ fun CharacterItemImage(
 ) {
     Surface(
         modifier = modifier.then(if (shape != null) Modifier.clip(shape) else Modifier),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = MaterialTheme.colorScheme.surfaceContainerHigh
     ) {
         if (imagePath != null) {
             AsyncImage(
@@ -851,10 +847,10 @@ fun CharacterItemImage(
             )
         } else {
             Icon(
-                imageVector = Icons.Default.Person,
+                imageVector = Icons.Default.NoPhotography,
                 contentDescription = "Fallback profile",
                 modifier = Modifier
-                    .padding(24.dp)
+                    .padding(48.dp)
                     .fillMaxSize()
             )
         }
@@ -930,19 +926,22 @@ fun CharacterMetadata(
     val characterInfo = remember(race, charClass) {
         listOf(race, charClass).filter { it.isNotBlank() }.joinToString(" — ")
     }
-    if (characterInfo.isNotBlank()) {
+    Column(modifier = modifier) {
+        if (characterInfo.isNotBlank()) {
+            Text(
+                text = characterInfo,
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = classRaceModifier
+            )
+        }
+        Spacer(Modifier.height(8.dp))
         Text(
-            text = characterInfo,
-            style = MaterialTheme.typography.labelLarge,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = classRaceModifier
+            text = "${stringResource(R.string.spell_level)} $level",
+            style = MaterialTheme.typography.labelLarge
         )
     }
-    Text(
-        text = "${stringResource(R.string.spell_level)} $level",
-        style = MaterialTheme.typography.labelLarge
-    )
 }
 
 @PreviewLightDark
@@ -958,6 +957,30 @@ private fun ListOfCharactersRoutePreview_LIST() {
                         loadingState = false,
                         searchQuery = "",
                         listView = ListView.LIST,
+                        selectedCharacters = setOf(UiUtils.sampleCharacters.first()),
+                        windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
+                    ),
+                    actions = CharacterListActions(),
+                    animatedVisibilityScope = this
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@PreviewDynamicColors
+@Composable
+private fun ListOfCharactersRoutePreview_GRID() {
+    DnDSheetTheme {
+        SharedTransitionLayout {
+            AnimatedVisibility(true) {
+                ListOfCharactersScreen(
+                    uiState = CharacterListUiState(
+                        characters = UiUtils.sampleCharacters,
+                        loadingState = false,
+                        searchQuery = "",
+                        listView = ListView.GRID,
                         selectedCharacters = setOf(UiUtils.sampleCharacters.first()),
                         windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
                     ),

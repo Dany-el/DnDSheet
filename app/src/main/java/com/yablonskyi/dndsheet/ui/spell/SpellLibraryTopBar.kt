@@ -149,6 +149,7 @@ fun SpellLibraryTopBar(
                     text = stringResource(
                         if (isLearnMode) R.string.spell_selection else R.string.msg_spell_library
                     ),
+                    fontWeight = FontWeight.SemiBold,
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Medium
                     ),

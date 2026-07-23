@@ -30,6 +30,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.NoPhotography
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.Settings
@@ -139,7 +140,7 @@ fun CharacterTopAppBar(
                         )
                     } else {
                         Icon(
-                            imageVector = Icons.Default.Person,
+                            imageVector = Icons.Default.NoPhotography,
                             contentDescription = "Add Photo",
                             modifier = Modifier
                                 .padding(12.dp)

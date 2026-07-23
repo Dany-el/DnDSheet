@@ -160,6 +160,7 @@ fun AppSettingsScreen(
                 title = {
                     Text(
                         stringResource(R.string.settings),
+                        fontWeight = FontWeight.SemiBold,
                         textAlign = if (isWideScreen) TextAlign.Center else TextAlign.Left,
                         modifier = Modifier.fillMaxWidth()
                     )

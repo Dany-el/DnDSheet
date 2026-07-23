@@ -66,7 +66,7 @@ fun CompendiumScreen(
                     Text(
                         text = stringResource(R.string.compendium),
                         style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.SemiBold
                         ),
                         textAlign = if (isWideScreen) TextAlign.Center else TextAlign.Left,
                         modifier = Modifier.fillMaxWidth()
@@ -130,7 +130,7 @@ private fun CompendiumCard(
     OutlinedCard(
         onClick = onClick,
         colors = CardDefaults.outlinedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
         ),
         modifier = modifier.fillMaxWidth()
     ) {
