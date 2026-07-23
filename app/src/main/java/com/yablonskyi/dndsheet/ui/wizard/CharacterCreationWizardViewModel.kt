@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.collections.filter
 import kotlin.math.floor
 
 @HiltViewModel
@@ -123,27 +122,61 @@ class CharacterCreationWizardViewModel @Inject constructor(
 
     val origRaces: StateFlow<List<Race>> = combine(_allRaces, _raceQuery) { races, query ->
         races.filter { !it.isHomebrew }
-            .let { if (query.isBlank()) it else it.filter { r -> r.name.contains(query, ignoreCase = true) } }
+            .let {
+                if (query.isBlank()) it else it.filter { r ->
+                    r.name.contains(
+                        query,
+                        ignoreCase = true
+                    )
+                }
+            }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val homebrewRaces: StateFlow<List<Race>> = combine(_allRaces, _raceQuery) { races, query ->
         races.filter { it.isHomebrew }
-            .let { if (query.isBlank()) it else it.filter { r -> r.name.contains(query, ignoreCase = true) } }
+            .let {
+                if (query.isBlank()) it else it.filter { r ->
+                    r.name.contains(
+                        query,
+                        ignoreCase = true
+                    )
+                }
+            }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val origClasses: StateFlow<List<CharacterClass>> = combine(_allClasses, _classQuery) { classes, query ->
-        classes.filter { !it.isHomebrew }
-            .let { if (query.isBlank()) it else it.filter { c -> c.name.contains(query, ignoreCase = true) } }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val origClasses: StateFlow<List<CharacterClass>> =
+        combine(_allClasses, _classQuery) { classes, query ->
+            classes.filter { !it.isHomebrew }
+                .let {
+                    if (query.isBlank()) it else it.filter { c ->
+                        c.name.contains(
+                            query,
+                            ignoreCase = true
+                        )
+                    }
+                }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val homebrewClasses: StateFlow<List<CharacterClass>> = combine(_allClasses, _classQuery) { classes, query ->
-        classes.filter { it.isHomebrew }
-            .let { if (query.isBlank()) it else it.filter { c -> c.name.contains(query, ignoreCase = true) } }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val homebrewClasses: StateFlow<List<CharacterClass>> =
+        combine(_allClasses, _classQuery) { classes, query ->
+            classes.filter { it.isHomebrew }
+                .let {
+                    if (query.isBlank()) it else it.filter { c ->
+                        c.name.contains(
+                            query,
+                            ignoreCase = true
+                        )
+                    }
+                }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun setRaceQuery(query: String) { _raceQuery.value = query }
+    fun setRaceQuery(query: String) {
+        _raceQuery.value = query
+    }
 
-    fun setClassQuery(query: String) { _classQuery.value = query }
+    fun setClassQuery(query: String) {
+        _classQuery.value = query
+    }
 
     // ── Derived: available skills for the chosen class ───────────
     val availableSkills: StateFlow<List<Skill>> = _selectedClass.map { cls ->
@@ -250,9 +283,6 @@ class CharacterCreationWizardViewModel @Inject constructor(
     }
 
     // ── Level ─────────────────────────────────────────────────────────────────────
-    private val _customLevelEnabled = MutableStateFlow(false)
-    val customLevelEnabled = _customLevelEnabled.asStateFlow()
-
     private val _level = MutableStateFlow(1)
     val level = _level.asStateFlow()
 
@@ -268,11 +298,6 @@ class CharacterCreationWizardViewModel @Inject constructor(
         val avgPerLevel = (sides / 2) + 1 + conMod
         maxOf(lvl, 1).let { level1Hp + (avgPerLevel * (it - 1)) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
-
-    fun setCustomLevelEnabled(enabled: Boolean) {
-        _customLevelEnabled.value = enabled
-        if (!enabled) _level.value = 1
-    }
 
     fun setLevel(value: Int) {
         _level.value = value.coerceIn(1, 20)
