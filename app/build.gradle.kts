@@ -16,8 +16,8 @@ android {
         applicationId = "com.yablonskyi.dndsheet"
         minSdk = 28
         targetSdk = 37
-        versionCode = 6
-        versionName = "0.1.6-beta"
+        versionCode = 7
+        versionName = "0.1.7-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
