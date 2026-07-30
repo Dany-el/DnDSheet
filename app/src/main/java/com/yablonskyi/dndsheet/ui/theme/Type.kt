@@ -20,8 +20,9 @@ val fontName = GoogleFont("Montserrat Alternates")
 val montserratAlternates = FontFamily(
     Font(googleFont = fontName, fontProvider = provider)
 )
+val androidDefaultFont = FontFamily.Default
 
-val DefaultFont = montserratAlternates
+val DefaultFont = androidDefaultFont
 
 // Set of Material typography styles to start with
 val Typography = Typography(
