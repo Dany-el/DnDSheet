@@ -361,6 +361,7 @@
     <string name="update_ready">Готово до встановлення</string>
     <string name="retry">Повторити</string>
     <string name="placeholder_char_name">Джон Ватсон</string>
+    <string name="install_apk">Встановити завантажений APK</string>
 
     <plurals name="wizard_skill_choices">
         <item quantity="one">%d навичка</item>
@@ -403,4 +404,5 @@
         <item quantity="many">%d заклинань</item>
         <item quantity="other">%d заклинання</item>
     </plurals>
+    <string name="app_is_up_to_date">Додаток оновлено до останньої версії.</string>
 </resources>

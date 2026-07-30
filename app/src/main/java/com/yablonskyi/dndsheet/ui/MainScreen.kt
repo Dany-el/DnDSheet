@@ -1,7 +1,6 @@
 package com.yablonskyi.dndsheet.ui
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -23,8 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -34,19 +31,14 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldLayout
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -57,7 +49,6 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.yablonskyi.dndsheet.R
-import com.yablonskyi.dndsheet.data.model.character.Spell
 import com.yablonskyi.dndsheet.ui.character.CharacterListViewModel
 import com.yablonskyi.dndsheet.ui.navigation.AppSettingsRoute
 import com.yablonskyi.dndsheet.ui.navigation.BottomNavItem
@@ -76,57 +67,9 @@ fun MainScreen(
     characterListViewModel: CharacterListViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()
-    val context = LocalContext.current
-    val resources = LocalResources.current
 
     val isSpellSelectionMode by globalSpellLibraryViewModel.isSelectionMode.collectAsStateWithLifecycle()
     val isCharacterSelectionMode by characterListViewModel.isSelectionMode.collectAsStateWithLifecycle()
-
-    var spellsToImport by remember { mutableStateOf<List<Spell>?>(null) }
-    var showImportDialog by remember { mutableStateOf(false) }
-
-    if (showImportDialog) {
-        spellsToImport?.let { spells ->
-            AlertDialog(
-                onDismissRequest = { showImportDialog = false },
-                title = { Text(stringResource(R.string.alert_dialog_import_spells)) },
-                text = {
-                    Text(
-                        stringResource(
-                            R.string.alert_dialog_spell_confirm_msg,
-                            spells.size
-                        )
-                    )
-                },
-                confirmButton = {
-                    Button(onClick = {
-                        globalSpellLibraryViewModel.importSpells(spells)
-                        showImportDialog = false
-                        Toast.makeText(
-                            context,
-                            resources.getString(R.string.spells_imported_success),
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                        navController.navigate(CompendiumRoute.SpellsLibrary) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }) {
-                        Text(stringResource(R.string.confirm_import))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showImportDialog = false }) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                }
-            )
-        }
-    }
 
     val topLevelRoutes = remember {
         listOf(

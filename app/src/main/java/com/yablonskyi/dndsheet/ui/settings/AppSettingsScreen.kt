@@ -8,6 +8,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +29,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -67,6 +71,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -105,7 +110,7 @@ enum class ActiveSettingsSheet {
 @Composable
 fun AppSettingsScreen(
     viewModel: AppSettingsViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
-    updateViewModel: UpdateViewModel = hiltViewModel()
+    updateViewModel: UpdateViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val currentLanguageState by viewModel.language.collectAsStateWithLifecycle()
@@ -210,7 +215,8 @@ fun AppSettingsScreen(
                     updateState = updateState,
                     onDismiss = updateViewModel::dismiss,
                     onDownload = { update -> updateViewModel.download(update) },
-                    onCheckUpdate = updateViewModel::checkForUpdate
+                    onCheckUpdate = updateViewModel::checkForUpdate,
+                    onInstallFile = updateViewModel::installApk
                 )
 
                 HorizontalDivider()
@@ -499,7 +505,7 @@ fun <T> SelectionBottomSheet(
         Column(
             modifier = Modifier.fillMaxWidth()
         ) {
-            options.forEachIndexed { index, option ->
+            options.forEach { option ->
                 val isSelected = option.value == selectedValue
 
                 Row(
@@ -539,9 +545,24 @@ fun UpdatesRow(
     updateState: UpdateViewModel.UpdateState,
     onCheckUpdate: () -> Unit,
     onDownload: (AppUpdate) -> Unit,
+    onInstallFile: () -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val rotation = remember { Animatable(0f) }
+
+    fun triggerCheck() {
+        onCheckUpdate()
+        coroutineScope.launch {
+            rotation.snapTo(0f)
+            rotation.animateTo(
+                targetValue = 360f,
+                animationSpec = tween(durationMillis = 1000, easing = LinearEasing)
+            )
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -550,7 +571,7 @@ fun UpdatesRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -587,6 +608,7 @@ fun UpdatesRow(
                             is UpdateViewModel.UpdateState.Downloading -> stringResource(R.string.downloading_update)
                             is UpdateViewModel.UpdateState.ReadyToInstall -> stringResource(R.string.update_ready)
                             is UpdateViewModel.UpdateState.Error -> stringResource(R.string.update_failed)
+                            is UpdateViewModel.UpdateState.UptoDate -> stringResource(R.string.app_is_up_to_date)
                         },
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium
@@ -615,10 +637,25 @@ fun UpdatesRow(
             // Trailing action
             when (updateState) {
                 is UpdateViewModel.UpdateState.Idle -> {
-                    IconButton(onClick = onCheckUpdate) {
+                    IconButton(
+                        onClick = { triggerCheck() }
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = stringResource(R.string.check_for_updates)
+                            contentDescription = stringResource(R.string.check_for_updates),
+                            modifier = Modifier.rotate(rotation.value)
+                        )
+                    }
+                }
+
+                is UpdateViewModel.UpdateState.UptoDate -> {
+                    IconButton(
+                        onClick = { triggerCheck() }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = stringResource(R.string.check_for_updates),
+                            modifier = Modifier.rotate(rotation.value)
                         )
                     }
                 }
@@ -642,6 +679,17 @@ fun UpdatesRow(
                     }
                 }
 
+                is UpdateViewModel.UpdateState.ReadyToInstall -> {
+                    IconButton(
+                        onClick = onInstallFile
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                            contentDescription = stringResource(R.string.install_apk)
+                        )
+                    }
+                }
+
                 is UpdateViewModel.UpdateState.Error -> {
                     IconButton(onClick = onCheckUpdate) {
                         Icon(
@@ -656,7 +704,7 @@ fun UpdatesRow(
             }
         }
 
-        // Progress bar — only visible while downloading
+        // Progress bar
         if (updateState is UpdateViewModel.UpdateState.Downloading) {
             LinearProgressIndicator(
                 progress = { updateState.progress },

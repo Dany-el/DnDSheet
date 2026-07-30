@@ -364,6 +364,8 @@
     <string name="update_ready">Ready to install</string>
     <string name="retry">Retry</string>
     <string name="placeholder_char_name">John Watson</string>
+    <string name="app_is_up_to_date">App is up to date.</string>
+    <string name="install_apk">Install downloaded APK</string>
 
     <plurals name="wizard_skill_choices">
         <item quantity="one">%d skill</item>

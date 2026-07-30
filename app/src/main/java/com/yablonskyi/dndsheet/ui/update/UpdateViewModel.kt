@@ -18,6 +18,7 @@ class UpdateViewModel @Inject constructor(
 
     sealed interface UpdateState {
         data object Idle : UpdateState
+        data object UptoDate: UpdateState
         data class Available(val update: AppUpdate) : UpdateState
         data class Downloading(val progress: Float) : UpdateState
         data object ReadyToInstall : UpdateState
@@ -33,7 +34,7 @@ class UpdateViewModel @Inject constructor(
         viewModelScope.launch {
             val update = repo.fetchUpdate()
             _state.value = if (update != null) UpdateState.Available(update)
-            else UpdateState.Idle
+            else UpdateState.UptoDate
         }
     }
 
@@ -50,6 +51,12 @@ class UpdateViewModel @Inject constructor(
             } else {
                 _state.value = UpdateState.Error
             }
+        }
+    }
+
+    fun installApk() {
+        downloadedFile?.let { file ->
+            repo.installApk(file)
         }
     }
 
