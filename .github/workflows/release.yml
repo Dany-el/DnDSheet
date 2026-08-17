@@ -1,0 +1,101 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master   # или master — срабатывает на каждый пуш в main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Читаем VERSION_CODE и VERSION_NAME из version.properties
+      - name: Read version.properties
+        id: version
+        run: |
+          VERSION_CODE=$(grep "VERSION_CODE" version.properties | cut -d'=' -f2)
+          VERSION_NAME=$(grep "VERSION_NAME" version.properties | cut -d'=' -f2)
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build Release APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > keystore.jks
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=$(pwd)/keystore.jks \
+            -Pandroid.injected.signing.store.password=$STORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$KEY_PASSWORD
+
+      # Создаём тег из VERSION_NAME
+      - name: Create git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v${{ steps.version.outputs.VERSION_NAME }}"
+          git push origin "v${{ steps.version.outputs.VERSION_NAME }}"
+
+      # Создаём Release — APK называем по версии
+      - name: Create GitHub Release
+        id: release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ steps.version.outputs.VERSION_NAME }}"
+          name: "DnDSheet v${{ steps.version.outputs.VERSION_NAME }}"
+          files: app/build/outputs/apk/release/app-release.apk
+          rename-files: |
+            app/build/outputs/apk/release/app-release.apk=v${{ steps.version.outputs.VERSION_NAME }}.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Обновляем version.json с точной структурой как в вашем файле
+      - name: Update version.json
+        run: |
+          VERSION_CODE=${{ steps.version.outputs.VERSION_CODE }}
+          VERSION_NAME=${{ steps.version.outputs.VERSION_NAME }}
+          REPO=${{ github.repository }}
+          
+          # Читаем существующие releaseNotes
+          NOTES=$(python3 -c "
+          import json
+          with open('version.json') as f:
+              data = json.load(f)
+          print(data.get('releaseNotes', ''))
+          ")
+          
+          # Пишем version.json с точной структурой
+          python3 -c "
+          import json
+          data = {
+              'versionCode': $VERSION_CODE,
+              'versionName': '$VERSION_NAME',
+              'downloadUrl': 'https://github.com/$REPO/releases/download/v$VERSION_NAME/v$VERSION_NAME.apk',
+              'releaseNotes': '$NOTES'
+          }
+          with open('version.json', 'w') as f:
+              json.dump(data, f, indent=2)
+          "
+
+      # Коммитим обновлённый version.json
+      - name: Commit version.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.json
+          git commit -m "chore: update version.json to ${{ steps.version.outputs.VERSION_NAME }}" || echo "No changes"
+          git push origin main

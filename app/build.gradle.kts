@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -8,6 +10,10 @@ plugins {
     id("com.github.skydoves.compose.stability.analyzer") version "0.7.2"
 }
 
+val versionProps = Properties().apply {
+    load(rootProject.file("version.properties").inputStream())
+}
+
 android {
     namespace = "com.yablonskyi.dndsheet"
     compileSdk = 37
@@ -16,8 +22,8 @@ android {
         applicationId = "com.yablonskyi.dndsheet"
         minSdk = 28
         targetSdk = 37
-        versionCode = 8
-        versionName = "0.1.7.1-beta"
+        versionCode = versionProps["VERSION_CODE"].toString().toInt()
+        versionName = versionProps["VERSION_NAME"].toString()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -28,7 +34,7 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("C:\\Users\\Daniel\\Downloads\\dnd-sheet-release-key.jks")
+            storeFile = file("dnd-sheet-release-key.jks")
             storePassword = "regner13242005"
             keyAlias = "dnd_sheet_app"
             keyPassword = "regner13242005"
@@ -127,7 +133,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
