@@ -279,7 +279,7 @@ class CharacterCreationWizardViewModel @Inject constructor(
 
     private fun rollFourDropLowest(): Int {
         val rolls = List(4) { (1..6).random() }
-        return rolls.sortedDescending().take(3).sum()
+        return rolls.asSequence().sortedDescending().take(3).sum()
     }
 
     // ── Level ─────────────────────────────────────────────────────────────────────
