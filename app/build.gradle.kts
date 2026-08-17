@@ -34,7 +34,7 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("dnd-sheet-release-key.jks")
+            storeFile = file("C:\\Users\\Daniel\\AndroidStudioProjects\\DnDSheet\\dnd-sheet-release-key.jks")
             storePassword = "regner13242005"
             keyAlias = "dnd_sheet_app"
             keyPassword = "regner13242005"
