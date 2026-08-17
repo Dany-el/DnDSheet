@@ -90,7 +90,6 @@ import com.google.api.services.drive.DriveScopes
 import com.yablonskyi.dndsheet.BuildConfig
 import com.yablonskyi.dndsheet.R
 import com.yablonskyi.dndsheet.data.update.AppUpdate
-import com.yablonskyi.dndsheet.data.worker.scheduleDailyBackup
 import com.yablonskyi.dndsheet.ui.update.UpdateViewModel
 import com.yablonskyi.dndsheet.ui.utils.AppLanguage
 import com.yablonskyi.dndsheet.ui.utils.AppTheme
@@ -142,7 +141,6 @@ fun AppSettingsScreen(
         try {
             val account = task.getResult(ApiException::class.java)
             viewModel.setLoggedInUser(account.email)
-            scheduleDailyBackup(context)
         } catch (e: ApiException) {
             Log.e("AuthError", "Google Sign In Failed. Status Code: ${e.statusCode}")
             Toast.makeText(
