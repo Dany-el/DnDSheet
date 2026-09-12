@@ -1,6 +1,5 @@
 package com.yablonskyi.dndsheet
 
-import com.yablonskyi.dndsheet.data.model.character.Character
 import com.yablonskyi.dndsheet.fake_repository.FakeCharacterRepository
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue

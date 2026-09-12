@@ -1,6 +1,5 @@
 package com.yablonskyi.dndsheet.viewmodels
 
-import com.yablonskyi.dndsheet.data.model.character.Character
 import com.yablonskyi.dndsheet.fake_repository.FakeCharacterRepository
 import com.yablonskyi.dndsheet.ui.character.CharacterListViewModel
 import junit.framework.TestCase

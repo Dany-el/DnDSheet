@@ -1,6 +1,5 @@
 package com.yablonskyi.dndsheet.viewmodels
 
-import com.yablonskyi.dndsheet.data.model.character.Character
 import com.yablonskyi.dndsheet.data.model.character.Ability
 import com.yablonskyi.dndsheet.data.model.character.AbilityBlock
 import com.yablonskyi.dndsheet.data.model.character.Attack

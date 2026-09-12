@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="list">Список</string>
+    <string name="grid">Сітка</string>
+
+    <string name="update_available">Доступне оновлення %s</string>
+    <string name="update_now">Оновити зараз</string>
+    <string name="later">Пізніше</string>
+    <string name="downloading_update">Завантаження оновлення…</string>
+    <string name="update_failed">Помилка оновлення</string>
+    <string name="update_failed_message">Не вдалося завантажити оновлення. Перевірте підключення та спробуйте ще раз.</string>
+    <string name="ok">ОК</string>
+    <string name="check_for_updates">Перевірити наявність оновлень</string>
+    <string name="update_ready">Готово до встановлення</string>
+    <string name="retry">Повторити</string>
+    <string name="placeholder_char_name">Джон Ватсон</string>
+    <string name="install_apk">Встановити завантажений APK</string>
+
+    <string name="system_default">За замовчуванням</string>
+    <string name="language_russian">Російська</string>
+    <string name="language_ukrainian">Українська</string>
+    <string name="theme_light">Світла</string>
+    <string name="theme_dark">Темна</string>
+    <string name="language_english">Англійська</string>
+</resources>

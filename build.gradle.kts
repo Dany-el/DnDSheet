@@ -1,4 +1,4 @@
-3// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.compose) apply false
@@ -7,4 +7,5 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.serialization) apply false
     alias(libs.plugins.kotlin.plugin.parcelize) apply false
+    alias(libs.plugins.jetbrains.kotlin.jvm) apply false
 }

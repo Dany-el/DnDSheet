@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ability_str">Сила</string>
+    <string name="ability_dex">Ловкость</string>
+    <string name="ability_con">Телосложение</string>
+    <string name="ability_int">Интеллект</string>
+    <string name="ability_wis">Мудрость</string>
+    <string name="ability_cha">Харизма</string>
+    <string name="ability_none">Ничего</string>
+
+    <string name="skill_athletics">Атлетика</string>
+    <string name="skill_acrobatics">Акробатика</string>
+    <string name="skill_sleight_of_hand">Ловкость рук</string>
+    <string name="skill_stealth">Скрытность</string>
+    <string name="skill_arcana">Магия</string>
+    <string name="skill_history">История</string>
+    <string name="skill_investigation">Анализ</string>
+    <string name="skill_nature">Природа</string>
+    <string name="skill_religion">Религия</string>
+    <string name="skill_animal_handling">Уход за животными</string>
+    <string name="skill_insight">Проницательность</string>
+    <string name="skill_medicine">Медицина</string>
+    <string name="skill_perception">Восприятие</string>
+    <string name="skill_survival">Выживание</string>
+    <string name="skill_deception">Обман</string>
+    <string name="skill_intimidation">Запугивание</string>
+    <string name="skill_performance">Выступление</string>
+    <string name="skill_persuasion">Убеждение</string>
+
+    <string name="level_cantrip">Заговор</string>
+    <string name="level_1">1-й уровень</string>
+    <string name="level_2">2-й уровень</string>
+    <string name="level_3">3-й уровень</string>
+    <string name="level_4">4-й уровень</string>
+    <string name="level_5">5-й уровень</string>
+    <string name="level_6">6-й уровень</string>
+    <string name="level_7">7-й уровень</string>
+    <string name="level_8">8-й уровень</string>
+    <string name="level_9">9-й уровень</string>
+
+    <string name="time_action">Действие</string>
+    <string name="time_bonus_action">Бонусное Действие</string>
+    <string name="time_reaction">Реакция</string>
+    <string name="time_special">Особенное</string>
+
+    <string name="clipped_time_action">Д</string>
+    <string name="clipped_time_bonus_action">БД</string>
+    <string name="clipped_time_reaction">Р</string>
+    <string name="clipped_time_special">О</string>
+
+    <string name="concentration">Концентрация</string>
+    <string name="ritual">Ритуал</string>
+
+    <string name="clipped_concentration">К</string>
+    <string name="clipped_ritual">Р</string>
+
+    <string name="time_1_min">1 минута</string>
+    <string name="time_10_min">10 минут</string>
+    <string name="time_1_hr">1 час</string>
+    <string name="time_8_hr">8 часов</string>
+    <string name="time_12_hr">12 часов</string>
+    <string name="time_24_hr">24 часа</string>
+
+    <string name="duration_instant">Мгновенная</string>
+    <string name="duration_1_round">1 раунд</string>
+    <string name="duration_1_min">1 минута</string>
+    <string name="duration_10_min">10 минут</string>
+    <string name="duration_1_hr">1 час</string>
+    <string name="duration_8_hr">8 часов</string>
+    <string name="duration_24_hr">24 часа</string>
+    <string name="duration_7_days">7 дней</string>
+    <string name="duration_30_days">30 дней</string>
+    <string name="duration_until_dispelled">Пока не рассеется</string>
+    <string name="duration_special">Особенное</string>
+
+    <string name="school_abjuration">Ограждение</string>
+    <string name="school_conjuration">Вызов</string>
+    <string name="school_divination">Прорицание</string>
+    <string name="school_enchantment">Очарование</string>
+    <string name="school_evocation">Воплощение</string>
+    <string name="school_illusion">Иллюзия</string>
+    <string name="school_necromancy">Некромантия</string>
+    <string name="school_transmutation">Преобразование</string>
+
+    <string name="comp_verbal">Вербальный</string>
+    <string name="comp_somatic">Соматический</string>
+    <string name="comp_material">Материальный</string>
+
+    <string name="attack_none">Ничего</string>
+    <string name="attack_melee">Рукопашная атака</string>
+    <string name="attack_ranged">Дальнобойная атака</string>
+    <string name="attack_save">Спасбросок</string>
+
+    <string name="damage_acid">Кислота</string>
+    <string name="damage_bludgeoning">Дробящий</string>
+    <string name="damage_cold">Холод</string>
+    <string name="damage_fire">Огонь</string>
+    <string name="damage_force">Силовой</string>
+    <string name="damage_lightning">Электричество</string>
+    <string name="damage_necrotic">Некротический</string>
+    <string name="damage_piercing">Колющий</string>
+    <string name="damage_poison">Яд</string>
+    <string name="damage_psychic">Психический</string>
+    <string name="damage_radiant">Излучение</string>
+    <string name="damage_slashing">Рубящий</string>
+    <string name="damage_thunder">Звук</string>
+
+    <string name="range_self">На себя</string>
+    <string name="range_touch">Касание</string>
+    <string name="range_distance">Дистанция</string>
+    <string name="range_sight">Видимость</string>
+    <string name="range_unlimited">Неограниченная</string>
+
+    <string name="size_tiny">Крошечный</string>
+    <string name="size_small">Маленький</string>
+    <string name="size_medium">Средний</string>
+    <string name="size_large">Большой</string>
+    <string name="size_huge">Огромный</string>
+    <string name="size_gargantuan">Колоссальный</string>
+</resources>

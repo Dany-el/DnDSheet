@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ability_str">Strength</string>
+    <string name="ability_dex">Dexterity</string>
+    <string name="ability_con">Constitution</string>
+    <string name="ability_int">Intelligence</string>
+    <string name="ability_wis">Wisdom</string>
+    <string name="ability_cha">Charisma</string>
+    <string name="ability_none">None</string>
+
+    <string name="skill_athletics">Athletics</string>
+    <string name="skill_acrobatics">Acrobatics</string>
+    <string name="skill_sleight_of_hand">Sleight of Hand</string>
+    <string name="skill_stealth">Stealth</string>
+    <string name="skill_arcana">Arcana</string>
+    <string name="skill_history">History</string>
+    <string name="skill_investigation">Investigation</string>
+    <string name="skill_nature">Nature</string>
+    <string name="skill_religion">Religion</string>
+    <string name="skill_animal_handling">Animal Handling</string>
+    <string name="skill_insight">Insight</string>
+    <string name="skill_medicine">Medicine</string>
+    <string name="skill_perception">Perception</string>
+    <string name="skill_survival">Survival</string>
+    <string name="skill_deception">Deception</string>
+    <string name="skill_intimidation">Intimidation</string>
+    <string name="skill_performance">Performance</string>
+    <string name="skill_persuasion">Persuasion</string>
+
+    <string name="level_cantrip">Cantrip</string>
+    <string name="level_1">1st Level</string>
+    <string name="level_2">2nd Level</string>
+    <string name="level_3">3rd Level</string>
+    <string name="level_4">4th Level</string>
+    <string name="level_5">5th Level</string>
+    <string name="level_6">6th Level</string>
+    <string name="level_7">7th Level</string>
+    <string name="level_8">8th Level</string>
+    <string name="level_9">9th Level</string>
+
+    <string name="time_action">Action</string>
+    <string name="time_bonus_action">Bonus Action</string>
+    <string name="time_reaction">Reaction</string>
+    <string name="time_special">Special</string>
+
+    <string name="clipped_time_action">A</string>
+    <string name="clipped_time_bonus_action">BA</string>
+    <string name="clipped_time_reaction">R</string>
+    <string name="clipped_time_special">S</string>
+
+    <string name="concentration">Concentration</string>
+    <string name="ritual">Ritual</string>
+
+    <string name="clipped_concentration">C</string>
+    <string name="clipped_ritual">R</string>
+
+    <string name="time_1_min">1 Minute</string>
+    <string name="time_10_min">10 Minutes</string>
+    <string name="time_1_hr">1 Hour</string>
+    <string name="time_8_hr">8 Hours</string>
+    <string name="time_12_hr">12 Hours</string>
+    <string name="time_24_hr">24 Hours</string>
+
+    <string name="duration_instant">Instantaneous</string>
+    <string name="duration_1_round">1 Round</string>
+    <string name="duration_1_min">1 Minute</string>
+    <string name="duration_10_min">10 Minutes</string>
+    <string name="duration_1_hr">1 Hour</string>
+    <string name="duration_8_hr">8 Hours</string>
+    <string name="duration_24_hr">24 Hours</string>
+    <string name="duration_7_days">7 Days</string>
+    <string name="duration_30_days">30 Days</string>
+    <string name="duration_until_dispelled">Until Dispelled</string>
+    <string name="duration_special">Special</string>
+
+    <string name="school_abjuration">Abjuration</string>
+    <string name="school_conjuration">Conjuration</string>
+    <string name="school_divination">Divination</string>
+    <string name="school_enchantment">Enchantment</string>
+    <string name="school_evocation">Evocation</string>
+    <string name="school_illusion">Illusion</string>
+    <string name="school_necromancy">Necromancy</string>
+    <string name="school_transmutation">Transmutation</string>
+
+    <string name="comp_verbal">Verbal</string>
+    <string name="comp_somatic">Somatic</string>
+    <string name="comp_material">Material</string>
+
+    <string name="attack_none">None</string>
+    <string name="attack_melee">Melee Attack</string>
+    <string name="attack_ranged">Ranged Attack</string>
+    <string name="attack_save">Saving Throw</string>
+
+    <string name="damage_acid">Acid</string>
+    <string name="damage_bludgeoning">Bludgeoning</string>
+    <string name="damage_cold">Cold</string>
+    <string name="damage_fire">Fire</string>
+    <string name="damage_force">Force</string>
+    <string name="damage_lightning">Lightning</string>
+    <string name="damage_necrotic">Necrotic</string>
+    <string name="damage_piercing">Piercing</string>
+    <string name="damage_poison">Poison</string>
+    <string name="damage_psychic">Psychic</string>
+    <string name="damage_radiant">Radiant</string>
+    <string name="damage_slashing">Slashing</string>
+    <string name="damage_thunder">Thunder</string>
+
+    <string name="range_self">Self</string>
+    <string name="range_touch">Touch</string>
+    <string name="range_distance">Distance</string>
+    <string name="range_sight">Sight</string>
+    <string name="range_unlimited">Unlimited</string>
+
+    <string name="size_tiny">Tiny</string>
+    <string name="size_small">Small</string>
+    <string name="size_medium">Medium</string>
+    <string name="size_large">Large</string>
+    <string name="size_huge">Huge</string>
+    <string name="size_gargantuan">Gargantuan</string>
+</resources>

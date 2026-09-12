@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ability_str">Сила</string>
+    <string name="ability_dex">Спритність</string>
+    <string name="ability_con">Статура</string>
+    <string name="ability_int">Інтелект</string>
+    <string name="ability_wis">Мудрість</string>
+    <string name="ability_cha">Харизма</string>
+    <string name="ability_none">Нічого</string>
+
+    <string name="skill_athletics">Атлетика</string>
+    <string name="skill_acrobatics">Акробатика</string>
+    <string name="skill_sleight_of_hand">Спритність рук</string>
+    <string name="skill_stealth">Потайливість</string>
+    <string name="skill_arcana">Магія</string>
+    <string name="skill_history">Історія</string>
+    <string name="skill_investigation">Розслідування</string>
+    <string name="skill_nature">Природа</string>
+    <string name="skill_religion">Релігія</string>
+    <string name="skill_animal_handling">Догляд за тваринами</string>
+    <string name="skill_insight">Проникливість</string>
+    <string name="skill_medicine">Медицина</string>
+    <string name="skill_perception">Уважність</string>
+    <string name="skill_survival">Виживання</string>
+    <string name="skill_deception">Обман</string>
+    <string name="skill_intimidation">Залякування</string>
+    <string name="skill_performance">Виступ</string>
+    <string name="skill_persuasion">Переконання</string>
+
+    <string name="level_cantrip">Замовляння</string>
+    <string name="level_1">1-й рівень</string>
+    <string name="level_2">2-й рівень</string>
+    <string name="level_3">3-й рівень</string>
+    <string name="level_4">4-й рівень</string>
+    <string name="level_5">5-й рівень</string>
+    <string name="level_6">6-й рівень</string>
+    <string name="level_7">7-й рівень</string>
+    <string name="level_8">8-й рівень</string>
+    <string name="level_9">9-й рівень</string>
+
+    <string name="time_action">Дія</string>
+    <string name="time_bonus_action">Бонусна Дія</string>
+    <string name="time_reaction">Реакція</string>
+    <string name="time_special">Особливий</string>
+
+    <string name="clipped_time_action">Д</string>
+    <string name="clipped_time_bonus_action">БД</string>
+    <string name="clipped_time_reaction">Р</string>
+    <string name="clipped_time_special">О</string>
+
+    <string name="concentration">Концентрація</string>
+    <string name="ritual">Ритуал</string>
+
+    <string name="clipped_concentration">К</string>
+    <string name="clipped_ritual">Р</string>
+
+    <string name="time_1_min">1 хвилина</string>
+    <string name="time_10_min">10 хвилин</string>
+    <string name="time_1_hr">1 година</string>
+    <string name="time_8_hr">8 годин</string>
+    <string name="time_12_hr">12 годин</string>
+    <string name="time_24_hr">24 години</string>
+
+    <string name="duration_instant">Миттєво</string>
+    <string name="duration_1_round">1 раунд</string>
+    <string name="duration_1_min">1 хвилина</string>
+    <string name="duration_10_min">10 хвилин</string>
+    <string name="duration_1_hr">1 година</string>
+    <string name="duration_8_hr">8 годин</string>
+    <string name="duration_24_hr">24 години</string>
+    <string name="duration_7_days">7 днів</string>
+    <string name="duration_30_days">30 днів</string>
+    <string name="duration_until_dispelled">Поки не розсіється</string>
+    <string name="duration_special">Особливий</string>
+
+    <string name="school_abjuration">Відгородження</string>
+    <string name="school_conjuration">Виклик</string>
+    <string name="school_divination">Віщування</string>
+    <string name="school_enchantment">Чарування</string>
+    <string name="school_evocation">Евокація</string>
+    <string name="school_illusion">Ілюзія</string>
+    <string name="school_necromancy">Некромантія</string>
+    <string name="school_transmutation">Перетворення</string>
+
+    <string name="comp_verbal">Вербальний</string>
+    <string name="comp_somatic">Соматичний</string>
+    <string name="comp_material">Матеріальний</string>
+
+    <string name="attack_none">Нічого</string>
+    <string name="attack_melee">Ближня атака</string>
+    <string name="attack_ranged">Дальня атака</string>
+    <string name="attack_save">Ряткидок</string>
+
+    <string name="damage_acid">Кислота</string>
+    <string name="damage_bludgeoning">Дробильний</string>
+    <string name="damage_cold">Холод</string>
+    <string name="damage_fire">Вогонь</string>
+    <string name="damage_force">Силовий</string>
+    <string name="damage_lightning">Блискавка</string>
+    <string name="damage_necrotic">Некротичний</string>
+    <string name="damage_piercing">Колючий</string>
+    <string name="damage_poison">Отрута</string>
+    <string name="damage_psychic">Психічний</string>
+    <string name="damage_radiant">Променистий</string>
+    <string name="damage_slashing">Рубаючий</string>
+    <string name="damage_thunder">Грім</string>
+
+    <string name="range_self">На себе</string>
+    <string name="range_touch">Дотик</string>
+    <string name="range_distance">Відстань</string>
+    <string name="range_sight">Видимість</string>
+    <string name="range_unlimited">Необмежена</string>
+
+    <string name="size_tiny">Крихітний</string>
+    <string name="size_small">Малий</string>
+    <string name="size_medium">Середній</string>
+    <string name="size_large">Великий</string>
+    <string name="size_huge">Величезний</string>
+    <string name="size_gargantuan">Колосальний</string>
+</resources>

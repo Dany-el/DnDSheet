@@ -35,6 +35,13 @@ jobs:
         run: |
           echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\n' | base64 --decode > keystore.jks
 
+      - name: Forbid NavController in feature modules
+        run: |
+          if rg -n "NavHostController" --glob "feature/**/*.kt" --glob "core/**/*.kt" \
+              --glob '!feature/compendium/src/main/java/com/yablonskyi/compendium/CompendiumNavigationHelpers.kt'; then
+            echo "NavHostController must remain in :app or the documented bridge"; exit 1
+          fi
+
       - name: Build Release APK
         env:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}

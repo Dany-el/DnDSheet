@@ -1,6 +1,5 @@
 package com.yablonskyi.dndsheet.viewmodels
 
-import com.yablonskyi.dndsheet.data.model.character.Character
 import com.yablonskyi.dndsheet.data.model.character.SpellLevel
 import com.yablonskyi.dndsheet.data.model.character.SpellSettings
 import com.yablonskyi.dndsheet.data.model.character.SpellSlot

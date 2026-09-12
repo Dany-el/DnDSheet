@@ -1,6 +1,5 @@
 package com.yablonskyi.dndsheet.fake_repository
 
-import com.yablonskyi.dndsheet.data.model.character.Character
 import com.yablonskyi.dndsheet.data.model.character.CharacterSheet
 import com.yablonskyi.dndsheet.domain.repository.CharacterRepository
 import kotlinx.coroutines.flow.Flow

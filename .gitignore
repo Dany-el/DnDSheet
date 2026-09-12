@@ -12,6 +12,8 @@
 /build
 /captures
 /app/build
+/.ai
+/tmp
 .externalNativeBuild
 .cxx
 local.properties
