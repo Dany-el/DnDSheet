@@ -7,6 +7,7 @@ android {
 }
 
 dependencies {
+    testImplementation(libs.junit)
     implementation(project(":core:model"))
     implementation(libs.androidx.annotation)
     implementation(libs.kotlinx.coroutines)

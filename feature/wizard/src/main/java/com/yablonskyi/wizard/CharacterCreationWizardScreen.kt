@@ -151,7 +151,7 @@ fun CharacterCreationWizardScreen(
 
                 WizardStep.ABILITIES -> WizardAbilitiesStep(
                     method = abilityMethod,
-                    selectedRace = selectedRace!!,
+                    raceAbilityBonuses = selectedRace!!.abilityBonuses,
                     standardAssignments = standardAssignments,
                     pendingPoolValue = pendingPoolValue,
                     pointBuyScores = pointBuyScores,

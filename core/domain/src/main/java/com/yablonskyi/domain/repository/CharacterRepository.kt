@@ -11,6 +11,9 @@ interface CharacterRepository {
 
     suspend fun restoreCharacters(sheets: List<CharacterSheet>)
 
+    /** Atomically applies a field change to the latest row. Fails if the character no longer exists. */
+    suspend fun applyChange(id: Long, change: com.yablonskyi.domain.character.CharacterChange): Character
+
     suspend fun updateCharacter(character: Character)
 
     suspend fun deleteCharacter(character: Character)

@@ -33,7 +33,13 @@ class FakeCharacterRepository : CharacterRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun updateCharacter(character: Character) {
+    override suspend fun applyChange(id: Long, change: com.yablonskyi.domain.character.CharacterChange): Character {
+            val current = getCharacterSheetById(id).character
+            val updated = com.yablonskyi.domain.character.applyCharacterChange(current, change)
+            updateCharacter(updated)
+            return updated
+        }
+        override suspend fun updateCharacter(character: Character) {
         updatedCharacters.add(character)
         _characters.value = _characters.value.map { if (it.id == character.id) character else it }
     }

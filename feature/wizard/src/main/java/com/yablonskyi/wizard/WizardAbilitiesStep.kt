@@ -4,7 +4,9 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Grid
 import androidx.compose.foundation.layout.GridTrackSize
 import androidx.compose.foundation.layout.Row
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -53,14 +56,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.yablonskyi.model.character.Ability
-import com.yablonskyi.model.rulebook.Race
 import com.yablonskyi.ui.R
 import com.yablonskyi.ui.theme.Dimens
 import com.yablonskyi.ui.utils.PreviewThemeWrapper
@@ -70,13 +73,14 @@ import com.yablonskyi.wizard.viewmodel.AbilityMethod
 import com.yablonskyi.wizard.viewmodel.WizardAbilityRules.CORE_ABILITIES
 import com.yablonskyi.wizard.viewmodel.WizardAbilityRules.POINT_BUY_BUDGET
 import com.yablonskyi.wizard.viewmodel.WizardAbilityRules.POINT_BUY_COSTS
+import com.yablonskyi.wizard.viewmodel.WizardAbilityRules.STANDARD_ARRAY
 import kotlinx.coroutines.launch
 import kotlin.math.floor
 
 @Composable
 fun WizardAbilitiesStep(
     method: AbilityMethod,
-    selectedRace: Race,
+    raceAbilityBonuses: Map<Ability, Int>,
     // Standard Array
     standardAssignments: Map<Ability, Int>,
     pendingPoolValue: Int?,
@@ -98,10 +102,6 @@ fun WizardAbilitiesStep(
     onSelectRollIndex: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val standardArrayPool = listOf(15, 14, 13, 12, 10, 8)
-    val usedPoolValues = standardAssignments.values.toSet()
-    val raceAbilityBonuses = selectedRace.abilityBonuses
-
     val pagerState = rememberPagerState(
         initialPage = method.ordinal,
         pageCount = { AbilityMethod.entries.size }
@@ -111,7 +111,12 @@ fun WizardAbilitiesStep(
     val currentMethod by rememberUpdatedState(method)
     val currentOnMethodChange by rememberUpdatedState(onMethodChange)
 
-    LaunchedEffect(pagerState) {
+    // The parent method is authoritative on entry, restoration, and external updates.
+    // Restarting also cancels observation of an obsolete method during synchronization.
+    LaunchedEffect(pagerState, method) {
+        if (pagerState.currentPage != method.ordinal || pagerState.settledPage != method.ordinal) {
+            pagerState.scrollToPage(method.ordinal)
+        }
         snapshotFlow { pagerState.settledPage }
             .collect { page ->
                 val selectedMethod = AbilityMethod.entries[page]
@@ -123,13 +128,13 @@ fun WizardAbilitiesStep(
 
     Column(modifier = modifier.fillMaxSize()) {
         PrimaryTabRow(
-            selectedTabIndex = method.ordinal,
+            selectedTabIndex = pagerState.currentPage,
             modifier = Modifier.fillMaxWidth(),
             divider = {},
             indicator = {
                 Box(
                     modifier = Modifier
-                        .tabIndicatorOffset(method.ordinal)
+                        .tabIndicatorOffset(pagerState.currentPage)
                         .fillMaxHeight()
                         .padding(vertical = 4.dp, horizontal = 4.dp)
                         .clip(CircleShape)
@@ -138,8 +143,9 @@ fun WizardAbilitiesStep(
                 )
             },
         ) {
-            CompositionLocalProvider(LocalRippleConfiguration provides null) {
-                AbilityMethod.entries.forEachIndexed { index, method ->
+            AbilityMethod.entries.forEachIndexed { index, method ->
+
+                CompositionLocalProvider(LocalRippleConfiguration provides null) {
                     Tab(
                         selected = pagerState.currentPage == index,
                         onClick = {
@@ -166,21 +172,21 @@ fun WizardAbilitiesStep(
 
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxSize()
+                .testTag("ability_pager"),
         ) { page ->
-            when (page) {
-                0 -> StandardArrayPage(
+            when (AbilityMethod.entries[page]) {
+                AbilityMethod.STANDARD_ARRAY -> StandardArrayPage(
                     raceAbilityBonuses = raceAbilityBonuses,
-                    standardArrayPool = standardArrayPool,
                     standardAssignments = standardAssignments,
-                    usedPoolValues = usedPoolValues,
                     pendingPoolValue = pendingPoolValue,
                     onSelectPoolValue = onSelectPoolValue,
                     onAssignToAbility = onAssignToAbility,
                     onUnassignAbility = onUnassignAbility,
                 )
 
-                1 -> PointBuyPage(
+                AbilityMethod.POINT_BUY -> PointBuyPage(
                     raceAbilityBonuses = raceAbilityBonuses,
                     pointBuyScores = pointBuyScores,
                     pointsSpent = pointsSpent,
@@ -188,7 +194,7 @@ fun WizardAbilitiesStep(
                     onDecrementPB = onDecrementPB
                 )
 
-                2 -> RollDicePage(
+                AbilityMethod.ROLL -> RollDicePage(
                     raceAbilityBonuses = raceAbilityBonuses,
                     rolledResults = rolledResults,
                     rollIndexAssignments = rollIndexAssignments,
@@ -204,7 +210,7 @@ fun WizardAbilitiesStep(
 }
 
 @Composable
-fun PointBuyPage(
+private fun PointBuyPage(
     pointBuyScores: Map<Ability, Int>,
     raceAbilityBonuses: Map<Ability, Int>,
     pointsSpent: Int,
@@ -214,7 +220,9 @@ fun PointBuyPage(
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier.padding(8.dp)
+        modifier = modifier
+            .fillMaxSize()
+            .padding(8.dp)
     ) {
         item {
             val remaining = POINT_BUY_BUDGET - pointsSpent
@@ -248,15 +256,7 @@ fun PointBuyPage(
                     ((POINT_BUY_COSTS[score + 1] ?: 0) - (POINT_BUY_COSTS[score] ?: 0))
             val canDec = score > 8
 
-            val topCorners = if (index == 0) 16.dp else 4.dp
-            val bottomCorners = if (index == CORE_ABILITIES.lastIndex) 16.dp else 4.dp
-
-            val shape = RoundedCornerShape(
-                topStart = topCorners,
-                topEnd = topCorners,
-                bottomStart = bottomCorners,
-                bottomEnd = bottomCorners
-            )
+            val shape = abilityRowShape(index)
 
             AbilityPointBuyRow(
                 ability = ability,
@@ -273,20 +273,21 @@ fun PointBuyPage(
 }
 
 @Composable
-fun StandardArrayPage(
+private fun StandardArrayPage(
     raceAbilityBonuses: Map<Ability, Int>,
-    standardArrayPool: List<Int>,
     standardAssignments: Map<Ability, Int>,
-    usedPoolValues: Set<Int>,
     pendingPoolValue: Int?,
     onSelectPoolValue: (Int) -> Unit,
     onAssignToAbility: (Ability) -> Unit,
     onUnassignAbility: (Ability) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val usedPoolValues = standardAssignments.values.toSet()
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier.padding(8.dp)
+        modifier = modifier
+            .fillMaxSize()
+            .padding(8.dp)
     ) {
         item {
             Text(
@@ -295,16 +296,18 @@ fun StandardArrayPage(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-            Row(
+            FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
             ) {
-                standardArrayPool.forEach { value ->
+                STANDARD_ARRAY.forEach { value ->
                     val isUsed = value in usedPoolValues
                     val isSelected = value == pendingPoolValue
                     FilterChip(
                         selected = isSelected,
-                        onClick = { if (!isUsed) onSelectPoolValue(value) },
+                        onClick = { onSelectPoolValue(value) },
                         enabled = !isUsed,
                         label = { Text("$value") },
                         colors = FilterChipDefaults.filterChipColors(
@@ -319,15 +322,7 @@ fun StandardArrayPage(
             val assigned = standardAssignments[ability]
             val racial = raceAbilityBonuses[ability] ?: 0
 
-            val topCorners = if (index == 0) 16.dp else 4.dp
-            val bottomCorners = if (index == CORE_ABILITIES.lastIndex) 16.dp else 4.dp
-
-            val shape = RoundedCornerShape(
-                topStart = topCorners,
-                topEnd = topCorners,
-                bottomStart = bottomCorners,
-                bottomEnd = bottomCorners
-            )
+            val shape = abilityRowShape(index)
 
             AbilityAssignRow(
                 ability = ability,
@@ -345,7 +340,7 @@ fun StandardArrayPage(
 }
 
 @Composable
-fun RollDicePage(
+private fun RollDicePage(
     raceAbilityBonuses: Map<Ability, Int>,
     rolledResults: List<Int>,
     rollIndexAssignments: Map<Ability, Int>,
@@ -358,7 +353,9 @@ fun RollDicePage(
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier.padding(8.dp)
+        modifier = modifier
+            .fillMaxSize()
+            .padding(8.dp)
     ) {
         item {
             Button(
@@ -387,16 +384,18 @@ fun RollDicePage(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 val usedIndices = rollIndexAssignments.values.toSet()
-                Row(
+                FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
                 ) {
                     rolledResults.forEachIndexed { index, value ->
                         val isUsed = index in usedIndices
                         val isSelected = index == pendingRollIndex
                         FilterChip(
                             selected = isSelected,
-                            onClick = { if (!isUsed) onSelectRollIndex(index) },
+                            onClick = { onSelectRollIndex(index) },
                             enabled = !isUsed,
                             label = { Text("$value") },
                             colors = FilterChipDefaults.filterChipColors(
@@ -409,31 +408,19 @@ fun RollDicePage(
             }
             // Result chips
             itemsIndexed(items = CORE_ABILITIES) { index, ability ->
-                val assigned = if (rollIndexAssignments.containsKey(ability))
-                    rolledResults.getOrNull(rollIndexAssignments[ability]!!) else null
+                val assigned = rollIndexAssignments[ability]?.let { rolledResults.getOrNull(it) }
                 val racial = raceAbilityBonuses[ability] ?: 0
-
-                val topCorners = if (index == 0) 16.dp else 4.dp
-                val bottomCorners =
-                    if (index == CORE_ABILITIES.lastIndex) 16.dp else 4.dp
-
-                val shape = RoundedCornerShape(
-                    topStart = topCorners,
-                    topEnd = topCorners,
-                    bottomStart = bottomCorners,
-                    bottomEnd = bottomCorners
-                )
 
                 AbilityAssignRow(
                     ability = ability,
                     baseScore = assigned,
                     racialBonus = racial,
                     isPending = pendingRollIndex != null,
-                    shape = shape,
+                    shape = abilityRowShape(index),
                     onClick = {
-                        if (assigned != null) onUnassignAbility(ability) // pass through
+                        if (assigned != null) onUnassignAbility(ability)
                         else if (pendingRollIndex != null) onAssignToAbility(ability)
-                    }
+                    },
                 )
             }
         }
@@ -441,96 +428,128 @@ fun RollDicePage(
 }
 
 @Composable
-fun AbilityAssignRow(
+private fun AbilityAssignRow(
     ability: Ability,
-    baseScore: Int?,       // null = unassigned
+    baseScore: Int?,
     racialBonus: Int,
-    isPending: Boolean,    // a value is selected and awaiting assignment
+    isPending: Boolean,
     shape: RoundedCornerShape,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val isAssigned = baseScore != null
     val containerColor by animateColorAsState(
         targetValue = when {
             isAssigned -> MaterialTheme.colorScheme.secondaryContainer
-            isPending -> MaterialTheme.colorScheme.surfaceContainerHigh
+            isPending -> MaterialTheme.colorScheme.surfaceContainerHighest
             else -> Color.Transparent
         },
-        label = "abilityRowBg"
+        label = "abilityRowBg",
     )
-
     OutlinedCard(
         onClick = onClick,
+//        enabled = isAssigned || isPending,
         shape = shape,
-        colors = CardDefaults.outlinedCardColors().copy(
-            containerColor = containerColor
-        ),
-        modifier = modifier.heightIn(min = 48.dp)
+        colors = CardDefaults.outlinedCardColors(containerColor = containerColor),
+        modifier = modifier.heightIn(min = 48.dp),
     ) {
-        Grid(
-            config = {
-                val fieldWidth = ((constraints.maxWidth.toDp() - 24.dp) / 5).coerceAtLeast(0.dp)
-                repeat(5) { column(fieldWidth) }
-                column(24.dp)
-                row(GridTrackSize.Auto)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Dimens.Spacing.Medium)
-                .heightIn(min = 32.dp)
-        ) {
-            Text(
-                text = stringResource(ability.nameRes).take(3).uppercase(),
-                fontWeight = FontWeight.SemiBold,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.gridItem(row = 1, column = 1, alignment = Alignment.CenterStart)
-            )
-            if (racialBonus != 0) {
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val compact = maxWidth < 360.dp || LocalDensity.current.fontScale > 1.3f
+            Grid(
+                config = {
+                    val iconWidth = if (compact) 0.dp else 24.dp
+                    val columns = if (compact) 3 else 5
+                    val fieldWidth =
+                        ((constraints.maxWidth.toDp() - iconWidth) / columns).coerceAtLeast(0.dp)
+                    repeat(columns) { column(fieldWidth) }
+                    if (!compact) column(24.dp)
+                    row(GridTrackSize.Auto)
+                    if (compact) row(GridTrackSize.Auto)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Dimens.Spacing.Medium)
+                    .heightIn(min = 48.dp),
+            ) {
                 Text(
-                    text = "+$racialBonus",
+                    text = stringResource(ability.nameRes).take(3).uppercase(),
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.gridItem(
+                        row = 1,
+                        column = 1,
+                        alignment = Alignment.CenterStart
+                    ),
+                )
+                if (racialBonus != 0) {
+                    Text(
+                        text = "+$racialBonus",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.gridItem(
+                            row = 1,
+                            column = 2,
+                            alignment = Alignment.Center
+                        ),
+                    )
+                }
+                val finalScore = baseScore?.plus(racialBonus)
+                FinalScoreChip(
+                    score = finalScore?.toString() ?: "\u2014",
+                    modifier = Modifier.gridItem(
+                        row = if (compact) 2 else 1,
+                        column = if (compact) 1 else 3,
+                        alignment = Alignment.Center,
+                    )
+                )
+                Text(
+                    text = finalScore?.let { formatModifier(floor((it - 10) / 2.0).toInt()) }
+                        ?: "\u2014",
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.gridItem(row = 1, column = 2, alignment = Alignment.Center),
-                    textAlign = TextAlign.Center
+                    modifier = Modifier.gridItem(
+                        row = if (compact) 2 else 1,
+                        column = if (compact) 2 else 4,
+                        alignment = Alignment.Center,
+                    ),
                 )
-            }
-            val finalScore = baseScore?.plus(racialBonus)
-            FinalScoreChip(
-                score = finalScore?.toString() ?: "\u2014",
-                modifier = Modifier.gridItem(row = 1, column = 3, alignment = Alignment.Center)
-            )
-            Text(
-                text = finalScore?.let { formatModifier(floor((it - 10) / 2.0).toInt()) }
-                    ?: "\u2014",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.gridItem(row = 1, column = 4, alignment = Alignment.Center),
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = baseScore?.toString() ?: "\u2014",
-                modifier = Modifier.gridItem(row = 1, column = 5, alignment = Alignment.Center),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            if (isAssigned) {
-                Icon(
-                    Icons.Default.Close,
-                    contentDescription = stringResource(R.string.unassign),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .gridItem(row = 1, column = 6, alignment = Alignment.Center)
-                        .size(24.dp)
+                Text(
+                    text = baseScore?.toString() ?: "\u2014",
+                    modifier = Modifier.gridItem(
+                        row = if (compact) 2 else 1,
+                        column = if (compact) 3 else 5,
+                        alignment = Alignment.Center,
+                    ),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
+                if (isAssigned) {
+                    IconButton(
+                        onClick = {},
+                        modifier = Modifier
+                            .size(48.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = stringResource(R.string.unassign),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .gridItem(
+                                    row = 1,
+                                    column = if (compact) 3 else 6,
+                                    alignment = Alignment.Center
+                                )
+//                                .size(24.dp)
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun AbilityPointBuyRow(
+private fun AbilityPointBuyRow(
     ability: Ability,
     racialBonus: Int,
     baseScore: Int,
@@ -545,112 +564,139 @@ fun AbilityPointBuyRow(
         shape = shape,
         modifier = modifier.heightIn(min = 48.dp)
     ) {
-        Grid(
-            config = {
-                val fieldWidth = ((constraints.maxWidth.toDp() - 96.dp) / 4).coerceAtLeast(0.dp)
-                repeat(4) { column(fieldWidth) }
-                repeat(3) { column(32.dp) }
-                row(GridTrackSize.Auto)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp)
-                .heightIn(min = 36.dp)
-        ) {
-            Text(
-                text = stringResource(ability.nameRes).take(3).uppercase(),
-                modifier = Modifier.gridItem(
-                    row = 1,
-                    column = 1,
-                    alignment = Alignment.CenterStart
-                ),
-                fontWeight = FontWeight.SemiBold,
-                style = MaterialTheme.typography.titleMedium
-            )
-            if (racialBonus != 0) {
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val compact = maxWidth < 400.dp || LocalDensity.current.fontScale > 1.3f
+            Grid(
+                config = {
+                    val controlsWidth = if (compact) 0.dp else 144.dp
+                    val fieldWidth =
+                        ((constraints.maxWidth.toDp() - controlsWidth) / 4).coerceAtLeast(0.dp)
+                    repeat(4) { column(fieldWidth) }
+                    if (!compact) repeat(3) { column(48.dp) }
+                    row(GridTrackSize.Auto)
+                    if (compact) row(GridTrackSize.Auto)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                    .heightIn(min = 36.dp)
+            ) {
                 Text(
-                    text = "+$racialBonus",
+                    text = stringResource(ability.nameRes).take(3).uppercase(),
+                    modifier = Modifier.gridItem(
+                        row = 1,
+                        column = 1,
+                        alignment = Alignment.CenterStart
+                    ),
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                if (racialBonus != 0) {
+                    Text(
+                        text = "+$racialBonus",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.gridItem(
+                            row = 1,
+                            column = 2,
+                            alignment = Alignment.Center
+                        ),
+                    )
+                }
+
+                FinalScoreChip(
+                    score = "${baseScore + racialBonus}",
+                    modifier = Modifier.gridItem(row = 1, column = 3, alignment = Alignment.Center)
+                )
+
+                val abilityMod = floor((baseScore + racialBonus - 10) / 2.0).toInt()
+
+                Text(
+                    text = formatModifier(abilityMod),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.gridItem(row = 1, column = 2, alignment = Alignment.Center),
-                    textAlign = TextAlign.Center
+                    modifier = Modifier.gridItem(row = 1, column = 4, alignment = Alignment.Center),
                 )
-            }
-
-            FinalScoreChip(
-                score = "${baseScore + racialBonus}",
-                modifier = Modifier.gridItem(row = 1, column = 3, alignment = Alignment.Center)
-            )
-
-            val abilityMod = floor((baseScore + racialBonus - 10) / 2.0).toInt()
-
-            Text(
-                text = formatModifier(abilityMod),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.gridItem(row = 1, column = 4, alignment = Alignment.Center),
-                textAlign = TextAlign.Center
-            )
-            IconButton(
-                onClick = { onDecrementPB(ability) },
-                enabled = canDec,
-                modifier = Modifier
-                    .gridItem(row = 1, column = 5, alignment = Alignment.Center)
-                    .background(
-                        MaterialTheme.colorScheme.surfaceVariant,
-                        CircleShape
+                IconButton(
+                    onClick = { onDecrementPB(ability) },
+                    enabled = canDec,
+                    modifier = Modifier
+                        .gridItem(
+                            row = if (compact) 2 else 1,
+                            column = if (compact) 2 else 5,
+                            alignment = Alignment.Center,
+                        )
+                        .background(
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            CircleShape
+                        )
+                        .size(48.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Remove,
+                        contentDescription = stringResource(
+                            R.string.decrease_ability,
+                            stringResource(ability.nameRes)
+                        ),
                     )
-                    .size(32.dp)
-            ) {
-                Icon(Icons.Default.Remove, contentDescription = null)
-            }
-            Text(
-                text = "$baseScore",
-                modifier = Modifier.gridItem(row = 1, column = 6, alignment = Alignment.Center),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-            IconButton(
-                onClick = { onIncrementPB(ability) },
-                enabled = canInc,
-                modifier = Modifier
-                    .gridItem(row = 1, column = 7, alignment = Alignment.Center)
-                    .background(
-                        MaterialTheme.colorScheme.surfaceVariant,
-                        CircleShape
-                    )
-                    .size(32.dp)
-            ) {
-                Icon(
-                    Icons.Default.Add, contentDescription = null
+                }
+                Text(
+                    text = "$baseScore",
+                    modifier = Modifier.gridItem(
+                        row = if (compact) 2 else 1,
+                        column = if (compact) 3 else 6,
+                        alignment = Alignment.Center,
+                    ),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
+                IconButton(
+                    onClick = { onIncrementPB(ability) },
+                    enabled = canInc,
+                    modifier = Modifier
+                        .gridItem(
+                            row = if (compact) 2 else 1,
+                            column = if (compact) 4 else 7,
+                            alignment = Alignment.Center,
+                        )
+                        .background(
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            CircleShape
+                        )
+                        .size(48.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = stringResource(
+                            R.string.increase_ability,
+                            stringResource(ability.nameRes)
+                        ),
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun FinalScoreChip(
+private fun FinalScoreChip(
     score: String,
     modifier: Modifier = Modifier
 ) {
     Surface(
         color = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        shape = RoundedCornerShape(20.dp),
-        modifier = modifier.size(36.dp)
+        shape = CircleShape,
+        modifier = modifier.sizeIn(minWidth = 36.dp, minHeight = 36.dp)
     ) {
         Box(
-            Modifier
-                .fillMaxSize()
-                .padding(6.dp)
+            modifier = Modifier.padding(6.dp),
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 text = score,
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.align(Alignment.Center),
-                textAlign = TextAlign.Center
             )
         }
     }
@@ -712,7 +758,7 @@ private fun WizardAbilitiesStepPreview_POINT_BUY() {
     PreviewThemeWrapper.Preview {
         WizardAbilitiesStep(
             method = AbilityMethod.POINT_BUY,
-            selectedRace = PreviewUtils.origRaces.first(),
+            raceAbilityBonuses = PreviewUtils.origRaces.first().abilityBonuses,
             standardAssignments = emptyMap(),
             pendingPoolValue = null,
             pointBuyScores = PreviewUtils.pointBuyScores,
@@ -733,12 +779,13 @@ private fun WizardAbilitiesStepPreview_POINT_BUY() {
 }
 
 @Preview(showBackground = true)
+@Preview(name = "Standard narrow large text", widthDp = 320, heightDp = 900, fontScale = 1.5f)
 @Composable
 private fun WizardAbilitiesStepPreview_STANDARD() {
     PreviewThemeWrapper.Preview {
         WizardAbilitiesStep(
             method = AbilityMethod.STANDARD_ARRAY,
-            selectedRace = PreviewUtils.origRaces.first(),
+            raceAbilityBonuses = PreviewUtils.origRaces.first().abilityBonuses,
             standardAssignments = mapOf(
                 Ability.INT to 15,
                 Ability.CHA to 8,
@@ -762,12 +809,13 @@ private fun WizardAbilitiesStepPreview_STANDARD() {
 }
 
 @Preview(showBackground = true)
+@Preview(name = "Roll narrow large text", widthDp = 320, heightDp = 900, fontScale = 1.5f)
 @Composable
 private fun WizardAbilitiesStepPreview_RANDOM() {
     PreviewThemeWrapper.Preview {
         WizardAbilitiesStep(
             method = AbilityMethod.ROLL,
-            selectedRace = PreviewUtils.origRaces.first(),
+            raceAbilityBonuses = PreviewUtils.origRaces.first().abilityBonuses,
             standardAssignments = emptyMap(),
             pendingPoolValue = null,
             pointBuyScores = PreviewUtils.pointBuyScores,
@@ -785,4 +833,15 @@ private fun WizardAbilitiesStepPreview_RANDOM() {
             onSelectRollIndex = {},
         )
     }
+}
+
+private fun abilityRowShape(index: Int): RoundedCornerShape {
+    val top = if (index == 0) 16.dp else 4.dp
+    val bottom = if (index == CORE_ABILITIES.lastIndex) 16.dp else 4.dp
+    return RoundedCornerShape(
+        topStart = top,
+        topEnd = top,
+        bottomStart = bottom,
+        bottomEnd = bottom
+    )
 }
