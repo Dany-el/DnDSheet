@@ -1,0 +1,2 @@
+-keep,allowobfuscation,allowshrinking class com.yablonskyi.characterspells.viewmodel.CharacterSpellsLibraryViewModel
+-keep,allowobfuscation,allowshrinking class com.yablonskyi.characterspells.viewmodel.CharacterSpellsLibraryViewModel

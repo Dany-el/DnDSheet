@@ -90,8 +90,11 @@ class CharacterCreationWizardViewModel @Inject constructor(
             intent.skill in s.availableSkills && s.selectedSkills.size < s.maxSkills -> s.selectedSkills + intent.skill
             else -> s.selectedSkills
         })
-        is WizardIntent.AbilityMethodChanged -> s.copy(abilityMethod = intent.method, standardAssignments = emptyMap(),
-            pendingPoolValue = null, pendingRollIndex = null, rolledResults = emptyList(), rollIndexAssignments = emptyMap())
+        is WizardIntent.AbilityMethodChanged -> if (s.abilityMethod == intent.method) s else s.copy(
+            abilityMethod = intent.method,
+            pendingPoolValue = null,
+            pendingRollIndex = null,
+        )
         is WizardIntent.PoolValueSelected -> s.copy(pendingPoolValue = if (s.pendingPoolValue == intent.value) null else intent.value)
         is WizardIntent.AbilityAssigned -> when (s.abilityMethod) {
             AbilityMethod.STANDARD_ARRAY -> s.pendingPoolValue?.let { s.copy(standardAssignments = s.standardAssignments + (intent.ability to it), pendingPoolValue = null) } ?: s

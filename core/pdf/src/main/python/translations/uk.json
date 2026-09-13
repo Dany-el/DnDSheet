@@ -1,0 +1,74 @@
+{
+  "document": { "title": "Аркуш персонажа" },
+  "sections": {
+    "combat": "Бій", "saving_throws": "Ряткидки", "attacks": "Атаки",
+    "inventory": "Інвентар і монети", "skills": "Навички", "spellcasting": "Заклинання",
+    "features_traits": "Особливості й риси", "feats": "Таланти",
+    "proficiencies_languages": "Володіння й мови", "character_story": "Історія персонажа",
+    "portrait": "Портрет", "backstory": "Передісторія", "notes_page": "Нотатки, союзники й організації",
+    "notes": "Нотатки", "spell_descriptions": "Описи заклинань"
+  },
+  "fields": {
+    "class_level": "Клас і рівень", "race": "Раса", "hit_dice": "Кості здоров’я",
+    "current_hp": "Поточні ПЗ", "max_hp": "Макс.", "temporary_hp": "Тимч.",
+    "armor_class": "Клас броні", "initiative": "Ініціатива", "speed": "Швидкість",
+    "proficiency_bonus": "Бонус майстерності", "spellcasting_ability": "Характеристика",
+    "save_dc": "СК ряткидка", "attack_bonus": "Бонус атаки"
+  },
+  "table": { "name": "Назва", "bonus": "Бонус", "damage_type": "Урон / тип" },
+  "currency": { "gold": "ЗМ", "silver": "СМ", "copper": "ММ" },
+  "accessibility": {
+    "NONE": "Без володіння", "HALF": "Половина володіння", "PROFICIENT": "Володіння",
+    "EXPERT": "Експертиза", "portrait_of": "Портрет {name}"
+  },
+  "legend": { "proficient": "Володіння", "expertise": "Експертиза", "half": "Половина" },
+  "spell_slots": { "level": "Рівень {level}", "total": "усього комірок" },
+  "spells": {
+    "cantrip": "Замовляння", "casting_time": "Час накладання", "range": "Дистанція",
+    "duration": "Тривалість", "components": "Компоненти", "ritual": "Ритуал",
+    "concentration": "Концентрація", "material": "Матеріал:", "higher_levels": "На вищих рівнях",
+    "feet": "{distance} фт.", "save": "Ряткидок: {ability}."
+  },
+  "abilities": {
+    "STR": "Сила", "DEX": "Спритність", "CON": "Статура", "INT": "Інтелект",
+    "WIS": "Мудрість", "CHA": "Харизма", "NONE": "Нічого"
+  },
+  "ability_abbreviations": {
+    "STR": "Сил", "DEX": "Спр", "CON": "Ста", "INT": "Інт", "WIS": "Мдр", "CHA": "Хар"
+  },
+  "skills": {
+    "ATHLETICS": "Атлетика", "ACROBATICS": "Акробатика", "SLEIGHT_OF_HAND": "Спритність рук",
+    "STEALTH": "Потайливість", "ARCANA": "Магія", "HISTORY": "Історія",
+    "INVESTIGATION": "Розслідування", "NATURE": "Природа", "RELIGION": "Релігія",
+    "ANIMAL_HANDLING": "Догляд за тваринами", "INSIGHT": "Проникливість", "MEDICINE": "Медицина",
+    "PERCEPTION": "Уважність", "SURVIVAL": "Виживання", "DECEPTION": "Обман",
+    "INTIMIDATION": "Залякування", "PERFORMANCE": "Виступ", "PERSUASION": "Переконання"
+  },
+  "damage_types": {
+    "ACID": "Кислота", "BLUDGEONING": "Дробильний", "COLD": "Холод", "FIRE": "Вогонь",
+    "FORCE": "Силовий", "LIGHTNING": "Блискавка", "NECROTIC": "Некротичний", "PIERCING": "Колючий",
+    "POISON": "Отрута", "PSYCHIC": "Психічний", "RADIANT": "Променистий", "SLASHING": "Рубаючий",
+    "THUNDER": "Грім"
+  },
+  "magic_schools": {
+    "ABJURATION": "Відгородження", "CONJURATION": "Виклик", "DIVINATION": "Віщування",
+    "ENCHANTMENT": "Чарування", "EVOCATION": "Евокація", "ILLUSION": "Ілюзія",
+    "NECROMANCY": "Некромантія", "TRANSMUTATION": "Перетворення"
+  },
+  "cast_times": {
+    "ACTION": "Дія", "BONUS_ACTION": "Бонусна Дія", "REACTION": "Реакція", "SPECIAL": "Особливий"
+  },
+  "range_types": {
+    "SELF": "На себе", "TOUCH": "Дотик", "DISTANCE": "Відстань", "SIGHT": "Видимість", "UNLIMITED": "Необмежена"
+  },
+  "durations": {
+    "INSTANTANEOUS": "Миттєво", "ONE_ROUND": "1 раунд", "ONE_MINUTE": "1 хвилина",
+    "TEN_MINUTES": "10 хвилин", "ONE_HOUR": "1 година", "EIGHT_HOURS": "8 годин",
+    "TWENTY_FOUR_HOURS": "24 години", "SEVEN_DAYS": "7 днів", "THIRTY_DAYS": "30 днів",
+    "UNTIL_DISPELLED": "Поки не розсіється", "SPECIAL": "Особливий"
+  },
+  "components": { "VERBAL": "Вербальний", "SOMATIC": "Соматичний", "MATERIAL": "Матеріальний" },
+  "attack_types": {
+    "NONE": "Нічого", "MELEE_ATTACK": "Ближня атака", "RANGED_ATTACK": "Дальня атака", "SAVE": "Ряткидок"
+  }
+}

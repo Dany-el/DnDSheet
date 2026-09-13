@@ -39,6 +39,13 @@ class CharacterRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun applyChange(id: Long, change: com.yablonskyi.domain.character.CharacterChange): Character = database.withTransaction {
+        val current = characterDao.findCharacterById(id)?.toModel() ?: error("Character no longer exists")
+        val updated = com.yablonskyi.domain.character.applyCharacterChange(current, change)
+        characterDao.updateCharacter(updated.toEntity())
+        updated
+    }
+
     override suspend fun updateCharacter(character: Character) {
         characterDao.updateCharacter(character.toEntity())
     }

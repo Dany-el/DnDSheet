@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dice_first_letter">к</string>
+    <string name="roll">Кидок</string>
+</resources>

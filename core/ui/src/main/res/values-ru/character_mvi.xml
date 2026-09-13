@@ -1,0 +1,12 @@
+<resources>
+    <string name="character_operation_failed">Ошибка операции</string>
+    <string name="character_load_failed">Не удалось загрузить персонажа. Попробуйте ещё раз.</string>
+    <string name="character_delete_failed">Не удалось удалить персонажа. Попробуйте ещё раз.</string>
+    <string name="character_retry">Повторить</string>
+    <string name="character_not_found">Персонаж не найден</string>
+    <string name="character_back">Назад</string>
+    <string name="character_spells_failed">Не удалось загрузить заклинания. Попробуйте ещё раз.</string>
+    <string name="character_attacks_failed">Не удалось загрузить атаки. Попробуйте ещё раз.</string>
+    <string name="character_save_failed">Не удалось сохранить изменения. Повторите или отмените это изменение.</string>
+    <string name="character_image_failed">Не удалось заменить изображение. Предыдущее изображение сохранено.</string>
+</resources>

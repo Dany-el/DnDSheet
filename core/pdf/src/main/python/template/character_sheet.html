@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="{{ language_code }}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ character.name }} - {{ t('document.title') }}</title>
+    <style>
+      @page { size: A4; margin: 10mm; @bottom-center { content: counter(page); font: 8px Arial, sans-serif; color: #666; } }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font: 11px/1.45 Arial, sans-serif; color: #222; background: #e5e5e5; }
+      .page { width: 190mm; margin: 0 auto; background: white; }
+      .header { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; border: 1px solid #444; border-radius: 10px; padding: 12px; margin-bottom: 14px; }
+      .character-name { grid-column: 1 / -1; font: bold 26px/1.2 Georgia, serif; border-bottom: 1px solid #555; padding-bottom: 8px; overflow-wrap: anywhere; }
+      .header-field { display: flex; flex-direction: column-reverse; min-width: 0; }
+      .header-label, .stat-label { font-size: 8px; text-transform: uppercase; letter-spacing: .5px; color: #555; }
+      .header-value { font-size: 13px; border-bottom: 1px solid #ccc; overflow-wrap: anywhere; }
+      .main-grid { display: grid; grid-template-columns: 74px minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: start; }
+      .main-grid > div { min-width: 0; }
+      .abilities { display: flex; flex-direction: column; gap: 16px; background: #eee; border-radius: 10px; padding: 8px 6px 14px; }
+      .ability-block { display: flex; flex-direction: column; border: 1px solid #555; border-radius: 8px; background: white; text-align: center; padding: 7px 2px 0; }
+      .ability-name { font-size: 7px; text-transform: uppercase; font-weight: bold; }
+      .ability-score { order: 1; font: 28px/1.4 Georgia, serif; }
+      .ability-mod { order: 2; font: bold 13px/23px Arial, sans-serif; width: 36px; margin: 0 auto -8px; border: 1px solid #555; border-radius: 50%; background: white; }
+      .section { border: 1px solid #555; border-radius: 8px; margin-bottom: 10px; overflow-wrap: anywhere; }
+      .section-title { font-size: 8px; text-transform: uppercase; letter-spacing: .7px; text-align: center; font-weight: bold; padding: 5px 8px; border-bottom: 1px solid #aaa; }
+      .section-content { padding: 8px; }
+      .combat-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+      .stat-box { text-align: center; border: 1px solid #aaa; border-radius: 7px; padding: 6px 2px; }
+      .stat-value { font: bold 20px/1.3 Georgia, serif; overflow-wrap: anywhere; }
+      .stat-value.spell-ability { font: bold 12px/26px Arial, sans-serif; }
+      .stat-label { font-size: 7px; letter-spacing: .2px; }
+      .skill-row { display: flex; align-items: baseline; gap: 5px; padding: 4px 0; font-size: 10px; }
+      .saving-throws-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, auto); column-gap: 10px; }
+      .skill-mod { font-weight: bold; min-width: 24px; text-align: center; border-bottom: 1px solid #bbb; }
+      .skill-ability { color: #666; font-size: 8px; }
+      .spell-slots { display: flex; flex-wrap: wrap; gap: 6px; }
+      .slot-level { flex: 1; min-width: 42px; text-align: center; border: 1px solid #aaa; border-radius: 5px; padding: 4px; }
+      .slot-label { font-size: 8px; color: #555; }
+      .slot-value { font-weight: bold; font-size: 14px; }
+      .hp-bar { display: flex; gap: 18px; justify-content: center; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 8px; }
+      .hp-main { font: bold 32px Georgia, serif; }
+      .hp-detail { font: 18px Georgia, serif; }
+      .text-block { white-space: break-spaces; overflow-wrap: anywhere; font-size: 11px; min-height: 70px; line-height: 1.55; }
+      .portrait { display: block; width: 100%; max-height: 65mm; object-fit: contain; }
+      .backstory { margin-top: 14px; }
+      table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+      th { text-align: left; text-transform: uppercase; font-size: 8px; color: #555; }
+      td { padding: 7px 3px; border-bottom: 1px solid #ddd; vertical-align: top; font-size: 10px; overflow-wrap: anywhere; }
+      th:nth-child(2), td:nth-child(2) { width: 20%; text-align: center; }
+      th:nth-child(3), td:nth-child(3) { width: 35%; }
+      .coins { display: flex; gap: 8px; margin-bottom: 8px; }
+      .coins span { flex: 1; border: 1px solid #aaa; padding: 6px; text-align: center; border-radius: 5px; }
+      .skill-prof { display: inline-flex; align-items: center; justify-content: center; width: 11px; height: 11px; border: 1px solid #444; border-radius: 50%; flex-shrink: 0; vertical-align: middle; font: bold 8px/1 Arial, sans-serif; color: #111; }
+      .skill-prof.proficient { background: #333; border-color: #333; }
+      .skill-prof.expert { background: #333; border-color: #333; color: white; font-size: 8px; }
+      .skill-prof.half { font-size: 10px; }
+      .legend { font-size: 8px; padding: 7px; border-bottom: 1px solid #ddd; }
+      .page-header { border-bottom: 2px solid #555; margin-bottom: 14px; padding-bottom: 8px; }
+      .page-header h1 { font: bold 23px Georgia, serif; }
+      .page-header p { margin-top: 4px; color: #555; }
+      .story-portrait { float: left; width: 58mm; margin-right: 12px; }
+      .story-portrait:empty { display: none; }
+      .story-portrait .portrait { max-height: 70mm; }
+      [data-page="story"] .flowing { border: 0; }
+      .clear { clear: both; }
+      .flowing .section-title { text-align: left; }
+      .flowing .text-block { line-height: 1.6; }
+      .spell-book { columns: 2; column-gap: 14px; }
+      .spell-card { border: 1px solid #777; border-radius: 8px; padding: 10px; margin-bottom: 14px; break-inside: avoid; overflow-wrap: anywhere; }
+      .spell-heading { border-bottom: 1px solid #aaa; padding-bottom: 6px; margin-bottom: 8px; break-after: avoid; }
+      .spell-heading h2 { font: bold 15px/1.3 Georgia, serif; }
+      .spell-heading p { font-size: 9px; color: #555; margin-top: 4px; }
+      .spell-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 9px; margin-bottom: 8px; }
+      .spell-meta dt { font-weight: bold; }
+      .spell-material { font-size: 9px; margin-bottom: 8px; }
+      .spell-description { white-space: break-spaces; font-size: 10px; line-height: 1.5; orphans: 3; widows: 3; }
+      .spell-card h3 { font-size: 10px; margin: 10px 0 4px; break-after: avoid; }
+      @media screen { .page { width: 210mm; min-height: 297mm; padding: 10mm; margin: 24px auto; box-shadow: 0 3px 20px #0002; } }
+      @media screen and (max-width: 760px) { .page { width: 100%; min-height: 0; padding: 16px; margin: 0 0 16px; } .spell-book { columns: 1; } .story-portrait { float: none; width: 100%; margin: 0; } .main-grid { grid-template-columns: 74px minmax(0, 1fr); } .main-grid > div:last-child { grid-column: 1 / -1; } }
+      @media print { .page + .page { break-before: page; } .flowing, .inventory { break-inside: auto; } .page-header { break-inside: avoid; break-after: avoid; } body { background: white; } .page { width: auto; margin: 0; } .section:not(.flowing):not(.inventory), .ability-block, tr { break-inside: avoid; } .backstory { break-inside: auto; } .section-title { break-after: avoid; } .text-block { orphans: 3; widows: 3; } }
+    </style>
+  </head>
+  <body>
+    {% macro page_header(title) -%}
+    <header class="page-header"><h1>{{ title }}</h1><p>{{ character.name }} &middot; {{ character.charClass }} {{ character.level }}</p></header>
+    {%- endmacro %}
+    {% macro multiline(text) -%}
+    {% for line in (text | string).replace('\r\n', '\n').replace('\r', '\n').split('\n') %}{{ line }}{% if not loop.last %}<br>{% endif %}{% endfor %}
+    {%- endmacro %}
+    {% macro text_section(title, text) -%}
+    {% if text %}<section class="section flowing"><h2 class="section-title">{{ title }}</h2><div class="section-content text-block">{{ multiline(text) }}</div></section>{% endif %}
+    {%- endmacro %}
+    {% macro marker(level) -%}
+    <span class="skill-prof {{ level | lower }}" role="img" aria-label="{{ t('accessibility.' ~ level) }}">{{ '★' if level == 'EXPERT' else '/' if level == 'HALF' else '' }}</span>
+    {%- endmacro %}
+    <div class="page" data-page="overview">
+      <!-- Header -->
+      <div class="header">
+        <h1 class="character-name">{{ character.name }}</h1>
+        <div class="header-field">
+          <span class="header-label">{{ t('fields.class_level') }}</span>
+          <span class="header-value"
+            >{{ character.charClass }} {{ character.level }}{% if character.subClass | default('') %}<br>{{ character.subClass }}{% endif %}</span
+          >
+        </div>
+        <div class="header-field">
+          <span class="header-label">{{ t('fields.race') }}</span>
+          <span class="header-value">{{ character.race }}</span>
+        </div>
+        <div class="header-field">
+          <span class="header-label">{{ t('fields.hit_dice') }}</span>
+          <span class="header-value"
+            >{{ character.level ~ character.hitDice if character.hitDice else '—' }}</span
+          >
+        </div>
+      </div>
+
+      <div class="main-grid">
+        <!-- Abilities -->
+        <div>
+          <div class="abilities">
+            {% for ability in abilities %}
+            <div class="ability-block">
+              <div class="ability-name">{{ t('abilities.' ~ ability.id) }}</div>
+              <div class="ability-mod">{{ ability.modifier }}</div>
+              <div class="ability-score">{{ ability.score }}</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Centre column -->
+        <div>
+          <!-- Combat -->
+          <div class="section">
+            <h2 class="section-title">{{ t('sections.combat') }}</h2>
+            <div class="section-content">
+              <div class="hp-bar">
+                <div>
+                  <div class="stat-label">{{ t('fields.current_hp') }}</div>
+                  <div class="hp-main">{{ character.currentHp }}</div>
+                </div>
+                <div>
+                  <div class="stat-label">{{ t('fields.max_hp') }}</div>
+                  <div class="hp-detail">{{ character.maxHp }}</div>
+                </div>
+                
+                <div>
+                  <div class="stat-label">{{ t('fields.temporary_hp') }}</div>
+                  <div class="hp-detail">{{ character.tempHp }}</div>
+                </div>
+              </div>
+              <div class="combat-row">
+                <div class="stat-box">
+                  <div class="stat-value">{{ character.totalAc }}</div>
+                  <div class="stat-label">{{ t('fields.armor_class') }}</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value">{{ character.initiative }}</div>
+                  <div class="stat-label">{{ t('fields.initiative') }}</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value">{{ character.speed }}</div>
+                  <div class="stat-label">{{ t('fields.speed') }}</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value">+{{ character.profBonus }}</div>
+                  <div class="stat-label">{{ t('fields.proficiency_bonus') }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Saving throws -->
+          <div class="section">
+            <h2 class="section-title">{{ t('sections.saving_throws') }}</h2>
+            <div class="section-content saving-throws-grid">
+              {% for save in saving_throws %}
+              <div class="skill-row">
+                {{ marker('PROFICIENT' if save.proficient else 'NONE') }}
+                <div class="skill-mod">{{ save.modifier }}</div>
+                <div class="skill-name">{{ t('abilities.' ~ save.id) }}</div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Attacks -->
+          {% if attacks %}
+          <div class="section">
+            <h2 class="section-title">{{ t('sections.attacks') }}</h2>
+            <div class="section-content">
+              <table><thead><tr><th scope="col">{{ t('table.name') }}</th><th scope="col">{{ t('table.bonus') }}</th><th scope="col">{{ t('table.damage_type') }}</th></tr></thead><tbody>
+              {% for attack in attacks %}
+              <tr><td>{{ attack.name }}</td><td>{{ attack.bonus }}</td><td>{{ attack.damage }}<br>{{ t('damage_types.' ~ attack.damageType) }}</td></tr>
+              {% endfor %}
+              </tbody></table>
+            </div>
+          </div>
+          {% endif %}
+
+          <section class="section inventory"><h2 class="section-title">{{ t('sections.inventory') }}</h2>
+            <div class="section-content">
+              {% set coins = character.coins | default({}) %}
+              <div class="coins"><span><strong>{{ coins.gold | default(0) }}</strong> {{ t('currency.gold') }}</span><span><strong>{{ coins.silver | default(0) }}</strong> {{ t('currency.silver') }}</span><span><strong>{{ coins.copper | default(0) }}</strong> {{ t('currency.copper') }}</span></div>
+              <div class="text-block">{{ multiline(character.inventory | default('')) }}</div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Right column -->
+        <div>
+          <!-- Skills -->
+          <div class="section">
+            <h2 class="section-title">{{ t('sections.skills') }}</h2>
+            <p class="legend">{{ marker('PROFICIENT') }} {{ t('legend.proficient') }} &nbsp; {{ marker('EXPERT') }} {{ t('legend.expertise') }} &nbsp; {{ marker('HALF') }} {{ t('legend.half') }}</p>
+            <div class="section-content">
+              {% for skill in skills %}
+              <div class="skill-row">
+                {{ marker(skill.proficiency | default('PROFICIENT' if skill.proficient else 'NONE')) }}
+                <div class="skill-mod">{{ skill.modifier }}</div>
+                <div class="skill-name">{{ t('skills.' ~ skill.id) }}</div>
+                <div class="skill-ability">({{ t('ability_abbreviations.' ~ skill.ability) }})</div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Spellcasting -->
+          {% if spells %}
+          <div class="section">
+            <h2 class="section-title">{{ t('sections.spellcasting') }}</h2>
+            <div class="section-content">
+              <div
+                class="combat-row"
+                style="
+                  grid-template-columns: repeat(3, 1fr);
+                  margin-bottom: 8px;
+                "
+              >
+                <div class="stat-box">
+                  <div class="stat-value spell-ability">{{ t('abilities.' ~ spells.ability) }}</div>
+                  <div class="stat-label">{{ t('fields.spellcasting_ability') }}</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value">{{ spells.saveDc }}</div>
+                  <div class="stat-label">{{ t('fields.save_dc') }}</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-value">{{ spells.attackBonus }}</div>
+                  <div class="stat-label">{{ t('fields.attack_bonus') }}</div>
+                </div>
+              </div>
+
+              <div class="spell-slots">
+                {% for slot in spells.slots %}
+                <div class="slot-level">
+                  <div class="slot-label">{{ t('spell_slots.level', level=slot.level) }}</div>
+                  <div class="slot-value">{{ slot.max }}</div>
+                  <div class="slot-label">{{ t('spell_slots.total') }}</div>
+
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+
+        </div>
+      </div>
+    </div>
+
+    {% if character.traits or character.feats | default('') or character.proficiencies | default('') %}
+    <article class="page" data-page="features">
+      {{ page_header(t('sections.features_traits')) }}
+      {{ text_section(t('sections.features_traits'), character.traits) }}
+      {{ text_section(t('sections.feats'), character.feats | default('')) }}
+      {{ text_section(t('sections.proficiencies_languages'), character.proficiencies | default('')) }}
+    </article>
+    {% endif %}
+
+    {% if character.backstory or portrait_data_uri | default('') %}
+    <article class="page" data-page="story">
+      {{ page_header(t('sections.character_story')) }}
+      {% if portrait_data_uri | default('') %}
+      <div class="story-portrait">
+          <section class="section"><h2 class="section-title">{{ t('sections.portrait') }}</h2><div class="section-content"><img class="portrait" src="{{ portrait_data_uri }}" alt="{{ t('accessibility.portrait_of', name=character.name) }}"></div></section>
+      </div>
+      {% endif %}
+      {{ text_section(t('sections.backstory'), character.backstory) }}
+      <div class="clear"></div>
+    </article>
+    {% endif %}
+
+    {% if character.notes | default('') %}
+    <article class="page" data-page="notes">
+      {{ page_header(t('sections.notes_page')) }}
+      {{ text_section(t('sections.notes'), character.notes) }}
+    </article>
+    {% endif %}
+
+    {% if spell_details | default([]) %}
+    <article class="page" data-page="spell-descriptions">
+      {{ page_header(t('sections.spell_descriptions')) }}
+      <div class="spell-book">
+      {% for spell in spell_details | sort(attribute='level') %}
+      <section class="spell-card">
+        <header class="spell-heading"><h2>{{ spell.name }}</h2><p>{{ t('spells.cantrip') if spell.level == 0 else t('spell_slots.level', level=spell.level) }} &middot; {{ t('magic_schools.' ~ spell.school) }}</p></header>
+        <dl class="spell-meta">
+          <div><dt>{{ t('spells.casting_time') }}</dt><dd>{{ t('cast_times.' ~ spell.castTime) }}{% if spell.isRitual %} ({{ t('spells.ritual') }}){% endif %}</dd></div>
+          <div><dt>{{ t('spells.range') }}</dt><dd>{% if spell.rangeType == 'DISTANCE' %}{{ t('spells.feet', distance=spell.rangeValue | default('')) }}{% else %}{{ t('range_types.' ~ spell.rangeType) }}{% endif %}</dd></div>
+          <div><dt>{{ t('spells.duration') }}</dt><dd>{% if spell.isConcentration %}{{ t('spells.concentration') }}, {% endif %}{{ t('durations.' ~ spell.duration) }}</dd></div>
+          <div><dt>{{ t('spells.components') }}</dt><dd>{% for component in spell.components %}{{ t('components.' ~ component) }}{% if not loop.last %}, {% endif %}{% endfor %}</dd></div>
+        </dl>
+        {% if spell.material | default('') %}<p class="spell-material"><strong>{{ t('spells.material') }}</strong> {{ spell.material }}</p>{% endif %}
+        {% if spell.attackType | default('NONE') != 'NONE' or spell.saveStat | default('') or spell.damageDice | default('') %}
+        <p class="spell-material">{% if spell.attackType | default('NONE') != 'NONE' %}{{ t('attack_types.' ~ spell.attackType) }}. {% endif %}{% if spell.saveStat | default('') %}{{ t('spells.save', ability=t('ability_abbreviations.' ~ spell.saveStat)) }} {% endif %}{% if spell.damageDice | default('') %}{{ spell.damageDice }}{% if spell.damageType | default('') %} {{ t('damage_types.' ~ spell.damageType) }}{% endif %}{% endif %}</p>
+        {% endif %}
+        <div class="spell-description">{{ multiline(spell.description) }}</div>
+        {% if spell.higherLevels | default('') %}<h3>{{ t('spells.higher_levels') }}</h3><div class="spell-description">{{ multiline(spell.higherLevels) }}</div>{% endif %}
+      </section>
+      {% endfor %}
+      </div>
+    </article>
+    {% endif %}
+  </body>
+</html>

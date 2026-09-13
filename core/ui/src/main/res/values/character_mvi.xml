@@ -1,0 +1,12 @@
+<resources>
+    <string name="character_operation_failed">Operation failed</string>
+    <string name="character_load_failed">Could not load the character. Please try again.</string>
+    <string name="character_delete_failed">Could not delete the character. Please try again.</string>
+    <string name="character_retry">Retry</string>
+    <string name="character_not_found">Character not found</string>
+    <string name="character_back">Back</string>
+    <string name="character_spells_failed">Could not load spells. Please try again.</string>
+    <string name="character_attacks_failed">Could not load attacks. Please try again.</string>
+    <string name="character_save_failed">Could not save your changes. Retry or cancel this change.</string>
+    <string name="character_image_failed">Could not replace the image. Your previous image is preserved.</string>
+</resources>

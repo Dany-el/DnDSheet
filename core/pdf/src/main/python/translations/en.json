@@ -1,0 +1,101 @@
+{
+  "document": { "title": "Character sheet" },
+  "sections": {
+    "combat": "Combat",
+    "saving_throws": "Saving Throws",
+    "attacks": "Attacks",
+    "inventory": "Inventory & coins",
+    "skills": "Skills",
+    "spellcasting": "Spellcasting",
+    "features_traits": "Features & traits",
+    "feats": "Feats",
+    "proficiencies_languages": "Proficiencies & languages",
+    "character_story": "Character story",
+    "portrait": "Portrait",
+    "backstory": "Backstory",
+    "notes_page": "Notes, allies & organizations",
+    "notes": "Notes",
+    "spell_descriptions": "Spell descriptions"
+  },
+  "fields": {
+    "class_level": "Class & Level",
+    "race": "Race",
+    "hit_dice": "Hit Dice",
+    "current_hp": "Current HP",
+    "max_hp": "Max",
+    "temporary_hp": "Temp",
+    "armor_class": "Armour Class",
+    "initiative": "Initiative",
+    "speed": "Speed",
+    "proficiency_bonus": "Prof. Bonus",
+    "spellcasting_ability": "Ability",
+    "save_dc": "Save DC",
+    "attack_bonus": "Atk Bonus"
+  },
+  "table": { "name": "Name", "bonus": "Bonus", "damage_type": "Damage / type" },
+  "currency": { "gold": "GP", "silver": "SP", "copper": "CP" },
+  "accessibility": {
+    "NONE": "Not proficient",
+    "HALF": "Half proficiency",
+    "PROFICIENT": "Proficient",
+    "EXPERT": "Expertise",
+    "portrait_of": "Portrait of {name}"
+  },
+  "legend": { "proficient": "Proficient", "expertise": "Expertise", "half": "Half" },
+  "spell_slots": { "level": "Level {level}", "total": "total slots" },
+  "spells": {
+    "cantrip": "Cantrip",
+    "casting_time": "Casting time",
+    "range": "Range",
+    "duration": "Duration",
+    "components": "Components",
+    "ritual": "Ritual",
+    "concentration": "Concentration",
+    "material": "Material:",
+    "higher_levels": "At higher levels",
+    "feet": "{distance} ft.",
+    "save": "{ability} save."
+  },
+  "abilities": {
+    "STR": "Strength", "DEX": "Dexterity", "CON": "Constitution",
+    "INT": "Intelligence", "WIS": "Wisdom", "CHA": "Charisma", "NONE": "None"
+  },
+  "ability_abbreviations": {
+    "STR": "Str", "DEX": "Dex", "CON": "Con", "INT": "Int", "WIS": "Wis", "CHA": "Cha"
+  },
+  "skills": {
+    "ATHLETICS": "Athletics", "ACROBATICS": "Acrobatics", "SLEIGHT_OF_HAND": "Sleight of Hand",
+    "STEALTH": "Stealth", "ARCANA": "Arcana", "HISTORY": "History",
+    "INVESTIGATION": "Investigation", "NATURE": "Nature", "RELIGION": "Religion",
+    "ANIMAL_HANDLING": "Animal Handling", "INSIGHT": "Insight", "MEDICINE": "Medicine",
+    "PERCEPTION": "Perception", "SURVIVAL": "Survival", "DECEPTION": "Deception",
+    "INTIMIDATION": "Intimidation", "PERFORMANCE": "Performance", "PERSUASION": "Persuasion"
+  },
+  "damage_types": {
+    "ACID": "Acid", "BLUDGEONING": "Bludgeoning", "COLD": "Cold", "FIRE": "Fire",
+    "FORCE": "Force", "LIGHTNING": "Lightning", "NECROTIC": "Necrotic", "PIERCING": "Piercing",
+    "POISON": "Poison", "PSYCHIC": "Psychic", "RADIANT": "Radiant", "SLASHING": "Slashing",
+    "THUNDER": "Thunder"
+  },
+  "magic_schools": {
+    "ABJURATION": "Abjuration", "CONJURATION": "Conjuration", "DIVINATION": "Divination",
+    "ENCHANTMENT": "Enchantment", "EVOCATION": "Evocation", "ILLUSION": "Illusion",
+    "NECROMANCY": "Necromancy", "TRANSMUTATION": "Transmutation"
+  },
+  "cast_times": {
+    "ACTION": "Action", "BONUS_ACTION": "Bonus Action", "REACTION": "Reaction", "SPECIAL": "Special"
+  },
+  "range_types": {
+    "SELF": "Self", "TOUCH": "Touch", "DISTANCE": "Distance", "SIGHT": "Sight", "UNLIMITED": "Unlimited"
+  },
+  "durations": {
+    "INSTANTANEOUS": "Instantaneous", "ONE_ROUND": "1 Round", "ONE_MINUTE": "1 Minute",
+    "TEN_MINUTES": "10 Minutes", "ONE_HOUR": "1 Hour", "EIGHT_HOURS": "8 Hours",
+    "TWENTY_FOUR_HOURS": "24 Hours", "SEVEN_DAYS": "7 Days", "THIRTY_DAYS": "30 Days",
+    "UNTIL_DISPELLED": "Until Dispelled", "SPECIAL": "Special"
+  },
+  "components": { "VERBAL": "Verbal", "SOMATIC": "Somatic", "MATERIAL": "Material" },
+  "attack_types": {
+    "NONE": "None", "MELEE_ATTACK": "Melee Attack", "RANGED_ATTACK": "Ranged Attack", "SAVE": "Saving Throw"
+  }
+}

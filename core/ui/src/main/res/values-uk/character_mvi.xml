@@ -1,0 +1,12 @@
+<resources>
+    <string name="character_operation_failed">Помилка операції</string>
+    <string name="character_load_failed">Не вдалося завантажити персонажа. Спробуйте ще раз.</string>
+    <string name="character_delete_failed">Не вдалося видалити персонажа. Спробуйте ще раз.</string>
+    <string name="character_retry">Повторити</string>
+    <string name="character_not_found">Персонажа не знайдено</string>
+    <string name="character_back">Назад</string>
+    <string name="character_spells_failed">Не вдалося завантажити закляття. Спробуйте ще раз.</string>
+    <string name="character_attacks_failed">Не вдалося завантажити атаки. Спробуйте ще раз.</string>
+    <string name="character_save_failed">Не вдалося зберегти зміни. Повторіть або скасуйте цю зміну.</string>
+    <string name="character_image_failed">Не вдалося замінити зображення. Попереднє зображення збережено.</string>
+</resources>

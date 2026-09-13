@@ -1,0 +1,20 @@
+<lint-module
+    format="1"
+    dir="/home/dyablonskyi/Documents/AndroidProjects/DnDSheet/feature/character-spells"
+    name=":feature:character-spells"
+    type="LIBRARY"
+    maven="D&amp;D Sheet.feature:character-spells:unspecified"
+    agpVersion="9.3.1"
+    buildFolder="build"
+    bootClassPath="/home/dyablonskyi/Documents/Android/platforms/android-37.0/android.jar:/home/dyablonskyi/Documents/Android/build-tools/36.0.0/core-lambda-stubs.jar"
+    javaSourceLevel="17"
+    compileTarget="android-37.0"
+    neverShrinking="true"
+    highlightGradualR8Api="false">
+  <lintOptions
+      abortOnError="true"
+      absolutePaths="true"
+      checkReleaseBuilds="true"
+      explainIssues="true"/>
+  <variant name="debug"/>
+</lint-module>

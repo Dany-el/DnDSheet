@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="increase_ability">Increase %1$s</string>
+    <string name="decrease_ability">Decrease %1$s</string>
+</resources>

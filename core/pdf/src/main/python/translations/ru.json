@@ -1,0 +1,74 @@
+{
+  "document": { "title": "Лист персонажа" },
+  "sections": {
+    "combat": "Бой", "saving_throws": "Спасброски", "attacks": "Атаки",
+    "inventory": "Инвентарь и монеты", "skills": "Навыки", "spellcasting": "Заклинания",
+    "features_traits": "Особенности и черты", "feats": "Черты",
+    "proficiencies_languages": "Владения и языки", "character_story": "История персонажа",
+    "portrait": "Портрет", "backstory": "Предыстория", "notes_page": "Заметки, союзники и организации",
+    "notes": "Заметки", "spell_descriptions": "Описания заклинаний"
+  },
+  "fields": {
+    "class_level": "Класс и уровень", "race": "Раса", "hit_dice": "Кости хитов",
+    "current_hp": "Текущие ПЗ", "max_hp": "Макс.", "temporary_hp": "Врем.",
+    "armor_class": "Класс брони", "initiative": "Инициатива", "speed": "Скорость",
+    "proficiency_bonus": "Бонус мастерства", "spellcasting_ability": "Характеристика",
+    "save_dc": "СЛ спасброска", "attack_bonus": "Бонус атаки"
+  },
+  "table": { "name": "Название", "bonus": "Бонус", "damage_type": "Урон / тип" },
+  "currency": { "gold": "ЗМ", "silver": "СМ", "copper": "ММ" },
+  "accessibility": {
+    "NONE": "Нет владения", "HALF": "Половина владения", "PROFICIENT": "Владение",
+    "EXPERT": "Экспертиза", "portrait_of": "Портрет {name}"
+  },
+  "legend": { "proficient": "Владение", "expertise": "Экспертиза", "half": "Половина" },
+  "spell_slots": { "level": "Уровень {level}", "total": "всего ячеек" },
+  "spells": {
+    "cantrip": "Заговор", "casting_time": "Время накладывания", "range": "Дистанция",
+    "duration": "Длительность", "components": "Компоненты", "ritual": "Ритуал",
+    "concentration": "Концентрация", "material": "Материал:", "higher_levels": "На более высоких уровнях",
+    "feet": "{distance} фт.", "save": "Спасбросок: {ability}."
+  },
+  "abilities": {
+    "STR": "Сила", "DEX": "Ловкость", "CON": "Телосложение", "INT": "Интеллект",
+    "WIS": "Мудрость", "CHA": "Харизма", "NONE": "Ничего"
+  },
+  "ability_abbreviations": {
+    "STR": "Сил", "DEX": "Лов", "CON": "Тел", "INT": "Инт", "WIS": "Мдр", "CHA": "Хар"
+  },
+  "skills": {
+    "ATHLETICS": "Атлетика", "ACROBATICS": "Акробатика", "SLEIGHT_OF_HAND": "Ловкость рук",
+    "STEALTH": "Скрытность", "ARCANA": "Магия", "HISTORY": "История", "INVESTIGATION": "Анализ",
+    "NATURE": "Природа", "RELIGION": "Религия", "ANIMAL_HANDLING": "Уход за животными",
+    "INSIGHT": "Проницательность", "MEDICINE": "Медицина", "PERCEPTION": "Восприятие",
+    "SURVIVAL": "Выживание", "DECEPTION": "Обман", "INTIMIDATION": "Запугивание",
+    "PERFORMANCE": "Выступление", "PERSUASION": "Убеждение"
+  },
+  "damage_types": {
+    "ACID": "Кислота", "BLUDGEONING": "Дробящий", "COLD": "Холод", "FIRE": "Огонь",
+    "FORCE": "Силовой", "LIGHTNING": "Электричество", "NECROTIC": "Некротический", "PIERCING": "Колющий",
+    "POISON": "Яд", "PSYCHIC": "Психический", "RADIANT": "Излучение", "SLASHING": "Рубящий",
+    "THUNDER": "Звук"
+  },
+  "magic_schools": {
+    "ABJURATION": "Ограждение", "CONJURATION": "Вызов", "DIVINATION": "Прорицание",
+    "ENCHANTMENT": "Очарование", "EVOCATION": "Воплощение", "ILLUSION": "Иллюзия",
+    "NECROMANCY": "Некромантия", "TRANSMUTATION": "Преобразование"
+  },
+  "cast_times": {
+    "ACTION": "Действие", "BONUS_ACTION": "Бонусное Действие", "REACTION": "Реакция", "SPECIAL": "Особенное"
+  },
+  "range_types": {
+    "SELF": "На себя", "TOUCH": "Касание", "DISTANCE": "Дистанция", "SIGHT": "Видимость", "UNLIMITED": "Неограниченная"
+  },
+  "durations": {
+    "INSTANTANEOUS": "Мгновенная", "ONE_ROUND": "1 раунд", "ONE_MINUTE": "1 минута",
+    "TEN_MINUTES": "10 минут", "ONE_HOUR": "1 час", "EIGHT_HOURS": "8 часов",
+    "TWENTY_FOUR_HOURS": "24 часа", "SEVEN_DAYS": "7 дней", "THIRTY_DAYS": "30 дней",
+    "UNTIL_DISPELLED": "Пока не рассеется", "SPECIAL": "Особенное"
+  },
+  "components": { "VERBAL": "Вербальный", "SOMATIC": "Соматический", "MATERIAL": "Материальный" },
+  "attack_types": {
+    "NONE": "Ничего", "MELEE_ATTACK": "Рукопашная атака", "RANGED_ATTACK": "Дальнобойная атака", "SAVE": "Спасбросок"
+  }
+}
