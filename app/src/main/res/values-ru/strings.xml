@@ -159,7 +159,7 @@
     <string name="backstory">Предыстория</string>
     <string name="settings">Настройки</string>
     <string name="char_name">Имя</string>
-    <string name="char_race">Расса</string>
+    <string name="char_race">Раса</string>
     <string name="char_class">Класс</string>
     <string name="char_subclass">Подкласс</string>
     <string name="char_ac">КД</string>
