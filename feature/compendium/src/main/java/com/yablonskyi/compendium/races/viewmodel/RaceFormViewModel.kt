@@ -11,6 +11,7 @@ import com.yablonskyi.domain.repository.RaceRepository
 import com.yablonskyi.model.character.Ability
 import com.yablonskyi.model.character.Skill
 import com.yablonskyi.model.rulebook.Race
+import com.yablonskyi.model.rulebook.RaceSize
 import com.yablonskyi.ui.validation.FieldState
 import com.yablonskyi.ui.validation.IntFieldState
 import com.yablonskyi.ui.validation.RaceValidators
@@ -235,7 +236,9 @@ class RaceFormViewModel @Inject constructor(
 data class RaceFormUiState(
     val id: String = "",
     val name: FieldState = FieldState(validator = RaceValidators.name),
-    val size: FieldState = FieldState(validator = RaceValidators.size),
+    val size: FieldState = FieldState(
+        text = RaceSize.MEDIUM.name,
+        validator = RaceValidators.size),
     val traits: FieldState = FieldState(validator = RaceValidators.traits),
     val description: FieldState = FieldState(validator = RaceValidators.description),
     val speedField: IntFieldState = IntFieldState(

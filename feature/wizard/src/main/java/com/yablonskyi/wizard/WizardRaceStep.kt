@@ -164,6 +164,12 @@ fun RaceCard(
         label = "raceContainer"
     )
 
+    val infoChipBorderColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.outlineVariant,
+        label = "infoChipBorderColor"
+    )
+
     val resources = LocalResources.current
 
     OutlinedCard(
@@ -204,8 +210,8 @@ fun RaceCard(
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                OutlinedInfoChip(race.size)
-                OutlinedInfoChip("${race.speed}${stringResource(R.string.feets)}")
+                OutlinedInfoChip(race.size, borderColor = infoChipBorderColor)
+                OutlinedInfoChip("${race.speed}${stringResource(R.string.feets)}", borderColor = infoChipBorderColor)
                 if (race.isHomebrew) WizardChip(text = stringResource(R.string.homebrew))
             }
             // Ability bonuses
@@ -214,7 +220,7 @@ fun RaceCard(
                     val name = stringResource(ability.nameRes).take(3).uppercase()
                     "$name\u00A0${if (bonus >= 0) "+" else ""}$bonus"
                 }.joinToString()
-                OutlinedInfoChip(bonuses)
+                OutlinedInfoChip(bonuses, borderColor = infoChipBorderColor)
             }
             // Granted skills
             if (race.grantedSkills.isNotEmpty()) {

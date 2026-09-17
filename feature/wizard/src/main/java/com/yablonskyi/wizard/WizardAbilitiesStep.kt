@@ -441,30 +441,24 @@ private fun AbilityAssignRow(
     val containerColor by animateColorAsState(
         targetValue = when {
             isAssigned -> MaterialTheme.colorScheme.secondaryContainer
-            isPending -> MaterialTheme.colorScheme.surfaceContainerHighest
             else -> Color.Transparent
         },
         label = "abilityRowBg",
     )
     OutlinedCard(
         onClick = onClick,
-//        enabled = isAssigned || isPending,
+        enabled = isAssigned || isPending,
         shape = shape,
         colors = CardDefaults.outlinedCardColors(containerColor = containerColor),
         modifier = modifier.heightIn(min = 48.dp),
     ) {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val compact = maxWidth < 360.dp || LocalDensity.current.fontScale > 1.3f
+            val columnWidth = (maxWidth - Dimens.Spacing.Medium * 2) / 6
+
             Grid(
                 config = {
-                    val iconWidth = if (compact) 0.dp else 24.dp
-                    val columns = if (compact) 3 else 5
-                    val fieldWidth =
-                        ((constraints.maxWidth.toDp() - iconWidth) / columns).coerceAtLeast(0.dp)
-                    repeat(columns) { column(fieldWidth) }
-                    if (!compact) column(24.dp)
-                    row(GridTrackSize.Auto)
-                    if (compact) row(GridTrackSize.Auto)
+                    repeat(6) { column(columnWidth) }
+                    row(48.dp)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -497,8 +491,8 @@ private fun AbilityAssignRow(
                 FinalScoreChip(
                     score = finalScore?.toString() ?: "\u2014",
                     modifier = Modifier.gridItem(
-                        row = if (compact) 2 else 1,
-                        column = if (compact) 1 else 3,
+                        row = 1,
+                        column = 3,
                         alignment = Alignment.Center,
                     )
                 )
@@ -508,16 +502,16 @@ private fun AbilityAssignRow(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.gridItem(
-                        row = if (compact) 2 else 1,
-                        column = if (compact) 2 else 4,
+                        row = 1,
+                        column = 4,
                         alignment = Alignment.Center,
                     ),
                 )
                 Text(
                     text = baseScore?.toString() ?: "\u2014",
                     modifier = Modifier.gridItem(
-                        row = if (compact) 2 else 1,
-                        column = if (compact) 3 else 5,
+                        row = 1,
+                        column = 5,
                         alignment = Alignment.Center,
                     ),
                     style = MaterialTheme.typography.titleMedium,
@@ -525,21 +519,19 @@ private fun AbilityAssignRow(
                 )
                 if (isAssigned) {
                     IconButton(
-                        onClick = {},
+                        onClick = onClick,
                         modifier = Modifier
-                            .size(48.dp)
+                            .gridItem(
+                                row = 1,
+                                column = 6,
+                                alignment = Alignment.Center,
+                            )
+                            .size(48.dp),
                     ) {
                         Icon(
                             Icons.Default.Close,
                             contentDescription = stringResource(R.string.unassign),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .gridItem(
-                                    row = 1,
-                                    column = if (compact) 3 else 6,
-                                    alignment = Alignment.Center
-                                )
-//                                .size(24.dp)
                         )
                     }
                 }
@@ -565,15 +557,16 @@ private fun AbilityPointBuyRow(
         modifier = modifier.heightIn(min = 48.dp)
     ) {
         BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val compact = maxWidth < 400.dp || LocalDensity.current.fontScale > 1.3f
+            val compact = maxWidth < 360.dp || LocalDensity.current.fontScale > 1.3f
+
             Grid(
                 config = {
-                    val controlsWidth = if (compact) 0.dp else 144.dp
+                    val columns = if (compact) 4 else 7
                     val fieldWidth =
-                        ((constraints.maxWidth.toDp() - controlsWidth) / 4).coerceAtLeast(0.dp)
-                    repeat(4) { column(fieldWidth) }
-                    if (!compact) repeat(3) { column(48.dp) }
-                    row(GridTrackSize.Auto)
+                        (constraints.maxWidth.toDp() / columns).coerceAtLeast(0.dp)
+                    repeat(columns) { column(fieldWidth) }
+                    if (!compact) column(24.dp)
+                    row(48.dp)
                     if (compact) row(GridTrackSize.Auto)
                 },
                 modifier = Modifier

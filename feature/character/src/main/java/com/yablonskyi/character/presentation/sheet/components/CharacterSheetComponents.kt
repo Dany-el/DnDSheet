@@ -1,12 +1,5 @@
 package com.yablonskyi.character.presentation.sheet.components
 
-import com.yablonskyi.character.presentation.sheet.model.CharacterTab
-
-import com.yablonskyi.character.presentation.sheet.model.CharacterSheetEditor
-import com.yablonskyi.character.presentation.sheet.editor.AbilityEditSheetContent
-import com.yablonskyi.character.presentation.sheet.editor.HealthEditSheetContent
-
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -36,6 +29,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.NoPhotography
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
@@ -84,7 +78,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
+import com.yablonskyi.character.presentation.sheet.editor.AbilityEditSheetContent
+import com.yablonskyi.character.presentation.sheet.editor.HealthEditSheetContent
 import com.yablonskyi.character.presentation.sheet.editor.UpdateAttackSheet
+import com.yablonskyi.character.presentation.sheet.model.CharacterSheetEditor
+import com.yablonskyi.character.presentation.sheet.model.CharacterTab
 import com.yablonskyi.dice.DiceRollResultBox
 import com.yablonskyi.dice.DiceRollState
 import com.yablonskyi.model.character.Ability
@@ -111,6 +109,7 @@ fun CharacterTopAppBar(
     imageModifier: Modifier,
     onNavigateBack: () -> Unit,
     onSettingsNavigate: () -> Unit,
+    onDiceHistoryNavigate: () -> Unit,
     lessDetails: Boolean,
     onLessDetails: () -> Unit,
 ) {
@@ -209,6 +208,11 @@ fun CharacterTopAppBar(
                             onClick = { onLessDetails() }
                         ),
                         SlicedMenuItem(
+                            text = stringResource(R.string.dice_history),
+                            icon = Icons.Default.History,
+                            onClick = onDiceHistoryNavigate,
+                        ),
+                        SlicedMenuItem(
                             text = stringResource(R.string.settings),
                             icon = Icons.Default.Settings,
                             onClick = onSettingsNavigate
@@ -284,6 +288,8 @@ fun SpeedDisplay(
         Text(
             text = stringResource(R.string.char_speed).uppercase(),
             style = MaterialTheme.typography.labelMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
@@ -473,7 +479,7 @@ fun CharacterDetailsRow(
     speed: Int,
     // Prof bonus
     proficiencyBonus: Int,
-    onRollClick: (String) -> Unit,
+    onInitiativeBonusRoll: () -> Unit,
     onHealthClick: () -> Unit,
     onRestClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -504,7 +510,7 @@ fun CharacterDetailsRow(
         CollapsibleDetails(
             proficiencyBonus = proficiencyBonus,
             initiativeBonus = initiativeBonus,
-            onRollClick = onRollClick,
+            onInitiativeBonusRoll = onInitiativeBonusRoll,
             onRestClick = onRestClick
         )
     }
@@ -514,7 +520,7 @@ fun CharacterDetailsRow(
 fun CollapsibleDetails(
     proficiencyBonus: Int,
     initiativeBonus: Int,
-    onRollClick: (String) -> Unit,
+    onInitiativeBonusRoll: () -> Unit,
     onRestClick: () -> Unit
 ) {
     Row(
@@ -550,6 +556,7 @@ fun CollapsibleDetails(
                 style = MaterialTheme.typography.labelMedium,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -559,7 +566,7 @@ fun CollapsibleDetails(
             modifier = Modifier.weight(1f)
         ) {
             TextButton(
-                onClick = { onRollClick("${DiceRoles.D20.roll}${formatModifier(initiativeBonus)}") },
+                onClick = onInitiativeBonusRoll,
                 border = BorderStroke(
                     width = 2.dp,
                     color = MaterialTheme.colorScheme.tertiary
@@ -583,6 +590,7 @@ fun CollapsibleDetails(
                 style = MaterialTheme.typography.labelMedium,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -612,6 +620,7 @@ fun ExpandedTopAppBar(
     // Prof bonus
     proficiencyBonus: Int,
     onSettingsNavigate: () -> Unit,
+    onDiceHistoryNavigate: () -> Unit,
     onNavigateBack: () -> Unit
 ) {
     TopAppBar(
@@ -742,12 +751,29 @@ fun ExpandedTopAppBar(
             }
         },
         actions = {
-            IconButton(
-                onClick = { onSettingsNavigate() }
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.Settings,
-                    contentDescription = "Options",
+            var menuExpanded by remember { mutableStateOf(false) }
+            Box {
+                IconButton(onClick = { menuExpanded = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(R.string.more_options),
+                    )
+                }
+                SlicedDropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false },
+                    items = listOf(
+                        SlicedMenuItem(
+                            text = stringResource(R.string.dice_history),
+                            icon = Icons.Default.History,
+                            onClick = onDiceHistoryNavigate,
+                        ),
+                        SlicedMenuItem(
+                            text = stringResource(R.string.settings),
+                            icon = Icons.Rounded.Settings,
+                            onClick = onSettingsNavigate,
+                        ),
+                    ),
                 )
             }
         }
@@ -875,4 +901,3 @@ fun CharacterSheetBottomSheets(
         }
     }
 }
-

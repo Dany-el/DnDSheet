@@ -17,7 +17,7 @@ object Dimens {
 
     object Fab {
         val Size: Dp = 64.dp
-        val BottomPadding: Dp = 88.dp
+        val BottomPadding: Dp = 110.dp
         val Clearance: Dp = 72.dp
     }
 

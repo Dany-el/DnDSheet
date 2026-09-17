@@ -1,19 +1,22 @@
 package com.yablonskyi.character.presentation.sheet.slides
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Grid
+import androidx.compose.foundation.layout.GridTrackSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -36,62 +39,65 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewDynamicColors
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.yablonskyi.character.presentation.sheet.model.SpellFilter
 import com.yablonskyi.character.presentation.common.UiUtils
-import com.yablonskyi.model.character.Character
+import com.yablonskyi.character.presentation.sheet.model.SpellFilter
 import com.yablonskyi.model.character.Spell
 import com.yablonskyi.model.character.SpellLevel
 import com.yablonskyi.model.character.SpellRangeType
+import com.yablonskyi.model.character.SpellSettings
 import com.yablonskyi.model.character.SpellSlot
-import com.yablonskyi.model.dice.DiceRoles
 import com.yablonskyi.ui.R
+import com.yablonskyi.ui.preview.FontScalePreviews
+import com.yablonskyi.ui.theme.Dimens
 import com.yablonskyi.ui.theme.DnDSheetTheme
 import com.yablonskyi.ui.utils.formatModifier
 import com.yablonskyi.ui.utils.spell.SpellTag
-import kotlin.text.get
 
 @Composable
 fun SpellSlide(
-    character: Character,
     spells: List<Spell>,
+    spellSettings: SpellSettings,
     availableFilters: List<SpellFilter>,
+    spellSaveDC: Int,
+    spellAttackBonus: Int,
     currentFilter: SpellFilter,
     onFilterChange: (SpellFilter) -> Unit,
-    onRollClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    onManageSpellsClick: (Long) -> Unit,
+    onCastSpell: (Spell) -> Unit,
+    onSpellAttackRoll: (Int) -> Unit,
+    onManageSpellsClick: () -> Unit,
     onSlotClick: (SpellLevel, Int) -> Unit,
-    onSpellClick: (Spell) -> Unit
+    onSpellClick: (Spell) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val groupedSpells = remember(spells) {
         spells.groupBy { it.level }.toSortedMap()
     }
 
-    Box(
-        modifier = modifier
-    ) {
+    Box(modifier = modifier) {
         LazyColumn(
             contentPadding = PaddingValues(
                 start = 4.dp,
                 top = 0.dp,
                 end = 4.dp,
-                bottom = 120.dp
+                bottom = Dimens.Fab.BottomPadding
             ),
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.fillMaxSize()
@@ -99,7 +105,7 @@ fun SpellSlide(
             item {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     SpellFiltersRow(
                         filters = availableFilters,
@@ -107,14 +113,10 @@ fun SpellSlide(
                         onFilterChange = onFilterChange,
                     )
                     SpellCastingRow(
-                        savingThrow = character.getSpellSaveDC(),
-                        attackBonus = character.getSpellAttackBonus(),
-                        onRollClick = {
-                            onRollClick(
-                                "${DiceRoles.D20.roll}${formatModifier(character.getSpellAttackBonus())}"
-                            )
-                        },
-                        onNavigate = { onManageSpellsClick(character.id) }
+                        savingThrow = spellSaveDC,
+                        attackBonus = spellAttackBonus,
+                        onSpellAttackRoll = { onSpellAttackRoll(spellAttackBonus) },
+                        onNavigate = onManageSpellsClick
                     )
                 }
             }
@@ -131,10 +133,10 @@ fun SpellSlide(
                 }
             } else {
                 groupedSpells.forEach { (level, levelSpells) ->
-                    stickyHeader {
+                    stickyHeader(key = "spell-level-${level.name}") {
                         SpellLevelHeader(
                             level = level,
-                            slot = character.spellSettings.spellSlots[level] ?: SpellSlot(),
+                            slot = spellSettings.spellSlots[level] ?: SpellSlot(),
                             onSlotClick = { delta ->
                                 onSlotClick(level, delta)
                             }
@@ -164,14 +166,9 @@ fun SpellSlide(
                         SpellCard(
                             spell = spell,
                             shape = itemShape,
-                            spellSaveDC = character.getSpellSaveDC(),
-                            onRollClick = { dice ->
-                                onRollClick(dice)
-                            },
-                            onUseSpellClick = { onSlotClick(level, 1) },
-                            onSpellClick = { spell ->
-                                onSpellClick(spell)
-                            }
+                            spellSaveDC = spellSaveDC,
+                            onCastSpell = { onCastSpell(spell) },
+                            onSpellClick = onSpellClick,
                         )
                     }
                 }
@@ -184,75 +181,123 @@ fun SpellSlide(
 fun SpellCastingRow(
     savingThrow: Int,
     attackBonus: Int,
-    onRollClick: () -> Unit,
+    onSpellAttackRoll: () -> Unit,
     onNavigate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    FlowRow(
+        itemVerticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier.fillMaxWidth()
     ) {
-        SpellStatPill(
-            label = stringResource(R.string.msg_attack),
-            modifier = Modifier.weight(1f),
-            trailingContent = {
-                TextButton(
-                    onClick = onRollClick,
-                    shape = MaterialTheme.shapes.large.copy(
-                        topStart = CornerSize(4.dp),
-                        bottomStart = CornerSize(4.dp)
-                    ),
-                    colors = ButtonDefaults.buttonColors().copy(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary
-                    )
-                ) {
-                    Text(
-                        text = formatModifier(attackBonus),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                }
-            }
-        )
+        Box(
+            modifier = Modifier
+                .heightIn(min = 48.dp)
+                .weight(1f)
+        ) {
+            Surface(
+                shape = MaterialTheme.shapes.large,
+                color = Color.Transparent,
+                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outlineVariant),
+                modifier = Modifier.matchParentSize()
+            ) { }
 
-        SpellStatPill(
-            label = stringResource(R.string.saving_throw_short),
-            modifier = Modifier.weight(1f),
-            trailingContent = {
-                TextButton(
-                    onClick = { },
-                    border = BorderStroke(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline
-                    ),
-                    enabled = false,
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+                    .clip(MaterialTheme.shapes.large)
+            ) {
+                Text(
+                    text = stringResource(R.string.msg_attack).uppercase(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 12.dp)
+                )
+                ModifierButton(
+                    onClick = onSpellAttackRoll,
+                    text = formatModifier(attackBonus),
                     shape = MaterialTheme.shapes.large.copy(
                         topStart = CornerSize(0.dp),
                         bottomStart = CornerSize(0.dp)
                     ),
-                    colors = ButtonDefaults.buttonColors().copy(
-                        containerColor = Color.Transparent,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        disabledContainerColor = Color.Transparent
-                    )
+                    modifier = Modifier.heightIn(min = 48.dp)
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .heightIn(min = 48.dp)
+                .weight(1f)
+        ) {
+            Surface(
+                shape = MaterialTheme.shapes.large,
+                color = Color.Transparent,
+                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outlineVariant),
+                modifier = Modifier.matchParentSize()
+            ) { }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+                    .clip(MaterialTheme.shapes.large)
+            ) {
+                Text(
+                    text = stringResource(R.string.saving_throw_short).uppercase(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 12.dp)
+                )
+                Surface(
+                    border = BorderStroke(
+                        width = 1.5.dp,
+                        color = MaterialTheme.colorScheme.outline
+                    ),
+                    shape = MaterialTheme.shapes.large.copy(
+                        topStart = CornerSize(4.dp),
+                        bottomStart = CornerSize(4.dp)
+                    ),
+                    color = Color.Transparent,
+                    modifier = Modifier.heightIn(min = 48.dp)
                 ) {
-                    Text(
-                        text = savingThrow.toString(),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .widthIn(min = ButtonDefaults.MinWidth)
+                            .heightIn(min = 48.dp)
+                            .padding(horizontal = 12.dp),
+                    ) {
+                        Text(
+                            text = savingThrow.toString(),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
                 }
             }
-        )
+        }
 
         OutlinedIconButton(
             onClick = onNavigate,
             shape = RoundedCornerShape(8.dp),
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(48.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Settings,
@@ -267,13 +312,14 @@ fun SpellCastingRow(
 private fun SpellStatPill(
     label: String,
     modifier: Modifier = Modifier,
-    trailingContent: @Composable (() -> Unit)? = null,
+    trailingContent: @Composable (() -> Unit),
 ) {
     Surface(
         shape = MaterialTheme.shapes.large,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         color = Color.Transparent,
-        modifier = modifier.height(40.dp)
+        modifier = modifier
+            .heightIn(min = 48.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -283,12 +329,11 @@ private fun SpellStatPill(
             Text(
                 text = label.uppercase(),
                 style = MaterialTheme.typography.titleSmall,
+                textAlign = TextAlign.Center,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.padding(vertical = 8.dp)
             )
-            if (trailingContent != null) {
-                trailingContent()
-            }
+            trailingContent()
         }
     }
 }
@@ -334,20 +379,31 @@ fun SpellSlotTracker(
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.semantics { heading() },
         )
         LazyRow {
             items(count = slot.max) { index ->
                 val isSpent = index < slot.current
+                val slotState = stringResource(
+                    if (isSpent) R.string.spell_slot_spent else R.string.spell_slot_available
+                )
+                val slotAction = stringResource(
+                    if (isSpent) R.string.restore_spell_slot else R.string.consume_spell_slot,
+                    stringResource(level.resId),
+                    index + 1,
+                )
 
                 IconButton(
                     onClick = {
                         onSlotClick(if (isSpent) -1 else 1)
                     },
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier
+                        .size(40.dp)
+                        .semantics { stateDescription = slotState }
                 ) {
                     Icon(
                         imageVector = if (isSpent) Icons.Default.Circle else Icons.Default.RadioButtonUnchecked,
-                        contentDescription = null,
+                        contentDescription = slotAction,
                         tint = if (isSpent) CheckboxDefaults.colors().checkedBoxColor else MaterialTheme.colorScheme.outlineVariant,
                         modifier = Modifier.size(24.dp)
                     )
@@ -398,26 +454,19 @@ fun SpellCard(
     spell: Spell,
     shape: Shape,
     spellSaveDC: Int,
-    onRollClick: (String) -> Unit,
-    onUseSpellClick: () -> Unit,
+    onCastSpell: () -> Unit,
     onSpellClick: (Spell) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val lowerTextStyle = MaterialTheme.typography.labelLarge.copy(
-        fontWeight = FontWeight.SemiBold
-    )
-
     Card(
+        onClick = { onSpellClick(spell) },
         shape = shape,
         colors = CardDefaults.cardColors().copy(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
             contentColor = MaterialTheme.colorScheme.onSurfaceVariant
         ),
         modifier = modifier
-            .fillMaxWidth()
-            .clickable(
-                onClick = { onSpellClick(spell) }
-            ),
+            .fillMaxWidth(),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -439,68 +488,17 @@ fun SpellCard(
                     Text(
                         text = spell.name,
                         style = MaterialTheme.typography.titleLarge,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.weight(1f)
                     )
                 }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = stringResource(spell.castTime.clippedResId),
-                        style = lowerTextStyle,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .weight(0.2f)
-                    )
-                    Text(
-                        text = spell.rangeType.let {
-                            if (it == SpellRangeType.DISTANCE) "${spell.rangeValue ?: 0} ${
-                                stringResource(
-                                    R.string.feets
-                                )
-                            }"
-                            else stringResource(spell.rangeType.resId)
-                        },
-                        style = lowerTextStyle,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .weight(0.8f)
-                    )
-                    Text(
-                        text = spell.saveStat?.let {
-                            "${stringResource(it.nameRes).take(3)} $spellSaveDC"
-                        } ?: "—",
-                        style = lowerTextStyle,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(0.6f)
-                    )
-                    Text(
-                        text = spell.damageDice?.let {
-                            if (it.isBlank() || it.isEmpty()) "—"
-                            else it
-                        } ?: "—",
-                        style = lowerTextStyle,
-                        textAlign = TextAlign.Center,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(0.6f)
-                    )
-                }
+                SpellDetailsGrid(spell = spell, spellSaveDC = spellSaveDC)
                 if (spell.isConcentration || spell.isRitual) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
                         if (spell.isConcentration) {
                             SpellTag(
@@ -517,12 +515,50 @@ fun SpellCard(
             }
             Spacer(Modifier.width(8.dp))
             SpellButton(
-                onClick = {
-                    spell.damageDice?.let {
-                        onRollClick(it)
-                    }
-                    onUseSpellClick()
-                }
+                onClick = onCastSpell,
+                spellName = spell.name,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SpellDetailsGrid(
+    spell: Spell,
+    spellSaveDC: Int,
+    modifier: Modifier = Modifier,
+) {
+    val details = listOf(
+        stringResource(spell.castTime.clippedResId),
+        if (spell.rangeType == SpellRangeType.DISTANCE) {
+            "${spell.rangeValue ?: 0} ${stringResource(R.string.feets)}"
+        } else {
+            stringResource(spell.rangeType.resId)
+        },
+        spell.saveStat?.let {
+            "${stringResource(it.nameRes).take(3)} $spellSaveDC"
+        } ?: "—",
+        spell.damageDice?.takeIf { it.isNotBlank() } ?: "—",
+    )
+    Grid(
+        config = {
+            val fieldWidth = constraints.maxWidth.toDp() / 4
+            repeat(4) { column(fieldWidth) }
+            row(GridTrackSize.Auto)
+        },
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        details.forEachIndexed { index, detail ->
+            Text(
+                text = detail,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.gridItem(
+                    row = 1,
+                    column = index + 1,
+                    alignment = Alignment.Center,
+                ),
             )
         }
     }
@@ -531,82 +567,63 @@ fun SpellCard(
 @Composable
 fun SpellButton(
     onClick: () -> Unit,
+    spellName: String,
     modifier: Modifier = Modifier
 ) {
     OutlinedIconButton(
         onClick = onClick,
         shape = RoundedCornerShape(8.dp),
-//        border = BorderStroke(width = 2.dp, color = MaterialTheme.colorScheme.onPrimary),
-        /*colors = IconButtonDefaults.iconButtonColors().copy(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        ),*/
         modifier = modifier.size(56.dp)
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_spell_book),
-            contentDescription = null,
+            contentDescription = stringResource(R.string.cast_named_spell, spellName),
             modifier = Modifier.size(42.dp)
         )
     }
 }
 
 @PreviewLightDark
-@PreviewDynamicColors
+@FontScalePreviews
+@Preview(locale = "ru", group = "Language")
+@Preview(locale = "uk", group = "Language")
 @Composable
 private fun SpellSlidePreview() {
-    DnDSheetTheme {
-        Surface {
-            SpellSlide(
-                character = UiUtils.sampleCharacters.first(),
-                spells = UiUtils.sampleSpells,
-                availableFilters = UiUtils.availableFilters,
-                currentFilter = UiUtils.currentFilter,
-                onFilterChange = {},
-                onRollClick = {},
-                onSlotClick = { _, _ -> },
-                onManageSpellsClick = {},
-                onSpellClick = {}
-            )
-        }
-    }
+    SpellSlidePreviewContent(UiUtils.sampleSpells)
 }
 
-@Preview(locale = "ru", group = "language")
+@Preview(name = "Empty", showBackground = true)
 @Composable
-private fun SpellSlidePreview_RU() {
-    DnDSheetTheme {
-        Surface {
-            SpellSlide(
-                character = UiUtils.sampleCharacters.first(),
-                spells = UiUtils.sampleSpells,
-                availableFilters = UiUtils.availableFilters,
-                currentFilter = UiUtils.currentFilter,
-                onFilterChange = {},
-                onRollClick = {},
-                onSlotClick = { _, _ -> },
-                onManageSpellsClick = {},
-                onSpellClick = {}
-            )
-        }
-    }
+private fun EmptySpellSlidePreview() {
+    SpellSlidePreviewContent(emptyList())
 }
 
-@Preview(locale = "uk", group = "language")
+@Preview(name = "Long name, large text", widthDp = 320, fontScale = 2f)
 @Composable
-private fun SpellSlidePreview_UK() {
+private fun LongNameSpellSlidePreview() {
+    SpellSlidePreviewContent(
+        listOf(UiUtils.sampleSpells.first().copy(name = "Protection from Evil and Good"))
+    )
+}
+
+@Composable
+private fun SpellSlidePreviewContent(spells: List<Spell>) {
+    val character = UiUtils.sampleCharacters.first()
     DnDSheetTheme {
         Surface {
             SpellSlide(
-                character = UiUtils.sampleCharacters.first(),
-                spells = UiUtils.sampleSpells,
+                spellSettings = character.spellSettings,
+                spellSaveDC = character.getSpellSaveDC(),
+                spellAttackBonus = character.getSpellAttackBonus(),
+                spells = spells,
                 availableFilters = UiUtils.availableFilters,
                 currentFilter = UiUtils.currentFilter,
                 onFilterChange = {},
-                onRollClick = {},
+                onCastSpell = {},
+                onSpellAttackRoll = {},
                 onSlotClick = { _, _ -> },
                 onManageSpellsClick = {},
-                onSpellClick = {}
+                onSpellClick = {},
             )
         }
     }

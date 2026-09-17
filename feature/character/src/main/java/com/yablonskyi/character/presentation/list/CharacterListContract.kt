@@ -1,11 +1,14 @@
 package com.yablonskyi.character.presentation.list
 
+import androidx.compose.runtime.Immutable
 import com.yablonskyi.model.character.Character
 import com.yablonskyi.model.character.CharacterSheet
 import com.yablonskyi.character.platform.print.CharacterPrintState
 import com.yablonskyi.character.platform.print.CharacterPrintEffect
 
+@Immutable
 data class CharacterListState(
+    val characterOrder: List<Long> = emptyList(),
     val allCharacters: List<Character> = emptyList(),
     val isLoading: Boolean = true,
     val searchQuery: String = "",
@@ -16,15 +19,22 @@ data class CharacterListState(
     val printState: CharacterPrintState = CharacterPrintState.Idle,
     val error: CharacterListError? = null,
 ) {
-    val characters: List<Character> get() = allCharacters.filter { it.name.contains(searchQuery, ignoreCase = true) }
+    val characters: List<Character> get() {
+        val positions = characterOrder.withIndex().associate { it.value to it.index }
+        return allCharacters.filter { it.name.contains(searchQuery, ignoreCase = true) }
+            .sortedBy { positions[it.id] ?: Int.MAX_VALUE }
+    }
     val isAllSelected: Boolean get() = characters.isNotEmpty() && characters.all { it.id in selectedIds }
     val isPrinting: Boolean get() = printState != CharacterPrintState.Idle
 }
 
 enum class CharacterListOperation { IMPORT_PICKER, IMPORT, EXPORT_PICKER, EXPORT, DELETE }
-enum class CharacterListError { LOAD, IMPORT, EMPTY_IMPORT, EXPORT, DELETE, EMPTY_SELECTION }
+enum class CharacterListError { LOAD, IMPORT, EMPTY_IMPORT, EXPORT, DELETE, EMPTY_SELECTION, REORDER }
 
 sealed interface CharacterListIntent {
+    data object ReorderFinished : CharacterListIntent
+    data class MoveCharacter(val fromId: Long, val toId: Long) : CharacterListIntent
+    data object EnterSelectionMode : CharacterListIntent
     data class SearchChanged(val query: String) : CharacterListIntent
     data class SelectionToggled(val id: Long) : CharacterListIntent
     data object SelectAllClicked : CharacterListIntent
@@ -59,6 +69,8 @@ sealed interface CharacterListEffect {
 }
 
 internal sealed interface CharacterListMutation {
+    data class MoveCharacter(val fromId: Long, val toId: Long) : CharacterListMutation
+    data object EnterSelectionMode : CharacterListMutation
     data class Loaded(val characters: List<Character>) : CharacterListMutation
     data class Search(val query: String) : CharacterListMutation
     data class ToggleSelection(val id: Long) : CharacterListMutation

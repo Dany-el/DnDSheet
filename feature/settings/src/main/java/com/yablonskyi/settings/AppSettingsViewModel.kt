@@ -10,11 +10,10 @@ import androidx.credentials.CredentialManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.yablonskyi.domain.repository.CharacterRepository
 import com.yablonskyi.model.character.CharacterSheet
 import com.yablonskyi.data.rulebook.BuiltInRulebookLoader
+import com.yablonskyi.data.utils.CharacterBackupCodec
 import com.yablonskyi.data.utils.decodeBase64ToImage
 import com.yablonskyi.data.utils.encodeImageToBase64
 import com.yablonskyi.domain.provider.AppVersionProvider
@@ -141,7 +140,7 @@ class AppSettingsViewModel @Inject constructor(
                             character = sheet.character.copy(imagePath = base64String)
                         )
                     }
-                    Gson().toJson(sheetsForExport)
+                    CharacterBackupCodec.encode(sheetsForExport)
                 }
 
                 val syncManager = GoogleDriveSyncManager(context)
@@ -180,9 +179,8 @@ class AppSettingsViewModel @Inject constructor(
                     val jsonString = result.getOrNull() ?: return@launch
 
                     withContext(Dispatchers.IO) {
-                        val listType = object : TypeToken<List<CharacterSheet>>() {}.type
                         val downloadedSheets: List<CharacterSheet> =
-                            Gson().fromJson(jsonString, listType)
+                            CharacterBackupCodec.decode(jsonString)
 
                         val restoredSheets = downloadedSheets.map { sheet ->
                             val newLocalPath =

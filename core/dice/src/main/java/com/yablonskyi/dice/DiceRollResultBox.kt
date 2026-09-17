@@ -1,5 +1,6 @@
 package com.yablonskyi.dice
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,7 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yablonskyi.dice.R
+import com.yablonskyi.model.character.Ability
 import com.yablonskyi.ui.theme.DnDSheetTheme
 import kotlin.math.abs
 
@@ -41,8 +42,8 @@ fun DiceRollResultBox(
     onPinClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val color = if (diceState.numbers.any { it == 20 } && diceState.hasRegularDice) Color.Green
-    else if (diceState.numbers.any { it == 1 } && diceState.hasRegularDice) Color.Red
+    val color = if (diceState.hasCritSuccess) Color.Green
+    else if (diceState.hasCritFailure) Color.Red
     else null
 
     val fallbackSurface = MaterialTheme.colorScheme.surfaceContainer
@@ -78,8 +79,33 @@ fun DiceRollResultBox(
                         .weight(1f)
                         .fillMaxSize()
                 ) {
-                    // USE AS LABEL
-                    val label = diceState.labelRes?.let { stringResource(it) }
+                    diceState.labelRes?.let { label ->
+                        val text = when (label) {
+                            is DiceRollLabel.TypeStringRes -> {
+                                val name = stringResource(label.name)
+                                val displayName = if (label.abbreviateName) name.take(3) else name
+                                "${displayName.uppercase()}: ${stringResource(label.type).uppercase()}"
+                            }
+                            is DiceRollLabel.TypeString -> {
+                                val type = stringResource(label.type).uppercase()
+                                buildString {
+                                    if (label.name.isNotBlank()) {
+                                        append(label.name.uppercase())
+                                        append(": ")
+                                    }
+                                    append(type)
+                                }
+                            }
+                        }
+
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.labelMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.align(Alignment.TopStart)
+                        )
+                    }
 
                     Text(
                         text = diceState.numbers.run {
@@ -101,7 +127,12 @@ fun DiceRollResultBox(
                     val diceChar = stringResource(R.string.dice_first_letter)
 
                     Text(
-                        text = diceState.stringDices.joinToString(", ") { it.replace("d", diceChar) },
+                        text = diceState.stringDices.joinToString(", ") {
+                            it.replace(
+                                "d",
+                                diceChar
+                            )
+                        },
                         maxLines = 2,
                         style = MaterialTheme.typography.labelMedium,
                         overflow = TextOverflow.Ellipsis,
@@ -165,6 +196,10 @@ private fun ResultBoxPreview() {
                     "3d20"
                 ),
                 isPinned = true,
+                labelRes = DiceRollLabel.TypeStringRes(
+                    type = RollType.SAVE_THROW.type,
+                    name = Ability.CON.nameRes
+                )
             ),
             onPinClick = {},
         )

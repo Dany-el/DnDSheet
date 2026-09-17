@@ -1,15 +1,16 @@
 package com.yablonskyi.ui.spell
 
-import androidx.compose.foundation.layout.width
-import androidx.window.core.layout.WindowSizeClass
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,11 +22,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -53,9 +57,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberBottomSheetState
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,17 +68,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.window.core.layout.WindowSizeClass
 import com.yablonskyi.ui.R
+import com.yablonskyi.ui.animation.utils.Entrance
 import com.yablonskyi.ui.theme.Dimens
 import com.yablonskyi.ui.utils.DeletingItemConfirmDialog
 import com.yablonskyi.ui.utils.ExpandableFab
@@ -105,46 +110,41 @@ fun SpellLibraryScreen(
         }
     }
     val listState = rememberLazyListState()
-    val wideFilters = currentWindowAdaptiveInfo().windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
+    val wideFilters =
+        currentWindowAdaptiveInfo().windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val groupedSpells = uiState.groupedSpells
 
     BackHandler(enabled = uiState.isSelectionMode) {
         onIntent(SpellsIntent.ClearSelection)
     }
 
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-
     Box(
         modifier = modifier.fillMaxSize()
     ) {
         Scaffold(
             snackbarHost = { SnackbarHost(snackbarHostState) },
-            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
                 SpellLibraryTopBar(
                     uiState = uiState,
                     onIntent = onIntent,
-                    scrollBehavior = scrollBehavior
-                )
-            },
-            bottomBar = {
-                SelectionBottomBar(
-                    isSelectionMode = uiState.isSelectionMode,
-                    isAllSelected = uiState.isAllSelected,
-                    actionsEnabled = uiState.selectedSpellIds.isNotEmpty(),
-                    onExportSelected = { onIntent(SpellsIntent.ExportAllSelected) },
-                    onDeleteSelected = { onIntent(SpellsIntent.DeleteSelected) },
-                    onToggleSelectAll = { onIntent(SpellsIntent.ToggleSelectAll) }
                 )
             }
         ) { innerPadding ->
             Box(
-                modifier = modifier
+                modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.TopCenter
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding),
             ) {
-                if (!uiState.isSelectionMode && !uiState.isLearnMode && !uiState.isFilterExpanded) {
+                AnimatedVisibility(
+                    !uiState.isSelectionMode && !uiState.isLearnMode && !uiState.isFilterExpanded,
+                    enter = fadeIn() + slideInVertically { -it / 2 },
+                    exit = fadeOut(),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 24.dp)
+                        .zIndex(1f)
+                ) {
                     ExpandableFab(
                         expanded = isFabExpanded,
                         onExpandedChange = { isFabExpanded = it },
@@ -152,12 +152,20 @@ fun SpellLibraryScreen(
                         onSave = { onIntent(SpellsIntent.EnterSelectionMode) },
                         onCreate = { onIntent(SpellsIntent.AddSpell) },
                         saveEnabled = uiState.spells.isNotEmpty(),
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(bottom = 24.dp)
-                            .zIndex(1f)
                     )
                 }
+
+                SelectionBottomBar(
+                    isSelectionMode = uiState.isSelectionMode,
+                    isAllSelected = uiState.isAllSelected,
+                    actionsEnabled = uiState.selectedSpellIds.isNotEmpty(),
+                    onExportSelected = { onIntent(SpellsIntent.ExportAllSelected) },
+                    onDeleteSelected = { onIntent(SpellsIntent.DeleteSelected) },
+                    onToggleSelectAll = { onIntent(SpellsIntent.ToggleSelectAll) },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .zIndex(1f),
+                )
 
                 Column(
                     modifier = Modifier.widthIn(max = Dimens.Content.MaxWidth)
@@ -172,40 +180,42 @@ fun SpellLibraryScreen(
                     if (uiState.isLoading || (uiState.spells.isEmpty())) {
                         LibraryFeedback(
                             isLoading = uiState.isLoading,
+                            isEmpty = uiState.spells.isEmpty(),
                             hasSearch = uiState.searchQuery.isNotBlank(),
                             hasFilters = uiState.filterState.isActive,
                             onClearFilters = { onIntent(SpellsIntent.ClearAllFilters) },
                             onClearSearch = { onIntent(SpellsIntent.SearchQueryChanged("")) },
-                            onCreate = if (!uiState.isLearnMode && !uiState.isSelectionMode) ({ onIntent(SpellsIntent.AddSpell) }) else null,
-                            onImport = if (!uiState.isLearnMode && !uiState.isSelectionMode) ({ onIntent(SpellsIntent.RequestFilePicker) }) else null
                         )
                     } else {
                         LazyColumn(
                             state = listState,
                             contentPadding = PaddingValues(
                                 start = Dimens.Spacing.Small,
+                                top = Dimens.Spacing.Small,
                                 end = Dimens.Spacing.Small,
-                                bottom = Dimens.Spacing.Small + Dimens.Fab.BottomPadding
+                                bottom = Dimens.Fab.BottomPadding
                             ),
                             verticalArrangement = Arrangement.spacedBy(Dimens.Spacing.XSmall),
                         ) {
                             groupedSpells.forEach { (level, spells) ->
                                 stickyHeader {
-                                    Surface(
-                                        color = MaterialTheme.colorScheme.background,
-                                    ) {
-                                        Column(
-                                            horizontalAlignment = Alignment.Start,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(top = Dimens.Spacing.Small)
+                                    Entrance {
+                                        Surface(
+                                            color = MaterialTheme.colorScheme.background,
                                         ) {
-                                            Text(
-                                                text = stringResource(level.resId),
-                                                style = MaterialTheme.typography.titleMedium,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                fontWeight = FontWeight.SemiBold,
-                                            )
+                                            Column(
+                                                horizontalAlignment = Alignment.Start,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(top = Dimens.Spacing.Small)
+                                            ) {
+                                                Text(
+                                                    text = stringResource(level.resId),
+                                                    style = MaterialTheme.typography.titleMedium,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    fontWeight = FontWeight.SemiBold,
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -218,6 +228,19 @@ fun SpellLibraryScreen(
                                     val bottomCorners =
                                         if (spells.size == 1 || index == spells.lastIndex) 16.dp else 4.dp
 
+                                    val progress = remember(item.spell.spellId) { Animatable(0f) }
+
+                                    LaunchedEffect(item.spell.spellId) {
+                                        progress.animateTo(
+                                            targetValue = 1f,
+                                            animationSpec = tween(
+                                                durationMillis = 400,
+                                                delayMillis = index.coerceAtMost(4) * 100,
+                                                easing = FastOutSlowInEasing,
+                                            ),
+                                        )
+                                    }
+
                                     SpellLibraryRow(
                                         item = item,
                                         defaultTopCorners = topCorners,
@@ -229,9 +252,20 @@ fun SpellLibraryScreen(
                                         onEdit = { onIntent(SpellsIntent.EditSpell(item.spell.spellId)) },
                                         onDelete = { onIntent(SpellsIntent.Delete(item.spell)) },
                                         onShare = { onIntent(SpellsIntent.ShareRequested(item.spell)) },
-                                        onToggleSelection = { onIntent(SpellsIntent.ToggleSelection(item.spell)) },
+                                        onToggleSelection = {
+                                            onIntent(
+                                                SpellsIntent.ToggleSelection(
+                                                    item.spell
+                                                )
+                                            )
+                                        },
                                         onShowDetails = { onIntent(SpellsIntent.ShowDetails(item.spell)) },
-                                        modifier = Modifier.animateItem()
+                                        modifier = Modifier
+                                            .animateItem()
+                                            .graphicsLayer {
+                                                alpha = progress.value
+                                                translationY = 24.dp.toPx() * (1f - progress.value)
+                                            },
                                     )
                                 }
                             }
@@ -356,7 +390,9 @@ fun SpellFiltersRow(
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = modifier.fillMaxWidth().padding(vertical = Dimens.Spacing.Medium)
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = Dimens.Spacing.Medium)
     ) {
         if (filterState.onlyConcentration) {
             InfoChip(stringResource(R.string.concentration))
@@ -456,6 +492,7 @@ fun SpellLibraryRow(
             .fillMaxWidth()
             .clip(animatedShape)
             .combinedClickable(
+                role = Role.Button,
                 onClick = {
                     when {
                         isSelectionMode -> onToggleSelection()

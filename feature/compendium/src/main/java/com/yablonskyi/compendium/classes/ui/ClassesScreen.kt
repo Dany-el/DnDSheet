@@ -2,8 +2,15 @@ package com.yablonskyi.compendium.classes.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,9 +51,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,7 +66,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -77,6 +82,7 @@ import com.yablonskyi.compendium.classes.viewmodel.ClassUiState
 import com.yablonskyi.compendium.classes.viewmodel.ClassesIntent
 import com.yablonskyi.model.rulebook.CharacterClass
 import com.yablonskyi.ui.R
+import com.yablonskyi.ui.animation.utils.Entrance
 import com.yablonskyi.ui.spell.LibraryFeedback
 import com.yablonskyi.ui.theme.Dimens
 import com.yablonskyi.ui.utils.DeletingItemConfirmDialog
@@ -102,19 +108,51 @@ fun ClassesScreen(
     }
     var isOrigExpanded by rememberSaveable { mutableStateOf(true) }
     var isHomebrewExpanded by rememberSaveable { mutableStateOf(true) }
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        modifier = modifier,
         topBar = {
             ClassesTopAppBar(
                 uiState = uiState,
                 onIntent = onIntent,
-                scrollBehavior = scrollBehavior
             )
         },
-        bottomBar = {
+    ) { innerPadding ->
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+        ) {
+            val visibleListIsEmpty = if (uiState.isSelectionMode) {
+                uiState.homebrewClasses.isEmpty()
+            } else {
+                uiState.listIsEmpty
+            }
+
+            AnimatedVisibility(
+                !uiState.isSelectionMode,
+                enter = fadeIn() + slideInVertically { -it / 2 },
+                exit = fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 24.dp)
+                    .zIndex(1f)
+            ) {
+                ExpandableFab(
+                    expanded = isFabExpanded,
+                    onExpandedChange = { isFabExpanded = it },
+                    onLoad = { onIntent(ClassesIntent.RequestFilePicker) },
+                    onSave = {
+                        isHomebrewExpanded = true
+                        onIntent(ClassesIntent.EnterSelectionMode)
+                    },
+                    onCreate = { onIntent(ClassesIntent.CreateClass) },
+                    saveEnabled = uiState.homebrewClasses.isNotEmpty(),
+                )
+            }
+
             SelectionBottomBar(
                 title = stringResource(R.string.q_delete_class),
                 confirmMsg = pluralStringResource(
@@ -127,48 +165,25 @@ fun ClassesScreen(
                 actionsEnabled = uiState.selectedClassesIds.isNotEmpty(),
                 onExportSelected = { onIntent(ClassesIntent.ExportAllSelected) },
                 onDeleteSelected = { onIntent(ClassesIntent.DeleteSelected) },
-                onToggleSelectAll = { onIntent(ClassesIntent.ToggleSelectAll) }
+                onToggleSelectAll = { onIntent(ClassesIntent.ToggleSelectAll) },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .zIndex(1f)
             )
-        }
-    ) { innerPadding ->
-        Box(
-            Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding)
-        ) {
-            if (!uiState.isSelectionMode) {
-                ExpandableFab(
-                    expanded = isFabExpanded,
-                    onExpandedChange = { isFabExpanded = it },
-                    onLoad = { onIntent(ClassesIntent.RequestFilePicker) },
-                    onSave = {
-                        isHomebrewExpanded = true
-                        onIntent(ClassesIntent.EnterSelectionMode)
-                    },
-                    onCreate = { onIntent(ClassesIntent.CreateClass) },
-                    saveEnabled = uiState.homebrewClasses.isNotEmpty(),
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(bottom = 24.dp)
-                        .zIndex(1f)
-                )
-            }
-            if (uiState.isLoading || ((uiState.isSelectionMode || uiState.origClasses.isEmpty()) && uiState.homebrewClasses.isEmpty())) {
+            if (uiState.isLoading || visibleListIsEmpty) {
                 LibraryFeedback(
                     isLoading = uiState.isLoading,
+                    isEmpty = visibleListIsEmpty,
                     hasSearch = uiState.searchQuery.isNotBlank(),
                     onClearSearch = { onIntent(ClassesIntent.SearchQueryChanged("")) },
-                    onCreate = if (!uiState.isSelectionMode) ({ onIntent(ClassesIntent.CreateClass) }) else null,
-                    onImport = if (!uiState.isSelectionMode) ({ onIntent(ClassesIntent.RequestFilePicker) }) else null
                 )
             } else {
                 LazyColumn(
                     contentPadding = PaddingValues(
                         start = Dimens.Spacing.Small,
                         end = Dimens.Spacing.Small,
-                        top = Dimens.Spacing.Medium,
-                        bottom = if (uiState.isSelectionMode) Dimens.Spacing.Small else Dimens.Fab.BottomPadding
+                        top = Dimens.Spacing.Small,
+                        bottom = Dimens.Fab.BottomPadding
                     ),
                     verticalArrangement = Arrangement.spacedBy(Dimens.Spacing.XSmall),
                     modifier = Modifier
@@ -183,14 +198,13 @@ fun ClassesScreen(
                             selectedClassesIds = emptySet(),
                             isSelectionMode = false,
                             isHomebrew = false,
-                            onToggleSelection = {},
+                            isExpanded = isOrigExpanded,
+                            onDetails = { onIntent(ClassesIntent.Details(it)) },
+                            onEdit = {},
                             onShare = {},
                             onDelete = {},
-                            onEdit = {},
-                            onDetails = { onIntent(ClassesIntent.Details(it)) },
-                            isExpanded = isOrigExpanded,
-                            onCollapse = { isOrigExpanded = !isOrigExpanded }
-                        )
+                            onToggleSelection = {},
+                        ) { isOrigExpanded = !isOrigExpanded }
                     }
 
                     if (uiState.homebrewClasses.isNotEmpty()) {
@@ -200,14 +214,13 @@ fun ClassesScreen(
                             selectedClassesIds = uiState.selectedClassesIds,
                             isSelectionMode = uiState.isSelectionMode,
                             isHomebrew = true,
-                            onToggleSelection = { onIntent(ClassesIntent.ToggleSelection(it)) },
-                            onShare = { onIntent(ClassesIntent.ShareRequested(it.id)) },
-                            onEdit = { onIntent(ClassesIntent.Edit(it)) },
-                            onDelete = { onIntent(ClassesIntent.Delete(it)) },
-                            onDetails = { onIntent(ClassesIntent.Details(it)) },
                             isExpanded = isHomebrewExpanded,
-                            onCollapse = { isHomebrewExpanded = !isHomebrewExpanded }
-                        )
+                            onDetails = { onIntent(ClassesIntent.Details(it)) },
+                            onEdit = { onIntent(ClassesIntent.Edit(it)) },
+                            onShare = { onIntent(ClassesIntent.ShareRequested(it.id)) },
+                            onDelete = { onIntent(ClassesIntent.Delete(it)) },
+                            onToggleSelection = { onIntent(ClassesIntent.ToggleSelection(it)) },
+                        ) { isHomebrewExpanded = !isHomebrewExpanded }
                     }
                 }
             }
@@ -220,13 +233,14 @@ fun ClassesScreen(
 fun ClassesTopAppBar(
     uiState: ClassUiState,
     onIntent: (ClassesIntent) -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior,
     modifier: Modifier = Modifier
 ) {
     var isSearchExpanded by remember { mutableStateOf(false) }
     val searchFocusRequester = remember { FocusRequester() }
-    val elevatedSurfaceColor =
-        MaterialTheme.colorScheme.surfaceColorAtElevation(Dimens.TopBar.Elevation)
+    val topBarColor by animateColorAsState(
+        targetValue = if (uiState.isSelectionMode) MaterialTheme.colorScheme.surface
+        else MaterialTheme.colorScheme.surfaceColorAtElevation(Dimens.TopBar.Elevation)
+    )
 
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val isWideScreen =
@@ -244,7 +258,6 @@ fun ClassesTopAppBar(
 
     CenterAlignedTopAppBar(
         modifier = modifier,
-        scrollBehavior = if (!isSearchExpanded && !uiState.isSelectionMode) scrollBehavior else null,
         navigationIcon = {
             when {
                 uiState.isSelectionMode -> IconButton(onClick = {
@@ -263,7 +276,7 @@ fun ClassesTopAppBar(
                     onIntent(ClassesIntent.SearchQueryChanged(""))
                 }) {
                     Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
+                        Icons.Default.Close,
                         contentDescription = stringResource(R.string.close_search)
                     )
                 }
@@ -325,8 +338,7 @@ fun ClassesTopAppBar(
 
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = elevatedSurfaceColor,
-            scrolledContainerColor = elevatedSurfaceColor,
+            containerColor = topBarColor,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
             actionIconContentColor = MaterialTheme.colorScheme.onSurface,
             navigationIconContentColor = MaterialTheme.colorScheme.onSurface
@@ -349,15 +361,30 @@ fun LazyListScope.collapsibleClassesList(
     onCollapse: () -> Unit,
 ) {
     stickyHeader(key = header) {
-        HeaderItem(
-            title = stringResource(header),
-            isExpanded = isExpanded,
-            onToggle = onCollapse
-        )
+        Entrance {
+            HeaderItem(
+                title = stringResource(header),
+                isExpanded = isExpanded,
+                onToggle = onCollapse
+            )
+        }
     }
 
     if (isExpanded) {
         itemsIndexed(items = classes, key = { _, cls -> cls.id }) { index, cls ->
+
+            val progress = remember(cls.id) { Animatable(0f) }
+
+            LaunchedEffect(cls.id) {
+                progress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(
+                        durationMillis = 400,
+                        delayMillis = index.coerceAtMost(4) * 100,
+                        easing = FastOutSlowInEasing,
+                    ),
+                )
+            }
 
             ClassCard(
                 defaultTopCorners = if (index == 0) 16.dp else 4.dp,
@@ -380,7 +407,12 @@ fun LazyListScope.collapsibleClassesList(
                 onShare = { onShare(cls) },
                 onDelete = { onDelete(cls) },
                 onToggleSelection = { onToggleSelection(cls.id) },
-                modifier = Modifier.animateItem()
+                modifier = Modifier
+                    .animateItem()
+                    .graphicsLayer {
+                        alpha = progress.value
+                        translationY = 24.dp.toPx() * (1f - progress.value)
+                    },
             )
         }
     }
@@ -406,6 +438,12 @@ fun ClassCard(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer
         else CardDefaults.outlinedCardColors().containerColor,
         label = "classCardColor"
+    )
+
+    val infoChipBorderColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.outlineVariant,
+        label = "infoChipBorderColor"
     )
 
     val topCorners by animateDpAsState(
@@ -473,19 +511,26 @@ fun ClassCard(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalArrangement = Arrangement.spacedBy(Dimens.Spacing.XSmall)
             ) {
-                OutlinedInfoChip(text = characterClass.hitDice)
+                OutlinedInfoChip(
+                    text = characterClass.hitDice,
+                    borderColor = infoChipBorderColor
+                )
                 OutlinedInfoChip(
                     text = pluralStringResource(
                         R.plurals.wizard_skill_choices,
                         characterClass.skillChoiceCount,
                         characterClass.skillChoiceCount
-                    )
+                    ),
+                    borderColor = infoChipBorderColor
                 )
                 if (characterClass.savingThrows.isNotEmpty()) {
                     val saves = characterClass.savingThrows.map {
                         stringResource(it.nameRes).take(3).uppercase()
                     }.joinToString(", ")
-                    OutlinedInfoChip(stringResource(R.string.wizard_saving_throws, saves))
+                    OutlinedInfoChip(
+                        stringResource(R.string.wizard_saving_throws, saves),
+                        borderColor = infoChipBorderColor
+                    )
                 }
             }
         }

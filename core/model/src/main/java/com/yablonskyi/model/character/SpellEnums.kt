@@ -1,7 +1,9 @@
 package com.yablonskyi.model.character
 
 import com.yablonskyi.model.R
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class MagicSchool(val resId: Int) {
     ABJURATION(R.string.school_abjuration),
     CONJURATION(R.string.school_conjuration),
@@ -13,12 +15,14 @@ enum class MagicSchool(val resId: Int) {
     TRANSMUTATION(R.string.school_transmutation)
 }
 
+@Serializable
 enum class Component(val resId: Int) {
     VERBAL(R.string.comp_verbal),
     SOMATIC(R.string.comp_somatic),
     MATERIAL(R.string.comp_material)
 }
 
+@Serializable
 enum class AttackType(val resId: Int) {
     NONE(R.string.attack_none),
     MELEE_ATTACK(R.string.attack_melee),
@@ -26,6 +30,7 @@ enum class AttackType(val resId: Int) {
     SAVE(R.string.attack_save)
 }
 
+@Serializable
 enum class DamageType(val resId: Int) {
     ACID(R.string.damage_acid),
     BLUDGEONING(R.string.damage_bludgeoning),
@@ -42,6 +47,7 @@ enum class DamageType(val resId: Int) {
     THUNDER(R.string.damage_thunder)
 }
 
+@Serializable
 enum class SpellLevel(val value: Int, val resId: Int) {
     CANTRIP(0, R.string.level_cantrip),
     LEVEL_1(1, R.string.level_1),
@@ -58,6 +64,7 @@ enum class SpellLevel(val value: Int, val resId: Int) {
         get() = this == CANTRIP
 }
 
+@Serializable
 enum class SpellCastTime(val resId: Int, val clippedResId: Int) {
     ACTION(R.string.time_action, R.string.clipped_time_action),
     BONUS_ACTION(R.string.time_bonus_action, R.string.clipped_time_bonus_action),
@@ -65,6 +72,7 @@ enum class SpellCastTime(val resId: Int, val clippedResId: Int) {
     SPECIAL(R.string.time_special, R.string.clipped_time_special);
 }
 
+@Serializable
 enum class SpellDuration(val resId: Int) {
     INSTANTANEOUS(R.string.duration_instant),
     ONE_ROUND(R.string.duration_1_round),
@@ -79,6 +87,7 @@ enum class SpellDuration(val resId: Int) {
     SPECIAL(R.string.duration_special);
 }
 
+@Serializable
 enum class SpellRangeType(val resId: Int) {
     SELF(R.string.range_self),
     TOUCH(R.string.range_touch),

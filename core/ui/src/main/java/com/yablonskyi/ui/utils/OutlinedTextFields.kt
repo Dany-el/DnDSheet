@@ -29,6 +29,7 @@ fun DnDSheetOutlinedTextField(
     onFocusChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     supportingText: String? = null,
+    placeHolder: @Composable (() -> Unit)? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions(
         keyboardType = KeyboardType.Text,
         imeAction = ImeAction.Next,
@@ -46,6 +47,7 @@ fun DnDSheetOutlinedTextField(
             Text(text = "$label${if (isRequired) "*" else ""}")
         },
         isError = fieldState.error != null,
+        placeholder = placeHolder,
         supportingText = {
             when {
                 fieldState.error != null ->

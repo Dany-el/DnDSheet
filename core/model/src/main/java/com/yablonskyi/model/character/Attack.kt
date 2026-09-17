@@ -1,5 +1,8 @@
 package com.yablonskyi.model.character
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Attack(
     val attackId: Long = 0,
     val characterId: Long = 0,

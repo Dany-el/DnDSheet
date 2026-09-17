@@ -101,9 +101,6 @@ fun ClassCreateScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(
-                        Dimens.TopBar.Elevation
-                    ),
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                     actionIconContentColor = MaterialTheme.colorScheme.onSurface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurface
@@ -114,7 +111,7 @@ fun ClassCreateScreen(
                         contentDescription = stringResource(R.string.save),
                         onClick = { onIntent(ClassFormIntent.Submit) }
                     )
-                }
+                },
             )
         },
         modifier = modifier

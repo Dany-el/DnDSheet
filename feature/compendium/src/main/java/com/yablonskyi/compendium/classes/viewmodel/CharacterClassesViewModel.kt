@@ -248,4 +248,7 @@ data class ClassUiState(
     val isAllSelected: Boolean = false,
     val searchQuery: String = "",
     val isLoading: Boolean = true
-)
+) {
+    val listIsEmpty = origClasses.isEmpty() && homebrewClasses.isEmpty()
+    val anyListIsEmpty = origClasses.isEmpty() || homebrewClasses.isEmpty()
+}

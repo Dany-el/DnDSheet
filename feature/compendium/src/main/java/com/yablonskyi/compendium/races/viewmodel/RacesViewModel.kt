@@ -252,4 +252,7 @@ data class RaceUiState(
     val isAllSelected: Boolean = false,
     val searchQuery: String = "",
     val isLoading: Boolean = true
-)
+) {
+    val listIsEmpty = origRaces.isEmpty() && homebrewRaces.isEmpty()
+    val anyListIsEmpty = origRaces.isEmpty() || homebrewRaces.isEmpty()
+}

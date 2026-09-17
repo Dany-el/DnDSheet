@@ -3,8 +3,9 @@ package com.yablonskyi.character.presentation.sheet.model
 import androidx.annotation.StringRes
 import com.yablonskyi.ui.R
 
-enum class CharacterTab(@StringRes val titleRes: Int) {
+enum class CharacterTab(@param:StringRes val titleRes: Int) {
     ABILITIES(R.string.tab_abilities),
+    SKILLS(R.string.skills),
     SPELLS(R.string.tab_spells),
     ATTACKS(R.string.tab_attacks),
     FEATURES(R.string.tab_features),

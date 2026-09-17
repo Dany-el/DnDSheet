@@ -1,8 +1,5 @@
 package com.yablonskyi.wizard
 
-import com.yablonskyi.wizard.utils.PreviewUtils
-import com.yablonskyi.ui.utils.PreviewThemeWrapper
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,11 +36,14 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.yablonskyi.ui.R
 import com.yablonskyi.model.rulebook.CharacterClass
+import com.yablonskyi.ui.R
 import com.yablonskyi.ui.theme.Dimens
 import com.yablonskyi.ui.utils.OutlinedInfoChip
+import com.yablonskyi.ui.utils.PreviewThemeWrapper
+import com.yablonskyi.wizard.utils.PreviewUtils
 
 @Composable
 fun WizardClassStep(
@@ -166,9 +165,15 @@ fun ClassCard(
         label = "classContainer"
     )
 
+    val infoChipBorderColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.outlineVariant,
+        label = "infoChipBorderColor"
+    )
+
     val resources = LocalResources.current
 
-    OutlinedCard (
+    OutlinedCard(
         onClick = onClick,
         shape = shape,
         modifier = modifier
@@ -182,7 +187,8 @@ fun ClassCard(
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(Dimens.Spacing.Small),
-            modifier = Modifier.padding(16.dp)) {
+            modifier = Modifier.padding(16.dp)
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -202,14 +208,14 @@ fun ClassCard(
                     )
                 }
             }
-            FlowRow (
+            FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                OutlinedInfoChip(cls.hitDice)
+                OutlinedInfoChip(cls.hitDice, borderColor = infoChipBorderColor)
                 val skillLabel = pluralStringResource(
                     R.plurals.wizard_skill_choices, cls.skillChoiceCount, cls.skillChoiceCount
                 )
-                OutlinedInfoChip(skillLabel)
+                OutlinedInfoChip(skillLabel, borderColor = infoChipBorderColor)
                 cls.spellcastingAbility?.let {
                     WizardChip(text = stringResource(R.string.wizard_spellcaster))
                 }
@@ -220,7 +226,10 @@ fun ClassCard(
                 val savesText = cls.savingThrows.joinToString(", ") {
                     resources.getText(it.nameRes).toString().take(3).uppercase()
                 }
-                OutlinedInfoChip(stringResource(R.string.wizard_saving_throws, savesText))
+                OutlinedInfoChip(
+                    stringResource(R.string.wizard_saving_throws, savesText),
+                    borderColor = infoChipBorderColor
+                )
             }
             // Description
             if (cls.description.isNotBlank()) {
@@ -235,6 +244,7 @@ fun ClassCard(
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 private fun WizardClassStepPreview() {

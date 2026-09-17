@@ -39,6 +39,7 @@ import com.yablonskyi.compendium.spells.viewmodel.CompendiumSpellsLibraryViewMod
 import com.yablonskyi.compendium.spells.viewmodel.SpellFormEffect
 import com.yablonskyi.compendium.spells.viewmodel.SpellFormViewModel
 import com.yablonskyi.navigation.CompendiumRoute
+import com.yablonskyi.ui.animation.navigation.NavAnimation
 import com.yablonskyi.ui.spell.SpellLibraryScreen
 import com.yablonskyi.ui.spell.SpellsEffect
 import com.yablonskyi.ui.spell.SpellsIntent
@@ -101,7 +102,10 @@ fun NavGraphBuilder.compendiumGraph(
         )
     }
 
-    composable<CompendiumRaceDetailsRoute> {
+    composable<CompendiumRaceDetailsRoute>(
+        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
+        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+    ) {
         val viewModel = hiltViewModel<RaceDetailsViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
         val snackbarHostState = remember { SnackbarHostState() }
@@ -140,7 +144,10 @@ fun NavGraphBuilder.compendiumGraph(
         }
     }
 
-    composable<CompendiumRaceCreateRoute> {
+    composable<CompendiumRaceCreateRoute>(
+        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
+        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+    ) {
         val viewModel = hiltViewModel<RaceFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -161,7 +168,10 @@ fun NavGraphBuilder.compendiumGraph(
         )
     }
 
-    composable<CompendiumRaceUpdateRoute> {
+    composable<CompendiumRaceUpdateRoute>(
+        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
+        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+    ) {
         val viewModel = hiltViewModel<RaceFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -226,7 +236,10 @@ fun NavGraphBuilder.compendiumGraph(
         )
     }
 
-    composable<CompendiumClassDetailsRoute> {
+    composable<CompendiumClassDetailsRoute>(
+        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
+        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+    ) {
         val viewModel = hiltViewModel<ClassDetailsViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
         val snackbarHostState = remember { SnackbarHostState() }
@@ -265,7 +278,10 @@ fun NavGraphBuilder.compendiumGraph(
         }
     }
 
-    composable<CompendiumClassCreateRoute> {
+    composable<CompendiumClassCreateRoute>(
+        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
+        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+    ) {
         val viewModel = hiltViewModel<ClassFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -286,7 +302,10 @@ fun NavGraphBuilder.compendiumGraph(
         )
     }
 
-    composable<CompendiumClassUpdateRoute> {
+    composable<CompendiumClassUpdateRoute>(
+        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
+        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+    ) {
         val viewModel = hiltViewModel<ClassFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -343,10 +362,6 @@ fun NavGraphBuilder.compendiumGraph(
                 }
         }
 
-        /*if (uiState.isLoading) {
-            LoadingDialog()
-        } else {
-        }*/
         SpellLibraryScreen(
             uiState = uiState,
             snackbarHostState = snackbarHostState,
@@ -354,7 +369,10 @@ fun NavGraphBuilder.compendiumGraph(
         )
     }
 
-    composable<CompendiumSpellUpdateRoute> {
+    composable<CompendiumSpellUpdateRoute>(
+        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
+        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+    ) {
         val viewModel = hiltViewModel<SpellFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 

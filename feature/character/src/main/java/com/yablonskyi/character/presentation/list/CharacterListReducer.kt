@@ -1,6 +1,19 @@
 package com.yablonskyi.character.presentation.list
 
 internal fun reduceCharacterList(state: CharacterListState, mutation: CharacterListMutation): CharacterListState = when (mutation) {
+    is CharacterListMutation.MoveCharacter -> {
+        val visibleIds = state.characters.map { it.id }.toMutableList()
+        val from = visibleIds.indexOf(mutation.fromId)
+        val to = visibleIds.indexOf(mutation.toId)
+        if (from < 0 || to < 0 || from == to) state else {
+            val allIds = state.copy(searchQuery = "").characters.map { it.id }
+            val visibleSet = visibleIds.toSet()
+            visibleIds.add(to, visibleIds.removeAt(from))
+            val reordered = visibleIds.iterator()
+            state.copy(characterOrder = allIds.map { if (it in visibleSet) reordered.next() else it })
+        }
+    }
+    CharacterListMutation.EnterSelectionMode -> state.copy(isSelectionMode = true)
     is CharacterListMutation.Loaded -> state.copy(
         allCharacters = mutation.characters,
         isLoading = false,

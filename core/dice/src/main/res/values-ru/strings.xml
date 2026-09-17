@@ -2,4 +2,8 @@
 <resources>
     <string name="roll">Кинуть</string>
     <string name="dice_first_letter">к</string>
+    <string name="roll_type_damage">Урон</string>
+    <string name="roll_type_attack">Атака</string>
+    <string name="roll_type_save">Спасбросок</string>
+    <string name="roll_type_roll">Кидок</string>
 </resources>

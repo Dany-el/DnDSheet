@@ -50,6 +50,7 @@ import com.yablonskyi.compendium.races.utils.PreviewUtils
 import com.yablonskyi.compendium.races.viewmodel.RaceDetailsIntent
 import com.yablonskyi.compendium.races.viewmodel.RaceDetailsUiState
 import com.yablonskyi.model.character.Ability
+import com.yablonskyi.model.rulebook.RaceSize
 import com.yablonskyi.ui.R
 import com.yablonskyi.ui.theme.Dimens
 import com.yablonskyi.ui.utils.EditFAB
@@ -159,7 +160,7 @@ fun RaceDetailsScreen(
                     ) {
                         RaceStatCard(
                             label = stringResource(R.string.size),
-                            value = race.size,
+                            value = stringResource(RaceSize.fromString(race.size).resId),
                             modifier = Modifier.weight(1f)
                         )
                         RaceStatCard(

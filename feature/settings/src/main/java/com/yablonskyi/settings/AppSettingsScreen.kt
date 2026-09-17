@@ -1,16 +1,11 @@
 package com.yablonskyi.settings
 
-import android.util.Log
-import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.LocalActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,21 +26,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Update
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -53,11 +47,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -74,7 +66,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -83,17 +74,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.Scope
-import com.google.api.services.drive.DriveScopes
-import com.yablonskyi.model.update.AppUpdate
-import com.yablonskyi.settings.update.UpdateViewModel
 import com.yablonskyi.settings.utils.AppLanguage
 import com.yablonskyi.settings.utils.AppTheme
 import com.yablonskyi.ui.R
 import com.yablonskyi.ui.settings.ListView
+import com.yablonskyi.model.update.AppUpdate
+import com.yablonskyi.settings.update.UpdateViewModel
 import kotlinx.coroutines.launch
 
 data class SheetOption<T>(
@@ -110,49 +96,11 @@ enum class ActiveSettingsSheet {
 @Composable
 fun AppSettingsScreen(
     viewModel: AppSettingsViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
-    updateViewModel: UpdateViewModel = hiltViewModel(LocalActivity.current as ComponentActivity)
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val authState = state.googleAuthState
     val currentLanguageState by viewModel.language.collectAsStateWithLifecycle()
-    val isBackupAvailable by viewModel.isBackupAvailable.collectAsStateWithLifecycle()
-
-    val updateState by updateViewModel.state.collectAsStateWithLifecycle()
-
-    val context = LocalContext.current
 
     var activeSheet by remember { mutableStateOf<ActiveSettingsSheet?>(null) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        viewModel.checkIfBackupExists(context)
-    }
-
-    val googleSignInClient = remember {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestScopes(Scope(DriveScopes.DRIVE_APPDATA))
-            .build()
-        GoogleSignIn.getClient(context, gso)
-    }
-
-    val signInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-            viewModel.setLoggedInUser(account.email)
-        } catch (e: ApiException) {
-            Log.e("AuthError", "Google Sign In Failed. Status Code: ${e.statusCode}")
-            Toast.makeText(
-                context,
-                "Google Sign In Failed. Status Code: ${e.statusCode}",
-                Toast.LENGTH_SHORT
-            ).show()
-            e.printStackTrace()
-        }
-    }
 
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val isWideScreen =
@@ -210,6 +158,7 @@ fun AppSettingsScreen(
 
                 HorizontalDivider()
 
+                /*
                 // UPDATES
                 UpdatesRow(
                     updateState = updateState,
@@ -220,7 +169,9 @@ fun AppSettingsScreen(
                 )
 
                 HorizontalDivider()
+                */
 
+                /*
                 // BACKUP & SYNC SECTION
                 Text(
                     text = stringResource(R.string.backup_and_sync),
@@ -357,6 +308,7 @@ fun AppSettingsScreen(
                     }
                 }
                 HorizontalDivider()
+                */
                 Spacer(Modifier.height(16.dp))
                 Text(
                     text = viewModel.appVersion,
@@ -368,6 +320,7 @@ fun AppSettingsScreen(
         }
     }
 
+    /*
     if (showDeleteDialog) {
         DeleteBackupDialog(
             onDismiss = {
@@ -378,6 +331,7 @@ fun AppSettingsScreen(
             }
         )
     }
+    */
 
     // BOTTOM SHEETS
     when (activeSheet) {

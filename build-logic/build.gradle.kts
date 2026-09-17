@@ -14,6 +14,7 @@ dependencies {
     implementation(libs.kotlin.gradle.plugin)
     implementation(libs.kotlin.composeCompiler.gradlePlugin)
     implementation(libs.chaquopy.gradle)
+    implementation(libs.ksp.gradle.plugin)
 }
 
 gradlePlugin {

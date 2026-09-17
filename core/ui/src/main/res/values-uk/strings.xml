@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="character_reorder_failed">Не вдалося зберегти персонажа. Спробуйте ще раз.</string>
     <string name="app_name">DND Sheet</string>
 
     <string name="check">Перевірка</string>
@@ -258,7 +259,7 @@
     <string name="description_required">Опис обов\'язково</string>
     <string name="select_at_least_one_item">Виберіть щонайменше 1 об\'єкт</string>
     <string name="import_file_empty">Файл порожній</string>
-    <string name="confirm_import_title">Підтвердження Завантаження</string>
+    <string name="confirm_import_title">Підтвердження завантаження</string>
     <string name="alert_dialog_import_chars">Чи хочете ви завантажити %1$d персонажів?</string>
     <string name="loading_please_wait">Зачекайте, будь ласка…</string>
     <string name="collapse">Згорнути</string>
@@ -463,4 +464,16 @@
     <string name="print_render_failed">Не вдалося створити аркуш персонажа. Спробуйте ще раз.</string>
     <string name="print_launch_failed">Не вдалося відкрити друк. Спробуйте ще раз.</string>
     <string name="print_request_accepted">Запит на друк прийнято</string>
+    <string name="cast_named_spell">Накласти: %1$s</string>
+    <string name="restore_spell_slot">Відновити комірку %2$d (%1$s)</string>
+    <string name="consume_spell_slot">Використати комірку %2$d (%1$s)</string>
+    <string name="spell_slot_spent">Витрачена</string>
+    <string name="spell_slot_available">Доступна</string>
+    <string name="dice_history">Історія кидків</string>
+    <string name="clear_dice_history">Очистити історію кидків</string>
+    <string name="clear_dice_history_confirmation">Очистити всі збережені кидки цього персонажа?</string>
+    <string name="dice_history_empty">Кидків ще немає</string>
+    <string name="dice_history_error_title">Історія кидків недоступна</string>
+    <string name="dice_history_error_message">Не вдалося завантажити або оновити історію кидків. Спробуйте ще раз.</string>
+    <string name="placeholder_traits">Перша навичка, друга навичка, третя навичка …</string>
 </resources>

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.performClick
 import com.yablonskyi.compendium.classes.ui.ClassesScreen
 import com.yablonskyi.compendium.classes.viewmodel.ClassUiState
@@ -96,5 +97,46 @@ class LibraryFabTest {
             }
         }
         compose.onNodeWithTag("library_fab").assertDoesNotExist()
+    }
+
+    @Test
+    fun `selection mode keeps homebrew races and classes visible`() {
+        val screen = mutableStateOf(0)
+        compose.setContent {
+            val snackbar = remember { SnackbarHostState() }
+            MaterialTheme {
+                when (screen.value) {
+                    0 -> RacesScreen(
+                        uiState = RaceUiState(
+                            homebrewRaces = listOf(
+                                Race(id = "race", name = "Ratfolk", isHomebrew = true),
+                            ),
+                            selectedRaceIds = setOf("race"),
+                            isSelectionMode = true,
+                            isLoading = false,
+                        ),
+                        snackbarHostState = snackbar,
+                        onIntent = {},
+                    )
+
+                    else -> ClassesScreen(
+                        uiState = ClassUiState(
+                            homebrewClasses = listOf(
+                                CharacterClass(id = "class", name = "Runesmith", isHomebrew = true),
+                            ),
+                            selectedClassesIds = setOf("class"),
+                            isSelectionMode = true,
+                            isLoading = false,
+                        ),
+                        snackbarHostState = snackbar,
+                        onIntent = {},
+                    )
+                }
+            }
+        }
+
+        compose.onNodeWithText("Ratfolk").assertIsDisplayed()
+        compose.runOnIdle { screen.value = 1 }
+        compose.onNodeWithText("Runesmith").assertIsDisplayed()
     }
 }

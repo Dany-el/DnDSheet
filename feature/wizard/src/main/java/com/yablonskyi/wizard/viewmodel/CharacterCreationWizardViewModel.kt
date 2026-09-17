@@ -155,6 +155,7 @@ class CharacterCreationWizardViewModel @Inject constructor(
             speed = race.speed,
             hitDice = cls.hitDice,
             maxHp = maxOf(1, hp),
+            traits = race.traits.joinToString("\n"),
             currentHp = maxOf(1, hp),
             abilityBlock = finalAbilities,
             skillProficiencies = skillProfMap,

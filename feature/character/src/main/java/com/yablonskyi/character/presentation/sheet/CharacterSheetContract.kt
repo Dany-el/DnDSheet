@@ -1,5 +1,6 @@
 package com.yablonskyi.character.presentation.sheet
 
+import androidx.compose.runtime.Immutable
 import com.yablonskyi.character.presentation.common.*
 import com.yablonskyi.character.presentation.sheet.model.*
 import com.yablonskyi.character.presentation.sheet.mapper.*
@@ -8,6 +9,7 @@ import com.yablonskyi.model.character.Character
 import com.yablonskyi.model.character.Attack
 import com.yablonskyi.model.character.Spell
 
+@Immutable
 data class CharacterSheetState(
     val character: Character? = null,
     val status: CharacterLoadStatus = CharacterLoadStatus.LOADING,
@@ -37,6 +39,7 @@ sealed interface CharacterSheetIntent {
     data object ToggleDetails : CharacterSheetIntent
     data object OpenSettings : CharacterSheetIntent
     data object ManageSpells : CharacterSheetIntent
+    data object OpenDiceHistory : CharacterSheetIntent
     data object BackClicked : CharacterSheetIntent
     data object Retry : CharacterSheetIntent
     data object DismissError : CharacterSheetIntent
@@ -45,6 +48,7 @@ sealed interface CharacterSheetIntent {
 sealed interface CharacterSheetEffect {
     data class OpenSettings(val id: Long) : CharacterSheetEffect
     data class ManageSpells(val id: Long) : CharacterSheetEffect
+    data class OpenDiceHistory(val characterId: Long) : CharacterSheetEffect
     data object Back : CharacterSheetEffect
 }
 

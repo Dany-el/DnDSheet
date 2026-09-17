@@ -53,6 +53,12 @@ class CharacterSheetViewModelTest {
         assertEquals(CharacterSheetEffect.OpenSettings(7), vm.effects.first())
     }
 
+    @Test fun givenSheet_whenDiceHistoryRequested_thenNavigatesWithRouteId() = runTest {
+        val vm = vm()
+        vm.onIntent(CharacterSheetIntent.OpenDiceHistory)
+        assertEquals(CharacterSheetEffect.OpenDiceHistory(7), vm.effects.first())
+    }
+
     @Test fun givenFailedWriteAndLaterEdit_whenRetried_thenPreservesIntentOrder() = runTest {
         val vm = vm(); advanceUntilIdle()
         repository.failure = IllegalStateException()

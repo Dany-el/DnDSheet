@@ -75,10 +75,16 @@ class ClassCardTest {
                 collapsibleClassesList(
                     header = R.string.homebrew,
                     classes = List(12) { CharacterClass(id = "$it", name = "Class $it", isHomebrew = true) },
-                    selectedClassesIds = emptySet(), isSelectionMode = false, isHomebrew = true,
-                    isExpanded = expanded.value, onDetails = {}, onEdit = {}, onShare = {}, onDelete = {},
-                    onToggleSelection = {}, onCollapse = { expanded.value = !expanded.value }
-                )
+                    selectedClassesIds = emptySet(),
+                    isSelectionMode = false,
+                    isHomebrew = true,
+                    isExpanded = expanded.value,
+                    onDetails = {},
+                    onEdit = {},
+                    onShare = {},
+                    onDelete = {},
+                    onToggleSelection = {},
+                ) { expanded.value = !expanded.value }
             }
         } }
         compose.runOnIdle { scroll() }

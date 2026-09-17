@@ -7,3 +7,6 @@ data class CharacterSheetRoute(val id: Long)
 
 @Serializable
 data class CharacterSettingsRoute(val id: Long)
+
+@Serializable
+data class DiceHistoryRoute(val characterId: Long)

@@ -39,12 +39,13 @@ fun InfoChip(
 fun OutlinedInfoChip(
     text: String,
     modifier: Modifier = Modifier,
+    borderColor: Color = MaterialTheme.colorScheme.outlineVariant,
     style: TextStyle = MaterialTheme.typography.labelLarge
 ) {
     Surface(
         shape = MaterialTheme.shapes.small,
         color = Color.Transparent,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        border = BorderStroke(1.dp, borderColor),
         modifier = modifier
     ) {
         Text(

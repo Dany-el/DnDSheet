@@ -3,10 +3,9 @@ package com.yablonskyi.data.repository.character
 import android.content.Context
 import android.util.Base64
 import androidx.core.net.toUri
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.yablonskyi.data.di.CharacterIoDispatcher
 import com.yablonskyi.data.utils.encodeImageToBase64
+import com.yablonskyi.data.utils.CharacterBackupCodec
 import com.yablonskyi.domain.repository.CharacterFileRepository
 import com.yablonskyi.domain.repository.CharacterRepository
 import com.yablonskyi.model.character.CharacterSheet
@@ -27,19 +26,11 @@ class CharacterFileRepositoryImpl @Inject constructor(
         val input = context.contentResolver.openInputStream(uri.toUri())
             ?: throw IOException("Cannot open document")
         input.bufferedReader().use { reader ->
-            val type = object : TypeToken<List<CharacterSheet>>() {}.type
-            val sheets: List<CharacterSheet> =
-                Gson().fromJson(reader, type) ?: throw IOException("Invalid character document")
-            // Gson can bypass Kotlin's non-null constructors: validate before confirmation/persistence.
-            sheets.forEach { sheet ->
-                requireNotNull(sheet.character)
-                requireNotNull(sheet.character.name)
-                requireNotNull(sheet.character.abilityBlock)
-                requireNotNull(sheet.character.spellSettings)
-                requireNotNull(sheet.spells)
-                requireNotNull(sheet.attacks)
+            try {
+                CharacterBackupCodec.decode(reader.readText())
+            } catch (e: Exception) {
+                throw IOException("Invalid character document", e)
             }
-            sheets
         }
     }
 
@@ -71,6 +62,6 @@ class CharacterFileRepositoryImpl @Inject constructor(
         }
         val output = context.contentResolver.openOutputStream(uri.toUri())
             ?: throw IOException("Cannot open destination")
-        output.bufferedWriter().use { it.write(Gson().toJson(exported)) }
+        output.bufferedWriter().use { it.write(CharacterBackupCodec.encode(exported)) }
     }
 }

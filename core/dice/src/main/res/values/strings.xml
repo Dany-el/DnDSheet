@@ -1,4 +1,8 @@
 <resources>
     <string name="dice_first_letter">d</string>
     <string name="roll">Roll</string>
+    <string name="roll_type_damage">Damage</string>
+    <string name="roll_type_attack">Attack</string>
+    <string name="roll_type_save">Save Throw</string>
+    <string name="roll_type_roll">Roll</string>
 </resources>

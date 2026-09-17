@@ -8,6 +8,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
 class FakeCharacterRepository : CharacterRepository {
+    override suspend fun reorderCharacters(orderedIds: List<Long>) {
+        failure?.let { throw it }
+        val positions = orderedIds.withIndex().associate { it.value to it.index }
+        characters.value = characters.value.sortedBy { positions[it.id] ?: Int.MAX_VALUE }
+    }
     val characters = MutableStateFlow(listOf(Character(id = 7, name = "Hero")))
     var failure: Exception? = null
     override fun getAllCharacters() = characters

@@ -5,6 +5,7 @@ import com.yablonskyi.model.character.Character
 import kotlinx.coroutines.flow.Flow
 
 interface CharacterRepository {
+    suspend fun reorderCharacters(orderedIds: List<Long>)
     suspend fun insertCharacter(character: Character): Long
 
     suspend fun insertCharacters(sheets: List<CharacterSheet>)

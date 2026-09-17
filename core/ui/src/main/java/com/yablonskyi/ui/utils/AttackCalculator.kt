@@ -18,6 +18,7 @@ class AttackCalculator(val character: Character, val attack: Attack) {
     fun getDamageString(): String {
         if (attack.ability == Ability.NONE) return ""
 
+        // TODO Ability modifier does not count on bonus action
         val abilityMod = character.getAbilityMod(attack.ability)
 
         val totalBonus = abilityMod + attack.bonusToDamage

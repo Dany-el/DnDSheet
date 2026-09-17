@@ -21,9 +21,16 @@ class CharacterRepositoryImpl @Inject constructor(
     private val attackDao: AttackDao,
     private val spellDao: SpellDao,
 ) : CharacterRepository {
+    override suspend fun reorderCharacters(orderedIds: List<Long>) {
+        characterDao.reorderCharacters(orderedIds)
+    }
 
     override suspend fun insertCharacter(character: Character): Long {
-        return characterDao.insertCharacter(character.toEntity())
+        return database.withTransaction {
+            val position = characterDao.findCharacterById(character.id)?.sortOrder
+                ?: characterDao.nextSortOrder()
+            characterDao.insertCharacter(character.toEntity().copy(sortOrder = position))
+        }
     }
 
     override suspend fun insertCharacters(sheets: List<CharacterSheet>) {
@@ -40,14 +47,18 @@ class CharacterRepositoryImpl @Inject constructor(
     }
 
     override suspend fun applyChange(id: Long, change: com.yablonskyi.domain.character.CharacterChange): Character = database.withTransaction {
-        val current = characterDao.findCharacterById(id)?.toModel() ?: error("Character no longer exists")
+        val entity = characterDao.findCharacterById(id) ?: error("Character no longer exists")
+        val current = entity.toModel()
         val updated = com.yablonskyi.domain.character.applyCharacterChange(current, change)
-        characterDao.updateCharacter(updated.toEntity())
+        characterDao.updateCharacter(updated.toEntity().copy(sortOrder = entity.sortOrder))
         updated
     }
 
     override suspend fun updateCharacter(character: Character) {
-        characterDao.updateCharacter(character.toEntity())
+        database.withTransaction {
+            val current = characterDao.findCharacterById(character.id) ?: error("Character no longer exists")
+            characterDao.updateCharacter(character.toEntity().copy(sortOrder = current.sortOrder))
+        }
     }
 
     override suspend fun deleteCharacter(character: Character) {
@@ -98,7 +109,9 @@ class CharacterRepositoryImpl @Inject constructor(
     private suspend fun insertSheetsInternal(sheets: List<CharacterSheet>) {
         sheets.forEach { sheet ->
             val newCharacter = sheet.character.copy(id = 0)
-            val newCharId = characterDao.insertCharacter(newCharacter.toEntity())
+            val newCharId = characterDao.insertCharacter(
+                newCharacter.toEntity().copy(sortOrder = characterDao.nextSortOrder())
+            )
 
             val newAttacks = sheet.attacks.map { it.copy(attackId = 0, characterId = newCharId) }
             attackDao.insertAttacks(newAttacks.map { it.toEntity() })

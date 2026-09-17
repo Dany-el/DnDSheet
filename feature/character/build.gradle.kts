@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.reorderable)
     implementation(project(":core:dice"))
     implementation(libs.coil.compose)
     testImplementation(libs.junit)

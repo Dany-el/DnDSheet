@@ -2,6 +2,8 @@ package com.yablonskyi.dndsheet.navigation
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
@@ -14,6 +16,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.yablonskyi.character.navigation.CharacterSettingsRoute
 import com.yablonskyi.character.navigation.CharacterSheetRoute
+import com.yablonskyi.character.navigation.DiceHistoryRoute
 import com.yablonskyi.character.navigation.characterGraph
 import com.yablonskyi.characterspells.navigation.CharacterSpellsRoute
 import com.yablonskyi.characterspells.navigation.characterSpellsGraph
@@ -57,6 +60,8 @@ fun DnDSheetNavGraph(
         NavHost(
             navController = navController,
             startDestination = CharacterSheetsRoute,
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
             modifier = modifier
         ) {
             characterGraph(
@@ -73,6 +78,9 @@ fun DnDSheetNavGraph(
                 },
                 onOpenSettings = { id ->
                     navController.navigate(CharacterSettingsRoute(id = id))
+                },
+                onOpenDiceHistory = { characterId ->
+                    navController.navigate(DiceHistoryRoute(characterId))
                 },
                 onToggleListView = {
                     val next = if (listViewState.value == ListView.LIST) {

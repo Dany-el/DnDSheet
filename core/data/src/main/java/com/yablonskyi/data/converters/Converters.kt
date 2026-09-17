@@ -1,8 +1,6 @@
 package com.yablonskyi.data.converters
 
 import androidx.room.TypeConverter
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.yablonskyi.model.character.Ability
 import com.yablonskyi.model.character.AttackType
 import com.yablonskyi.model.character.Component
@@ -15,17 +13,24 @@ import com.yablonskyi.model.character.SpellDuration
 import com.yablonskyi.model.character.SpellLevel
 import com.yablonskyi.model.character.SpellRangeType
 import com.yablonskyi.model.character.SpellSlot
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+
+private val appJson = Json {
+    ignoreUnknownKeys = true
+    encodeDefaults = true
+}
 
 class Converters {
     @TypeConverter
     fun fromSkillMap(value: Map<Skill, ProficiencyLevel>): String {
-        return Gson().toJson(value)
+        return appJson.encodeToString(value)
     }
 
     @TypeConverter
     fun toSkillMap(value: String): Map<Skill, ProficiencyLevel> {
-        val mapType = object : TypeToken<Map<Skill, ProficiencyLevel>>() {}.type
-        return Gson().fromJson(value, mapType) ?: emptyMap()
+        return appJson.decodeFromString(value)
     }
 
     @TypeConverter
@@ -99,17 +104,12 @@ class Converters {
 
     @TypeConverter
     fun fromSpellSlotsMap(map: Map<SpellLevel, SpellSlot>): String {
-        return Gson().toJson(map)
+        return appJson.encodeToString(map)
     }
 
     @TypeConverter
     fun toSpellSlotsMap(jsonString: String): Map<SpellLevel, SpellSlot> {
-        val type = object : TypeToken<Map<SpellLevel, SpellSlot>>() {}.type
-        return try {
-            Gson().fromJson(jsonString, type)
-        } catch (_: Exception) {
-            emptyMap()
-        }
+        return appJson.decodeFromString(jsonString)
     }
 
     @TypeConverter
@@ -119,12 +119,11 @@ class Converters {
     fun toRange(value: String): SpellRangeType = SpellRangeType.valueOf(value)
 
     @TypeConverter
-    fun fromAbilityIntMap(map: Map<Ability, Int>): String = Gson().toJson(map)
+    fun fromAbilityIntMap(map: Map<Ability, Int>): String = appJson.encodeToString(map)
 
     @TypeConverter
     fun toAbilityIntMap(json: String): Map<Ability, Int> {
-        val type = object : TypeToken<Map<Ability, Int>>() {}.type
-        return Gson().fromJson(json, type) ?: emptyMap()
+        return appJson.decodeFromString(json)
     }
 
     @TypeConverter

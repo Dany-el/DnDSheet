@@ -14,12 +14,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -49,6 +47,7 @@ fun SelectionBottomBar(
     title: String? = null,
     confirmMsg: String? = null,
     actionsEnabled: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
     var showConfirmDialog by remember { mutableStateOf(false) }
 
@@ -63,15 +62,16 @@ fun SelectionBottomBar(
 
     AnimatedVisibility(
         visible = isSelectionMode,
-        enter = fadeIn() + slideInVertically(initialOffsetY = { it/2}),
-        exit = fadeOut() + slideOutVertically(targetOffsetY = { it/2})
+        enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+        exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
+        modifier = modifier
     ) {
         val shape = MaterialTheme.shapes.extraLarge
 
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .windowInsetsPadding(BottomAppBarDefaults.windowInsets)
+//                .windowInsetsPadding(BottomAppBarDefaults.windowInsets)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             BottomAppBar(

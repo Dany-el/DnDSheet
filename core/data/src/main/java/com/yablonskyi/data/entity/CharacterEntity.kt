@@ -14,6 +14,7 @@ import com.yablonskyi.model.character.SpellSettings
 @Entity(tableName = "character")
 data class CharacterEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @ColumnInfo(defaultValue = "0") val sortOrder: Long = 0,
     val name: String = "",
     val level: Int = 1,
     val imagePath: String? = null,

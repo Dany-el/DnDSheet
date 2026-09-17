@@ -41,7 +41,7 @@ fun VerticalCharacterLayout(
     tabs: List<CharacterTab>,
     pagerState: PagerState,
     lessDetails: Boolean,
-    onDiceButtonClick: (String) -> Unit,
+    onInitiativeBonusRoll: () -> Unit,
     onRestClick: () -> Unit,
     onHealthClick: () -> Unit,
     onTabSelected: (CharacterTab) -> Unit,
@@ -62,7 +62,7 @@ fun VerticalCharacterLayout(
                 armorClass = armorClass,
                 speed = speed,
                 proficiencyBonus = proficiencyBonus,
-                onRollClick = onDiceButtonClick,
+                onInitiativeBonusRoll = onInitiativeBonusRoll,
                 onRestClick = onRestClick,
                 onHealthClick = onHealthClick,
             )
@@ -149,7 +149,7 @@ fun WideCharacterLayout(
                     .fillMaxWidth()
             ) {
                 CharacterDetailsRowExpanded(
-                    initiativeBonus = character.getInitiativeBonus(),
+                    initiativeBonus = character.initiativeBonus,
                     onRollClick = onDiceButtonClick,
                     onRestClick = onRestClick,
                     modifier = Modifier.weight(1f)

@@ -48,6 +48,8 @@ object AppModule {
                 MIGRATION_4_5,
                 MIGRATION_5_6,
                 MIGRATION_6_7,
+                MIGRATION_7_8,
+                MIGRATION_8_9,
             )
             .build()
     }
@@ -67,6 +69,9 @@ object AppModule {
 
     @Provides
     fun provideClassDao(db: AppDatabase) = db.classDao()
+
+    @Provides
+    fun provideDiceRollDao(db: AppDatabase) = db.diceRollDao()
 
     // REPOSITORY
     @Provides
@@ -115,6 +120,37 @@ object AppModule {
         loader: BuiltInRulebookLoader,
         dao: ClassDao
     ): ClassRepository = ClassRepositoryImpl(loader, dao)
+}
+
+val MIGRATION_7_8 = object : Migration(7, 8) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE character ADD COLUMN sortOrder INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("UPDATE character SET sortOrder = id")
+    }
+}
+
+val MIGRATION_8_9 = object : Migration(8, 9) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `dice_rolls` (
+                `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                `characterId` INTEGER NOT NULL,
+                `label` TEXT NOT NULL,
+                `numbers` TEXT NOT NULL,
+                `modifier` INTEGER,
+                `result` INTEGER NOT NULL,
+                `dices` TEXT NOT NULL,
+                `timestamp` INTEGER NOT NULL,
+                FOREIGN KEY(`characterId`) REFERENCES `character`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+            """.trimIndent(),
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS `index_dice_rolls_characterId_timestamp_id` " +
+                "ON `dice_rolls` (`characterId`, `timestamp`, `id`)",
+        )
+    }
 }
 
 val MIGRATION_1_2 = object : Migration(1, 2) {

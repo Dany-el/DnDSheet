@@ -1,7 +1,9 @@
 package com.yablonskyi.model.character
 
 import kotlin.math.floor
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Character(
     val id: Long = 0,
     val name: String = "",
@@ -34,6 +36,7 @@ data class Character(
     val abilityBlock: AbilityBlock = AbilityBlock(),
     val skillProficiencies: Map<Skill, ProficiencyLevel> = emptyMap(),
     val savingThrowProficiencies: Set<Ability> = emptySet(),
+    // Other
     val passivePerceptionBonus: Int = 0,
     val hasJackOfAllTrades: Boolean = false,
 ) {
@@ -92,19 +95,8 @@ data class Character(
         }
     }
 
-    fun getInitiativeBonus(): Int {
-        val dexMod = getAbilityMod(Ability.DEX)
-        val bonus =
-            if (hasJackOfAllTrades) floor(getProfBonus() * ProficiencyLevel.HALF.multiplier).toInt() else 0
-        return dexMod + bonus + initiativeMiscBonus
-    }
+    val initiativeBonus: Int = getAbilityMod(Ability.DEX) + initiativeMiscBonus
 
-    fun getPassivePerception(): Int {
-        val perMod = getSkillMod(Skill.PERCEPTION)
-        return 10 + perMod + passivePerceptionBonus
-    }
-
-    fun getTotalAc(): Int {
-        return armorClass + shield
-    }
+    val passivePerception: Int =
+        10 + getSkillMod(Skill.PERCEPTION) + passivePerceptionBonus
 }

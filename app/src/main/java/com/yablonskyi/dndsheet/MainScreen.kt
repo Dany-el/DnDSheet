@@ -5,13 +5,12 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
@@ -37,6 +36,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldLayout
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -54,7 +54,6 @@ import com.yablonskyi.navigation.CharacterSheetsRoute
 import com.yablonskyi.navigation.CompendiumRoute
 import com.yablonskyi.settings.AppSettingsState
 import com.yablonskyi.ui.utils.rememberDebouncedClick
-import kotlin.collections.listOf
 
 @SuppressLint("UnusedContentLambdaTargetStateParameter")
 @Composable
@@ -112,30 +111,21 @@ fun MainScreen(
                 navigationSuite = {
                     when (navLayoutType) {
                         NavigationSuiteType.NavigationBar -> {
+
+                            val navVisibility = remember {
+                                MutableTransitionState(false)
+                            }
+
+                            LaunchedEffect(isNavVisible) {
+                                navVisibility.targetState = isNavVisible
+                            }
+
                             AnimatedVisibility(
-                                visible = isNavVisible,
-                                enter = slideInVertically(
-                                    animationSpec = tween(
-                                        durationMillis = 400,
-                                        easing = FastOutSlowInEasing
-                                    )
-                                ) { height -> height } + expandVertically(
-                                    animationSpec = tween(
-                                        durationMillis = 400,
-                                        easing = FastOutSlowInEasing
-                                    )
-                                ),
-                                exit = slideOutVertically(
-                                    animationSpec = tween(
-                                        durationMillis = 300,
-                                        easing = FastOutSlowInEasing
-                                    )
-                                ) { height -> height } + shrinkVertically(
-                                    animationSpec = tween(
-                                        durationMillis = 300,
-                                        easing = FastOutSlowInEasing
-                                    )
-                                )
+                                visibleState = navVisibility, // Replaces visible = isNavVisible
+                                enter = slideInVertically(tween(350)) { height -> height } +
+                                        fadeIn(tween(250)),
+                                exit = slideOutVertically(tween(250)) { height -> height } +
+                                        fadeOut(tween(200)),
                             ) {
                                 NavigationBar {
                                     topLevelRoutes.forEach { item ->

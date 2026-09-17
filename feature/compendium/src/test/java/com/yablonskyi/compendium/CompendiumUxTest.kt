@@ -48,7 +48,7 @@ class CompendiumUxTest {
         val state = mutableStateOf(SpellLibraryState(isLoading = true))
         val intents = mutableListOf<SpellsIntent>()
         compose.setContent { MaterialTheme { SpellLibraryScreen(state.value, remember { SnackbarHostState() }, intents::add) } }
-        compose.onNodeWithText("Loading library?").assertExists()
+        compose.onNodeWithText("Loading library").assertExists()
         compose.onNodeWithText("No entries yet").assertDoesNotExist()
         compose.runOnIdle { state.value = SpellLibraryState() }
         compose.onNodeWithText("No entries yet").assertExists()

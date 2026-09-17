@@ -1,4 +1,5 @@
 <resources>
+    <string name="character_reorder_failed">Could not save character order. Please try again.</string>
     <string name="app_name">DND Sheet</string>
 
     <string name="check">Check</string>
@@ -257,7 +258,7 @@
     <string name="description_required">Description is required</string>
     <string name="select_at_least_one_item">Select at least 1 item</string>
     <string name="import_file_empty">File is empty</string>
-    <string name="confirm_import_title">Confirm Load</string>
+    <string name="confirm_import_title">Confirm load</string>
     <string name="alert_dialog_import_chars">Do you want to load %1$d characters?</string>
     <string name="loading_please_wait">Please wait…</string>
     <string name="collapse">Collapse</string>
@@ -442,4 +443,16 @@
     <string name="print_render_failed">Could not generate the character sheet. Please try again.</string>
     <string name="print_launch_failed">Could not open printing. Please try again.</string>
     <string name="print_request_accepted">Print request accepted</string>
+    <string name="cast_named_spell">Cast %1$s</string>
+    <string name="restore_spell_slot">Restore %1$s slot %2$d</string>
+    <string name="consume_spell_slot">Use %1$s slot %2$d</string>
+    <string name="spell_slot_spent">Spent</string>
+    <string name="spell_slot_available">Available</string>
+    <string name="dice_history">Dice history</string>
+    <string name="clear_dice_history">Clear dice history</string>
+    <string name="clear_dice_history_confirmation">Clear all saved dice rolls for this character?</string>
+    <string name="dice_history_empty">No dice rolls yet</string>
+    <string name="dice_history_error_title">Dice history unavailable</string>
+    <string name="dice_history_error_message">Could not load or update dice history. Please try again.</string>
+    <string name="placeholder_traits">First traits, second trait, third trait …</string>
 </resources>

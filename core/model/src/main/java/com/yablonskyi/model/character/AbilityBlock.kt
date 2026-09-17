@@ -1,8 +1,10 @@
 package com.yablonskyi.model.character
 
 import com.yablonskyi.model.R
+import kotlinx.serialization.Serializable
 import kotlin.math.floor
 
+@Serializable
 enum class Ability(val nameRes: Int) {
     STR(R.string.ability_str),
     DEX(R.string.ability_dex),
@@ -17,6 +19,7 @@ enum class Ability(val nameRes: Int) {
     }
 }
 
+@Serializable
 enum class ProficiencyLevel(val multiplier: Double) {
     NONE(0.0),
     HALF(0.5),
@@ -24,6 +27,7 @@ enum class ProficiencyLevel(val multiplier: Double) {
     EXPERT(2.0)
 }
 
+@Serializable
 enum class Skill(
     val defaultAbility: Ability,
     val nameRes: Int
@@ -52,6 +56,7 @@ enum class Skill(
     PERSUASION(Ability.CHA, R.string.skill_persuasion)
 }
 
+@Serializable
 data class AbilityBlock(
     val strength: Int = 8,
     val dexterity: Int = 8,

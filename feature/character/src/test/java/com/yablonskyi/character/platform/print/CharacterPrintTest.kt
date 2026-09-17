@@ -160,6 +160,7 @@ class CharacterPrintTest {
     }
 
     private class FakeCharacterRepository : CharacterRepository {
+        override suspend fun reorderCharacters(orderedIds: List<Long>) = error("Unused")
         val loadedIds = mutableListOf<Long>()
         var failure: Exception? = null
         override suspend fun getCharacterSheetById(characterId: Long): CharacterSheet {

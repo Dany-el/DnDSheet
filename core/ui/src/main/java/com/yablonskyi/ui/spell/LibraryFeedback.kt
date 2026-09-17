@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -19,33 +18,42 @@ import com.yablonskyi.ui.R
 @Composable
 fun LibraryFeedback(
     isLoading: Boolean,
+    isEmpty: Boolean,
     hasSearch: Boolean,
     hasFilters: Boolean = false,
     onClearSearch: () -> Unit,
     onClearFilters: () -> Unit = {},
-    onCreate: (() -> Unit)? = null,
-    onImport: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxWidth().padding(24.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        if (isLoading) {
-            CircularProgressIndicator()
-            Text(stringResource(R.string.compendium_loading))
-        } else {
-            Text(
-                stringResource(if (hasSearch || hasFilters) R.string.compendium_no_results else R.string.compendium_empty),
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
-            )
-            if (hasSearch) TextButton(onClick = onClearSearch) { Text(stringResource(R.string.compendium_clear_search)) }
-            if (hasFilters) TextButton(onClick = onClearFilters) { Text(stringResource(R.string.compendium_clear_filters)) }
-            if (!hasSearch && !hasFilters) {
-                onCreate?.let { TextButton(onClick = it) { Text(stringResource(R.string.compendium_create)) } }
-                onImport?.let { TextButton(onClick = it) { Text(stringResource(R.string.compendium_import)) } }
+        when {
+            isLoading -> {
+                //            CircularProgressIndicator()
+//            Text(stringResource(R.string.compendium_loading))
+            }
+
+            !isLoading && (hasFilters || hasSearch) -> {
+                Text(
+                    stringResource(R.string.compendium_no_results),
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
+                )
+                if (hasSearch) TextButton(onClick = onClearSearch) { Text(stringResource(R.string.compendium_clear_search)) }
+                if (hasFilters) TextButton(onClick = onClearFilters) { Text(stringResource(R.string.compendium_clear_filters)) }
+            }
+
+            !isLoading && isEmpty -> {
+//                Text(
+//                    stringResource(R.string.compendium_empty),
+//                    style = MaterialTheme.typography.titleMedium,
+//                    textAlign = TextAlign.Center
+//                )
             }
         }
     }

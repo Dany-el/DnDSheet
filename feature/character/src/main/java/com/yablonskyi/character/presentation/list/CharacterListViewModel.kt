@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,7 +28,9 @@ class CharacterListViewModel @Inject constructor(
     private val files: CharacterFileRepository,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
-    private val mutableState = MutableStateFlow(CharacterListState(searchQuery = savedStateHandle["query"] ?: ""))
+    private val mutableState = MutableStateFlow(CharacterListState(
+        searchQuery = savedStateHandle["query"] ?: "",
+    ))
     val state = mutableState.asStateFlow()
     private val effectChannel = Channel<CharacterListEffect>(Channel.BUFFERED, onUndeliveredElement = { effect ->
         if (effect is CharacterListEffect.Print && effect.effect is com.yablonskyi.character.platform.print.CharacterPrintEffect.LaunchPrint) {
@@ -37,6 +42,9 @@ class CharacterListViewModel @Inject constructor(
     private var observation: Job? = null
     private var exportIds = emptyList<Long>()
     private var retryOperation: (() -> Unit)? = null
+    private val reorderMutex = Mutex()
+    private var orderRevision = 0L
+    private var failedOrder: List<Long>? = null
 
     init {
         observeCharacters()
@@ -48,6 +56,9 @@ class CharacterListViewModel @Inject constructor(
 
     fun onIntent(intent: CharacterListIntent) {
         when (intent) {
+            CharacterListIntent.ReorderFinished -> saveCharacterOrder()
+            is CharacterListIntent.MoveCharacter -> moveCharacter(intent.fromId, intent.toId)
+            CharacterListIntent.EnterSelectionMode -> reduce(CharacterListMutation.EnterSelectionMode)
             is CharacterListIntent.SearchChanged -> {
                 savedStateHandle["query"] = intent.query
                 reduce(CharacterListMutation.Search(intent.query))
@@ -108,7 +119,52 @@ class CharacterListViewModel @Inject constructor(
             is CharacterListIntent.PrintCancelled -> printCoordinator.onPrintLaunchCancelled(intent.requestId)
             CharacterListIntent.DismissError -> reduce(CharacterListMutation.Failed(null))
             CharacterListIntent.Retry -> if (idle()) {
-                if (state.value.error == CharacterListError.LOAD) observeCharacters() else retryOperation?.invoke()
+                when (state.value.error) {
+                    CharacterListError.LOAD -> observeCharacters()
+                    CharacterListError.REORDER -> failedOrder?.let { order ->
+                        mutableState.update { it.copy(characterOrder = order, error = null) }
+                        orderRevision++
+                        saveCharacterOrder()
+                    }
+                    else -> retryOperation?.invoke()
+                }
+            }
+        }
+    }
+
+    fun moveCharacter(fromId: Long, toId: Long) {
+        val previousOrder = state.value.characterOrder
+        reduce(CharacterListMutation.MoveCharacter(fromId, toId))
+        if (previousOrder != state.value.characterOrder) orderRevision++
+    }
+
+    fun saveCharacterOrder() {
+        val order = state.value.characterOrder.toList()
+        if (order.isEmpty()) return
+        val revision = orderRevision
+        viewModelScope.launch {
+            reorderMutex.withLock {
+                if (revision != orderRevision) return@withLock
+                try {
+                    repository.reorderCharacters(order)
+                    val persisted = repository.getAllCharacters().first()
+                    reduce(CharacterListMutation.Loaded(persisted))
+                    if (revision == orderRevision) {
+                        failedOrder = null
+                        mutableState.update {
+                            it.copy(characterOrder = emptyList(), error = it.error.takeUnless { error -> error == CharacterListError.REORDER })
+                        }
+                    }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    if (revision == orderRevision) {
+                        failedOrder = order
+                        mutableState.update {
+                            it.copy(characterOrder = emptyList(), error = CharacterListError.REORDER)
+                        }
+                    }
+                }
             }
         }
     }

@@ -19,8 +19,73 @@ class CharacterListViewModelTest {
     @get:Rule val main = MainDispatcherRule()
     private val repository = FakeCharacterRepository()
     private val files = FakeCharacterFileRepository()
-    private fun viewModel() = CharacterListViewModel(repository,
-        CharacterSheetHtmlRenderer { _, _ -> Result.success(RenderedCharacterSheet("html", "Hero")) }, files, SavedStateHandle())
+    private fun viewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) = CharacterListViewModel(repository,
+        CharacterSheetHtmlRenderer { _, _ -> Result.success(RenderedCharacterSheet("html", "Hero")) }, files, savedStateHandle)
+
+    @Test fun givenFilteredCharacters_whenMoved_thenPreservesHiddenPositionsAndSelection() = runTest {
+        repository.characters.value = listOf(
+            Character(id = 7, name = "Hero A"),
+            Character(id = 8, name = "Other"),
+            Character(id = 9, name = "Hero B"),
+        )
+        val vm = viewModel()
+        advanceUntilIdle()
+        vm.onIntent(CharacterListIntent.SelectionToggled(7))
+        vm.onIntent(CharacterListIntent.SearchChanged("Hero"))
+        vm.onIntent(CharacterListIntent.MoveCharacter(7, 9))
+
+        assertEquals(listOf(9L, 7L), vm.state.value.characters.map { it.id })
+        assertEquals(setOf(7L), vm.state.value.selectedIds)
+        vm.onIntent(CharacterListIntent.SearchChanged(""))
+        assertEquals(listOf(9L, 8L, 7L), vm.state.value.characters.map { it.id })
+
+        repository.characters.value = repository.characters.value.map { it.copy(level = 2) }
+        advanceUntilIdle()
+        assertEquals(listOf(9L, 8L, 7L), vm.state.value.characters.map { it.id })
+    }
+
+    @Test fun givenSavedOrder_whenViewModelRecreated_thenRestoresOrderAndIgnoresInvalidMoves() = runTest {
+        repository.characters.value += Character(id = 8, name = "Other")
+        val vm = viewModel()
+        advanceUntilIdle()
+        vm.moveCharacter(7, 8)
+        vm.onIntent(CharacterListIntent.ReorderFinished)
+        advanceUntilIdle()
+        val restored = viewModel()
+        advanceUntilIdle()
+
+        assertEquals(listOf(8L, 7L), restored.state.value.characters.map { it.id })
+        restored.moveCharacter(99, 7)
+        restored.moveCharacter(8, 8)
+        assertEquals(listOf(8L, 7L), restored.state.value.characters.map { it.id })
+    }
+
+    @Test fun givenCharacters_whenEnteringSelectionMode_thenCanSelectExportAndExit() = runTest {
+        val vm = viewModel()
+        advanceUntilIdle()
+
+        vm.onIntent(CharacterListIntent.EnterSelectionMode)
+        assertTrue(vm.state.value.isSelectionMode)
+        assertTrue(vm.state.value.selectedIds.isEmpty())
+
+        vm.onIntent(CharacterListIntent.SelectionToggled(7))
+        vm.onIntent(CharacterListIntent.ExportClicked)
+        assertEquals(CharacterListEffect.LaunchExport, vm.effects.first())
+        vm.onIntent(CharacterListIntent.ExportDocumentSelected("content://export"))
+        advanceUntilIdle()
+        assertEquals(listOf(7L), files.exportedIds)
+
+        vm.onIntent(CharacterListIntent.ClearSelection)
+        assertFalse(vm.state.value.isSelectionMode)
+        assertTrue(vm.state.value.selectedIds.isEmpty())
+    }
+
+    @Test fun givenCreateClicked_whenHandled_thenOpensCharacterCreation() = runTest {
+        val vm = viewModel()
+        advanceUntilIdle()
+        vm.onIntent(CharacterListIntent.CreateClicked)
+        assertEquals(CharacterListEffect.CreateCharacter, vm.effects.first())
+    }
 
     @Test fun givenSelectionChangedDuringPicker_whenExported_thenUsesOriginalIds() = runTest {
         repository.characters.value += Character(id = 8, name = "Other")

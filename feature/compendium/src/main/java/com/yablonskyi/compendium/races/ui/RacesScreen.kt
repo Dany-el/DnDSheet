@@ -2,8 +2,15 @@ package com.yablonskyi.compendium.races.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,9 +53,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,7 +68,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -80,6 +85,7 @@ import com.yablonskyi.compendium.races.viewmodel.RacesIntent
 import com.yablonskyi.model.rulebook.Race
 import com.yablonskyi.model.rulebook.RaceSize
 import com.yablonskyi.ui.R
+import com.yablonskyi.ui.animation.utils.Entrance
 import com.yablonskyi.ui.spell.LibraryFeedback
 import com.yablonskyi.ui.theme.Dimens
 import com.yablonskyi.ui.utils.DeletingItemConfirmDialog
@@ -105,19 +111,50 @@ fun RacesScreen(
     }
     var isOrigExpanded by rememberSaveable { mutableStateOf(true) }
     var isHomebrewExpanded by rememberSaveable { mutableStateOf(true) }
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             RacesTopAppBar(
                 uiState = uiState,
                 onIntent = onIntent,
-                scrollBehavior = scrollBehavior
             )
         },
-        bottomBar = {
+    ) { innerPadding ->
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+        ) {
+            val visibleListIsEmpty = if (uiState.isSelectionMode) {
+                uiState.homebrewRaces.isEmpty()
+            } else {
+                uiState.listIsEmpty
+            }
+
+            AnimatedVisibility(
+                !uiState.isSelectionMode,
+                enter = fadeIn() + slideInVertically { -it / 2 },
+                exit = fadeOut(),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(bottom = 24.dp)
+                    .zIndex(1f)
+            ) {
+                ExpandableFab(
+                    expanded = isFabExpanded,
+                    onExpandedChange = { isFabExpanded = it },
+                    onLoad = { onIntent(RacesIntent.RequestFilePicker) },
+                    onSave = {
+                        isHomebrewExpanded = true
+                        onIntent(RacesIntent.EnterSelectionMode)
+                    },
+                    onCreate = { onIntent(RacesIntent.CreateRace) },
+                    saveEnabled = uiState.homebrewRaces.isNotEmpty(),
+                )
+            }
             SelectionBottomBar(
                 title = stringResource(R.string.q_delete_race),
                 confirmMsg = pluralStringResource(
@@ -130,48 +167,26 @@ fun RacesScreen(
                 actionsEnabled = uiState.selectedRaceIds.isNotEmpty(),
                 onExportSelected = { onIntent(RacesIntent.ExportAllSelected) },
                 onDeleteSelected = { onIntent(RacesIntent.DeleteSelected) },
-                onToggleSelectAll = { onIntent(RacesIntent.ToggleSelectAll) }
+                onToggleSelectAll = { onIntent(RacesIntent.ToggleSelectAll) },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .zIndex(1f)
             )
-        }
-    ) { innerPadding ->
-        Box(
-            Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding)
-        ) {
-            if (!uiState.isSelectionMode) {
-                ExpandableFab(
-                    expanded = isFabExpanded,
-                    onExpandedChange = { isFabExpanded = it },
-                    onLoad = { onIntent(RacesIntent.RequestFilePicker) },
-                    onSave = {
-                        isHomebrewExpanded = true
-                        onIntent(RacesIntent.EnterSelectionMode)
-                    },
-                    onCreate = { onIntent(RacesIntent.CreateRace) },
-                    saveEnabled = uiState.homebrewRaces.isNotEmpty(),
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(bottom = 24.dp)
-                        .zIndex(1f)
-                )
-            }
-            if (uiState.isLoading || ((uiState.isSelectionMode || uiState.origRaces.isEmpty()) && uiState.homebrewRaces.isEmpty())) {
+
+            if (uiState.isLoading || visibleListIsEmpty) {
                 LibraryFeedback(
                     isLoading = uiState.isLoading,
+                    isEmpty = visibleListIsEmpty,
                     hasSearch = uiState.searchQuery.isNotBlank(),
                     onClearSearch = { onIntent(RacesIntent.SearchQueryChanged("")) },
-                    onCreate = if (!uiState.isSelectionMode) ({ onIntent(RacesIntent.CreateRace) }) else null,
-                    onImport = if (!uiState.isSelectionMode) ({ onIntent(RacesIntent.RequestFilePicker) }) else null
                 )
             } else {
                 LazyColumn(
                     contentPadding = PaddingValues(
                         start = Dimens.Spacing.Small,
+                        top = Dimens.Spacing.Small,
                         end = Dimens.Spacing.Small,
-                        top = Dimens.Spacing.Medium,
-                        bottom = if (uiState.isSelectionMode) Dimens.Spacing.Small else Dimens.Fab.BottomPadding
+                        bottom = Dimens.Fab.BottomPadding
                     ),
                     verticalArrangement = Arrangement.spacedBy(Dimens.Spacing.XSmall),
                     modifier = Modifier
@@ -223,13 +238,14 @@ fun RacesScreen(
 fun RacesTopAppBar(
     uiState: RaceUiState,
     onIntent: (RacesIntent) -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior,
     modifier: Modifier = Modifier
 ) {
     var isSearchExpanded by remember { mutableStateOf(false) }
     val searchFocusRequester = remember { FocusRequester() }
-    val elevatedSurfaceColor =
-        MaterialTheme.colorScheme.surfaceColorAtElevation(Dimens.TopBar.Elevation)
+    val topBarColor by animateColorAsState(
+        targetValue = if (uiState.isSelectionMode) MaterialTheme.colorScheme.surface
+        else MaterialTheme.colorScheme.surfaceColorAtElevation(Dimens.TopBar.Elevation)
+    )
 
     val windowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val isWideScreen =
@@ -247,14 +263,15 @@ fun RacesTopAppBar(
 
     CenterAlignedTopAppBar(
         modifier = modifier,
-        scrollBehavior = if (!isSearchExpanded && !uiState.isSelectionMode) scrollBehavior else null,
         navigationIcon = {
             when {
-                uiState.isSelectionMode -> IconButton(onClick = {
-                    onIntent(RacesIntent.ClearSelection)
-                    isSearchExpanded = false
-                    onIntent(RacesIntent.SearchQueryChanged(""))
-                }) {
+                uiState.isSelectionMode -> IconButton(
+                    onClick = {
+                        onIntent(RacesIntent.ClearSelection)
+                        isSearchExpanded = false
+                        onIntent(RacesIntent.SearchQueryChanged(""))
+                    }
+                ) {
                     Icon(
                         Icons.Default.Close,
                         contentDescription = stringResource(R.string.clear_selection)
@@ -266,7 +283,7 @@ fun RacesTopAppBar(
                     onIntent(RacesIntent.SearchQueryChanged(""))
                 }) {
                     Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
+                        Icons.Default.Close,
                         contentDescription = stringResource(R.string.close_search)
                     )
                 }
@@ -328,8 +345,7 @@ fun RacesTopAppBar(
 
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = elevatedSurfaceColor,
-            scrolledContainerColor = elevatedSurfaceColor,
+            containerColor = topBarColor,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
             actionIconContentColor = MaterialTheme.colorScheme.onSurface,
             navigationIconContentColor = MaterialTheme.colorScheme.onSurface
@@ -352,15 +368,30 @@ fun LazyListScope.collapsibleRacesList(
     onCollapse: () -> Unit,
 ) {
     stickyHeader(key = header) {
-        HeaderItem(
-            title = stringResource(header),
-            isExpanded = isExpanded,
-            onToggle = onCollapse
-        )
+        Entrance {
+            HeaderItem(
+                title = stringResource(header),
+                isExpanded = isExpanded,
+                onToggle = onCollapse
+            )
+        }
     }
 
     if (isExpanded) {
         itemsIndexed(items = races, key = { _, race -> race.id }) { index, race ->
+
+            val progress = remember(race.id) { Animatable(0f) }
+
+            LaunchedEffect(race.id) {
+                progress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(
+                        durationMillis = 400,
+                        delayMillis = index.coerceAtMost(4) * 100,
+                        easing = FastOutSlowInEasing,
+                    ),
+                )
+            }
 
             RaceCard(
                 defaultTopCorners = if (index == 0) 16.dp else 4.dp,
@@ -383,7 +414,12 @@ fun LazyListScope.collapsibleRacesList(
                 onShare = { onShare(race) },
                 onDelete = { onDelete(race) },
                 onToggleSelection = { onToggleSelection(race.id) },
-                modifier = Modifier.animateItem()
+                modifier = Modifier
+                    .animateItem()
+                    .graphicsLayer {
+                        alpha = progress.value
+                        translationY = 24.dp.toPx() * (1f - progress.value)
+                    },
             )
         }
     }
@@ -409,6 +445,12 @@ fun RaceCard(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer
         else CardDefaults.outlinedCardColors().containerColor,
         label = "raceCardColor"
+    )
+
+    val infoChipBorderColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.outlineVariant,
+        label = "infoChipBorderColor"
     )
 
     val topCorners by animateDpAsState(
@@ -482,10 +524,19 @@ fun RaceCard(
                         val name = stringResource(ability.nameRes).take(3).uppercase()
                         "$name\u00A0${if (bonus >= 0) "+" else ""}$bonus"
                     }.joinToString()
-                    OutlinedInfoChip(bonuses)
+                    OutlinedInfoChip(
+                        bonuses,
+                        borderColor = infoChipBorderColor
+                    )
                 }
-                OutlinedInfoChip(text = stringResource(RaceSize.fromString(race.size).resId))
-                OutlinedInfoChip(text = "${race.speed} ${stringResource(R.string.feets)}")
+                OutlinedInfoChip(
+                    text = stringResource(RaceSize.fromString(race.size).resId),
+                    borderColor = infoChipBorderColor
+                )
+                OutlinedInfoChip(
+                    text = "${race.speed} ${stringResource(R.string.feets)}",
+                    borderColor = infoChipBorderColor
+                )
             }
         }
     }

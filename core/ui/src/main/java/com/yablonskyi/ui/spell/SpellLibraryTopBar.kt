@@ -1,6 +1,7 @@
 package com.yablonskyi.ui.spell
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -16,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
@@ -41,7 +41,6 @@ import com.yablonskyi.ui.theme.Dimens
 fun SpellLibraryTopBar(
     uiState: SpellLibraryState,
     onIntent: (SpellsIntent) -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior
 ) {
     var isSearchExpanded by remember { mutableStateOf(false) }
     val searchFocusRequester = remember { FocusRequester() }
@@ -57,18 +56,21 @@ fun SpellLibraryTopBar(
         }
     }
 
-    val elevatedSurfaceColor =
-        MaterialTheme.colorScheme.surfaceColorAtElevation(Dimens.TopBar.Elevation)
+    val topBarColor by animateColorAsState(
+        targetValue = if (uiState.isSelectionMode) MaterialTheme.colorScheme.surface
+        else MaterialTheme.colorScheme.surfaceColorAtElevation(Dimens.TopBar.Elevation)
+    )
 
     CenterAlignedTopAppBar(
-        scrollBehavior = if (!isSearchExpanded) scrollBehavior else null,
         navigationIcon = {
             when {
-                uiState.isSelectionMode -> IconButton(onClick = {
-                    onIntent(SpellsIntent.ClearSelection)
-                    isSearchExpanded = false
-                    onIntent(SpellsIntent.SearchQueryChanged(""))
-                }) {
+                uiState.isSelectionMode -> IconButton(
+                    onClick = {
+                        onIntent(SpellsIntent.ClearSelection)
+                        isSearchExpanded = false
+                        onIntent(SpellsIntent.SearchQueryChanged(""))
+                    }
+                ) {
                     Icon(
                         Icons.Default.Close,
                         contentDescription = stringResource(R.string.clear_selection)
@@ -82,7 +84,7 @@ fun SpellLibraryTopBar(
                     }
                 ) {
                     Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
+                        Icons.Default.Close,
                         contentDescription = stringResource(R.string.close_search)
                     )
                 }
@@ -153,8 +155,7 @@ fun SpellLibraryTopBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = elevatedSurfaceColor,
-            scrolledContainerColor = elevatedSurfaceColor,
+            containerColor = topBarColor,
             titleContentColor = MaterialTheme.colorScheme.onSurface,
             actionIconContentColor = MaterialTheme.colorScheme.onSurface,
             navigationIconContentColor = MaterialTheme.colorScheme.onSurface

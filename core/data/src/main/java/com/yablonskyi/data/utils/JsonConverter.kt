@@ -6,19 +6,24 @@ import android.graphics.Matrix
 import androidx.exifinterface.media.ExifInterface
 import android.net.Uri
 import android.util.Base64
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.yablonskyi.model.character.CharacterSheet
 import com.yablonskyi.model.character.Spell
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import java.io.File
 import java.util.UUID
+
+private val spellJson = kotlinx.serialization.json.Json {
+    ignoreUnknownKeys = true
+    encodeDefaults = true
+}
 
 suspend fun exportSpellsToJson(context: Context, uri: Uri, spells: List<Spell>): Result<Unit> {
     return withContext(Dispatchers.IO) {
         try {
-            val jsonString = Gson().toJson(spells)
+            val jsonString = spellJson.encodeToString(spells)
 
             context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                 outputStream.write(jsonString.toByteArray())
@@ -40,8 +45,7 @@ suspend fun importSpellsFromJson(
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 val jsonString = inputStream.bufferedReader().use { it.readText() }
 
-                val listType = object : TypeToken<List<Spell>>() {}.type
-                val spells: List<Spell> = Gson().fromJson(jsonString, listType)
+                val spells: List<Spell> = spellJson.decodeFromString(jsonString)
 
                 Result.success(spells)
             } ?: Result.failure(Exception(errorMessage))
@@ -66,7 +70,7 @@ suspend fun exportCharactersToJson(
                 )
             }
 
-            val jsonString = Gson().toJson(sheetsForExport)
+            val jsonString = CharacterBackupCodec.encode(sheetsForExport)
 
             context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                 outputStream.write(jsonString.toByteArray())
@@ -88,8 +92,7 @@ suspend fun importCharactersFromJson(
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 val jsonString = inputStream.bufferedReader().use { it.readText() }
 
-                val listType = object : TypeToken<List<CharacterSheet>>() {}.type
-                val importedSheets: List<CharacterSheet> = Gson().fromJson(jsonString, listType)
+                val importedSheets: List<CharacterSheet> = CharacterBackupCodec.decode(jsonString)
 
                 val restoredSheets = importedSheets.map { sheet ->
                     val newLocalPath = decodeBase64ToImage(context, sheet.character.imagePath)

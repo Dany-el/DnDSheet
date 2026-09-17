@@ -6,6 +6,7 @@ import com.yablonskyi.model.character.CharacterSheet
 import kotlinx.coroutines.flow.flowOf
 
 class FakeCharacterRepository : CharacterRepository {
+    override suspend fun reorderCharacters(orderedIds: List<Long>) = error("Unused")
     val saved = mutableListOf<Character>()
     var fail = false
     override suspend fun insertCharacter(character: Character): Long {

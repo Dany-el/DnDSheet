@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -19,24 +20,22 @@ import com.yablonskyi.ui.theme.Dimens
 @Composable
 fun SpellTag(
     text: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle = MaterialTheme.typography.labelLarge
 ) {
     Surface(
+        shape = MaterialTheme.shapes.small,
         color = Color.Transparent,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        shape = RoundedCornerShape(8.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        modifier = modifier
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(
-                    vertical = Dimens.Spacing.XSmall,
-                    horizontal = Dimens.Spacing.Small
-                )
+        Text(
+            text = text,
+            style = style,
+            modifier = Modifier.padding(
+                horizontal = Dimens.Spacing.Medium,
+                vertical = Dimens.Spacing.Small
             )
-        }
+        )
     }
 }

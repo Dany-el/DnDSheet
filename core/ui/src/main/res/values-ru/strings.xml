@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="character_reorder_failed">Не удалось сохранить персонажа. Попробуйте еще раз.</string>
     <string name="app_name">DND Sheet</string>
 
     <string name="time_1_min">1 минута</string>
@@ -251,7 +252,7 @@
     <string name="description_required">Описание обязательно</string>
     <string name="select_at_least_one_item">Выберите как минимум 1 объект</string>
     <string name="import_file_empty">Файл пустой</string>
-    <string name="confirm_import_title">Подтверждение Загрузки</string>
+    <string name="confirm_import_title">Подтверждение загрузки</string>
     <string name="alert_dialog_import_chars">Вы хотите загрузить %1$d персонажей?</string>
     <string name="loading_please_wait">Пожалуйста, подождите…</string>
     <string name="collapse">Свернуть</string>
@@ -456,4 +457,16 @@
     <string name="print_render_failed">Не удалось создать лист персонажа. Попробуйте ещё раз.</string>
     <string name="print_launch_failed">Не удалось открыть печать. Попробуйте ещё раз.</string>
     <string name="print_request_accepted">Запрос на печать принят</string>
+    <string name="cast_named_spell">Сотворить: %1$s</string>
+    <string name="restore_spell_slot">Восстановить ячейку %2$d (%1$s)</string>
+    <string name="consume_spell_slot">Использовать ячейку %2$d (%1$s)</string>
+    <string name="spell_slot_spent">Потрачена</string>
+    <string name="spell_slot_available">Доступна</string>
+    <string name="dice_history">История бросков</string>
+    <string name="clear_dice_history">Очистить историю бросков</string>
+    <string name="clear_dice_history_confirmation">Очистить все сохранённые броски этого персонажа?</string>
+    <string name="dice_history_empty">Бросков пока нет</string>
+    <string name="dice_history_error_title">История бросков недоступна</string>
+    <string name="dice_history_error_message">Не удалось загрузить или обновить историю бросков. Попробуйте ещё раз.</string>
+    <string name="placeholder_traits">Первое умение, второе умение, третье умение …</string>
 </resources>

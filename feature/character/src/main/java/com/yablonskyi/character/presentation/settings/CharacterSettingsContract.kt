@@ -1,9 +1,11 @@
 package com.yablonskyi.character.presentation.settings
 
+import androidx.compose.runtime.Immutable
 import com.yablonskyi.character.presentation.common.*
 import com.yablonskyi.domain.character.*
 import com.yablonskyi.model.character.Character
 
+@Immutable
 data class CharacterSettingsState(
     val character: Character? = null,
     val status: CharacterLoadStatus = CharacterLoadStatus.LOADING,

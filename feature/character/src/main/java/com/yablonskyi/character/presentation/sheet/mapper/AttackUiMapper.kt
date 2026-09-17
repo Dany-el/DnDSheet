@@ -10,6 +10,6 @@ internal fun mapAttacks(character: Character?, attacks: List<Attack>): List<Atta
     return attacks.map { attack ->
         val calculator = AttackCalculator(character, attack)
         val hit = calculator.getToHitModifier()
-        AttackUiModel(attack.attackId, attack.name, if (hit >= 0) "+$hit" else "$hit", calculator.getDamageString(), attack)
+        AttackUiModel(attack.attackId, attack.name, if (hit >= 0) "+$hit" else "$hit", calculator.getDamageString(), calculator)
     }
 }

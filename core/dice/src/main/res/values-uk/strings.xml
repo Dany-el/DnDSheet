@@ -2,4 +2,8 @@
 <resources>
     <string name="dice_first_letter">к</string>
     <string name="roll">Кидок</string>
+    <string name="roll_type_damage">Шкода</string>
+    <string name="roll_type_attack">Атака</string>
+    <string name="roll_type_save">Ряткидок</string>
+    <string name="roll_type_roll">Кидок</string>
 </resources>

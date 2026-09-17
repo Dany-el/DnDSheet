@@ -14,11 +14,11 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -38,6 +38,9 @@ import com.yablonskyi.character.presentation.sheet.components.DiceResultOverlay
 import com.yablonskyi.character.presentation.sheet.components.ExpandedTopAppBar
 import com.yablonskyi.character.presentation.sheet.components.VerticalCharacterLayout
 import com.yablonskyi.character.presentation.sheet.components.WideCharacterLayout
+import com.yablonskyi.character.presentation.sheet.mapper.toAbilityUiModel
+import com.yablonskyi.character.presentation.sheet.mapper.toSavingThrows
+import com.yablonskyi.character.presentation.sheet.mapper.toSkillUiModel
 import com.yablonskyi.character.presentation.sheet.model.CharacterSheetEditor
 import com.yablonskyi.character.presentation.sheet.model.CharacterTab
 import com.yablonskyi.character.presentation.sheet.model.SpellFilter
@@ -47,6 +50,7 @@ import com.yablonskyi.character.presentation.sheet.slides.BackstorySlide
 import com.yablonskyi.character.presentation.sheet.slides.FeaturesSlide
 import com.yablonskyi.character.presentation.sheet.slides.InventorySlide
 import com.yablonskyi.character.presentation.sheet.slides.NotesSlide
+import com.yablonskyi.character.presentation.sheet.slides.SkillsSlide
 import com.yablonskyi.character.presentation.sheet.slides.SpellSlide
 import com.yablonskyi.dice.DiceIntent
 import com.yablonskyi.dice.DiceRollFloatingActionButton
@@ -68,15 +72,6 @@ fun SharedTransitionScope.CharacterSheetScreen(
     val character = uiState.character
 
     Box(modifier = Modifier.fillMaxSize()) {
-        AnimatedVisibility(
-            visible = character == null,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = Modifier.align(Alignment.Center)
-        ) {
-            CircularProgressIndicator()
-        }
-
         AnimatedVisibility(
             visible = character != null,
             enter = fadeIn(),
@@ -121,7 +116,9 @@ fun SharedTransitionScope.CharacterSheetScreen(
 
                 // Sheets
                 val activeSheet = uiState.editor
-                val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+                val sheetState = rememberBottomSheetState(
+                    initialValue = SheetValue.Expanded,
+                )
                 val closeSheet: () -> Unit = remember(scope, sheetState, onIntent) {
                     {
                         scope.launch { sheetState.hide() }.invokeOnCompletion {
@@ -151,8 +148,18 @@ fun SharedTransitionScope.CharacterSheetScreen(
                         when (tab) {
                             CharacterTab.ABILITIES -> {
                                 AbilitySlide(
-                                    character = character,
-                                    onRollClick = { onDiceIntent(DiceIntent.RegularStringRoll(it)) },
+                                    abilities = character.toAbilityUiModel(),
+                                    savingThrows = character.toSavingThrows(),
+                                    onAbilityRoll = { ability, mod ->
+                                        onDiceIntent(
+                                            DiceIntent.AbilityCheckRoll(ability, mod)
+                                        )
+                                    },
+                                    onSaveThrowRoll = { ability, mod ->
+                                        onDiceIntent(
+                                            DiceIntent.SaveThrowRoll(ability, mod)
+                                        )
+                                    },
                                     onAbilityClick = { ability ->
                                         onIntent(
                                             CharacterSheetIntent.EditorChanged(
@@ -160,7 +167,7 @@ fun SharedTransitionScope.CharacterSheetScreen(
                                             )
                                         )
                                     },
-                                    onProfSavingThrowClick = { ability, proficient ->
+                                    onProficiencyChange = { ability, proficient ->
                                         onIntent(
                                             CharacterSheetIntent.Change(
                                                 CharacterChange.SavingThrow(
@@ -170,14 +177,25 @@ fun SharedTransitionScope.CharacterSheetScreen(
                                             )
                                         )
                                     },
+                                    modifier = modifier
+                                )
+                            }
+
+                            CharacterTab.SKILLS -> {
+                                SkillsSlide(
+                                    skills = character.toSkillUiModel(),
                                     onProficiencyChange = { skill, level ->
                                         onIntent(
                                             CharacterSheetIntent.Change(
                                                 CharacterChange.SkillProficiency(
-                                                    skill,
-                                                    level
+                                                    skill, level
                                                 )
                                             )
+                                        )
+                                    },
+                                    onSkillRoll = { skill, mod ->
+                                        onDiceIntent(
+                                            DiceIntent.SkillCheckRoll(skill, mod)
                                         )
                                     },
                                     modifier = modifier
@@ -186,23 +204,33 @@ fun SharedTransitionScope.CharacterSheetScreen(
 
                             CharacterTab.SPELLS -> {
                                 SpellSlide(
-                                    character = character,
                                     spells = uiState.spells,
                                     availableFilters = uiState.availableFilters,
                                     currentFilter = uiState.currentFilter,
+                                    spellSaveDC = character.getSpellSaveDC(),
+                                    spellAttackBonus = character.getSpellAttackBonus(),
+                                    spellSettings = character.spellSettings,
                                     onFilterChange = {
-                                        onIntent(
-                                            CharacterSheetIntent.FilterChanged(
-                                                it
+                                        onIntent(CharacterSheetIntent.FilterChanged(it))
+                                    },
+                                    onCastSpell = { spell ->
+                                        dispatchSpellCast(spell, onIntent, onDiceIntent)
+                                    },
+                                    onSpellAttackRoll = { mod ->
+                                        onDiceIntent(
+                                            DiceIntent.SpellAttackRoll(
+                                                mod
                                             )
                                         )
                                     },
-                                    onRollClick = { onDiceIntent(DiceIntent.RegularStringRoll(it)) },
-                                    onManageSpellsClick = { _ -> onIntent(CharacterSheetIntent.ManageSpells) },
+                                    onManageSpellsClick = { onIntent(CharacterSheetIntent.ManageSpells) },
                                     onSlotClick = { level, delta ->
                                         onIntent(
                                             CharacterSheetIntent.Change(
-                                                CharacterChange.SlotUsed(level, delta)
+                                                CharacterChange.SlotUsed(
+                                                    level,
+                                                    delta
+                                                )
                                             )
                                         )
                                     },
@@ -234,7 +262,22 @@ fun SharedTransitionScope.CharacterSheetScreen(
                                             )
                                         )
                                     },
-                                    onRollClick = { onDiceIntent(DiceIntent.RegularStringRoll(it)) },
+                                    onDamageRoll = { attack, damage ->
+                                        onDiceIntent(
+                                            DiceIntent.WeaponDamageRoll(
+                                                attack,
+                                                damage
+                                            )
+                                        )
+                                    },
+                                    onAttackBonusRoll = { attack, hit ->
+                                        onDiceIntent(
+                                            DiceIntent.WeaponAttackRoll(
+                                                attack,
+                                                hit
+                                            )
+                                        )
+                                    },
                                     modifier = modifier
                                 )
                             }
@@ -342,6 +385,9 @@ fun SharedTransitionScope.CharacterSheetScreen(
                                 speed = character.speed,
                                 proficiencyBonus = character.getProfBonus(),
                                 onSettingsNavigate = onSettingsClick,
+                                onDiceHistoryNavigate = {
+                                    onIntent(CharacterSheetIntent.OpenDiceHistory)
+                                },
                                 onNavigateBack = { onIntent(CharacterSheetIntent.BackClicked) },
                                 nameModifier = nameModifier,
                                 classRaceModifier = classRaceModifier,
@@ -355,6 +401,9 @@ fun SharedTransitionScope.CharacterSheetScreen(
                                 imagePath = character.imagePath,
                                 onNavigateBack = { onIntent(CharacterSheetIntent.BackClicked) },
                                 onSettingsNavigate = onSettingsClick,
+                                onDiceHistoryNavigate = {
+                                    onIntent(CharacterSheetIntent.OpenDiceHistory)
+                                },
                                 nameModifier = nameModifier,
                                 classRaceModifier = classRaceModifier,
                                 imageModifier = imageModifier,
@@ -405,13 +454,13 @@ fun SharedTransitionScope.CharacterSheetScreen(
                                 currentHp = character.currentHp,
                                 maxHp = character.maxHp,
                                 tempHp = character.tempHp,
-                                initiativeBonus = character.getInitiativeBonus(),
+                                initiativeBonus = character.initiativeBonus,
                                 armorClass = character.armorClass,
                                 speed = character.speed,
                                 proficiencyBonus = character.getProfBonus(),
                                 tabs = tabs,
                                 pagerState = pagerState,
-                                onDiceButtonClick = { onDiceIntent(DiceIntent.RegularStringRoll(it)) },
+                                onInitiativeBonusRoll = { onDiceIntent(DiceIntent.InitiativeRoll(character.initiativeBonus)) },
                                 onRestClick = { onIntent(CharacterSheetIntent.Change(CharacterChange.LongRest)) },
                                 onHealthClick = onHealthClick,
                                 onTabSelected = { newTab ->

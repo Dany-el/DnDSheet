@@ -36,8 +36,28 @@ interface CharacterDao {
     @Query("SELECT * FROM character WHERE id = :id")
     suspend fun findCharacterById(id: Long): CharacterEntity?
 
-    @Query("SELECT * FROM character")
+    @Query("SELECT * FROM character ORDER BY sortOrder, id")
     fun getAllCharacters(): Flow<List<CharacterEntity>>
+
+    @Query("SELECT id FROM character ORDER BY sortOrder, id")
+    suspend fun getOrderedIds(): List<Long>
+
+    @Query("SELECT COALESCE(MAX(sortOrder), -1) + 1 FROM character")
+    suspend fun nextSortOrder(): Long
+
+    @Query("UPDATE character SET sortOrder = :position WHERE id = :id")
+    suspend fun updateSortOrder(id: Long, position: Long)
+
+    @Transaction
+    suspend fun reorderCharacters(orderedIds: List<Long>) {
+        val current = getOrderedIds()
+        val existing = current.toSet()
+        val requested = orderedIds.distinct().filter { it in existing }
+        val requestedSet = requested.toSet()
+        (requested + current.filterNot { it in requestedSet }).forEachIndexed { index, id ->
+            updateSortOrder(id, index.toLong())
+        }
+    }
 
     @Transaction
     @Query("SELECT * FROM character WHERE id IN (:characterIds)")
@@ -48,7 +68,7 @@ interface CharacterDao {
     suspend fun getCharacterSheetById(characterId: Long): CharacterSheetEntity
 
     @Transaction
-    @Query("SELECT * FROM character")
+    @Query("SELECT * FROM character ORDER BY sortOrder, id")
     suspend fun getAllCharacterSheets(): List<CharacterSheetEntity>
 
     @Query("DELETE FROM character")

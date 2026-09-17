@@ -4,9 +4,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -23,26 +22,24 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -50,6 +47,7 @@ import androidx.compose.ui.tooling.preview.PreviewDynamicColors
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.window.core.layout.WindowSizeClass
 import com.yablonskyi.character.platform.print.normalizePrintLanguage
 import com.yablonskyi.character.presentation.common.UiUtils
@@ -58,10 +56,22 @@ import com.yablonskyi.character.presentation.list.components.CharacterListItem
 import com.yablonskyi.character.presentation.list.components.CharactersTopAppBar
 import com.yablonskyi.model.character.Character
 import com.yablonskyi.ui.R
+import com.yablonskyi.ui.animation.utils.Entrance
+import com.yablonskyi.ui.animation.utils.StartupSlide
 import com.yablonskyi.ui.settings.ListView
+import com.yablonskyi.ui.theme.Dimens
 import com.yablonskyi.ui.theme.DnDSheetTheme
+import com.yablonskyi.ui.utils.ExpandableFab
 import com.yablonskyi.ui.utils.LoadingDialog
 import com.yablonskyi.ui.utils.SelectionBottomBar
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
+import sh.calvin.reorderable.rememberReorderableLazyStaggeredGridState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.graphicsLayer
 
 @Stable
 data class CharacterItemActions(
@@ -69,7 +79,8 @@ data class CharacterItemActions(
     val onLongClick: () -> Unit,
     val onToggleSelection: () -> Unit,
     val onDelete: () -> Unit,
-    val onExport: () -> Unit
+    val onExport: () -> Unit,
+    val onReorderFinished: () -> Unit,
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,7 +91,6 @@ fun SharedTransitionScope.CharacterSheetsScreen(
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
     listView: ListView = ListView.LIST,
-    windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
 ) {
     val configuration = LocalConfiguration.current
 
@@ -91,69 +101,26 @@ fun SharedTransitionScope.CharacterSheetsScreen(
         }
     }
 
+    val windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val isWideScreen =
         windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
     val screenInsets =
         if (isWideScreen) ScaffoldDefaults.contentWindowInsets else WindowInsets(bottom = 0.dp)
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
         contentWindowInsets = screenInsets,
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier,
         topBar = {
-            CharactersTopAppBar(
-                listView = listView,
-                windowSizeClass = windowSizeClass,
-                uiState = uiState,
-                onIntent = onIntent,
-                scrollBehavior = scrollBehavior,
-                onImportClick = { onIntent(CharacterListIntent.ImportClicked) }
-            )
-        },
-        floatingActionButton = {
-            AnimatedVisibility(
-                visible = !uiState.isSelectionMode,
-                enter = scaleIn(),
-                exit = scaleOut()
-            ) {
-                FloatingActionButton(
-                    onClick = { onIntent(CharacterListIntent.CreateClicked) },
-                    modifier = Modifier.size(64.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Create New Character"
-                    )
-                }
+            StartupSlide(fromY = (-32).dp) {
+                CharactersTopAppBar(
+                    listView = listView,
+                    uiState = uiState,
+                    onIntent = onIntent,
+                )
             }
         },
-        bottomBar = {
-            SelectionBottomBar(
-                title = stringResource(R.string.q_delete_character),
-                confirmMsg = pluralStringResource(
-                    R.plurals.q_confirm_text_characters,
-                    uiState.selectedIds.size,
-                    uiState.selectedIds.size
-                ),
-                isSelectionMode = uiState.isSelectionMode,
-                isAllSelected = uiState.isAllSelected,
-                onExportSelected = { onIntent(CharacterListIntent.ExportClicked) },
-                onDeleteSelected = { onIntent(CharacterListIntent.DeleteSelectedConfirmed) },
-                onToggleSelectAll = { onIntent(CharacterListIntent.SelectAllClicked) }
-            )
-        }
     ) { padding ->
-        if (!uiState.isLoading) {
-            CharactersContent(
-                listView = listView,
-                windowSizeClass = windowSizeClass,
-                uiState = uiState,
-                onIntent = onIntent,
-                animatedVisibilityScope = animatedVisibilityScope,
-                onExportPdf = onExportPdf,
-                modifier = Modifier.padding(padding)
-            )
-        } else {
+        if (uiState.isLoading) {
             Box(
                 Modifier
                     .padding(padding)
@@ -161,6 +128,15 @@ fun SharedTransitionScope.CharacterSheetsScreen(
             ) {
                 CircularProgressIndicator(Modifier.align(Alignment.Center))
             }
+        } else {
+            CharactersContent(
+                listView = listView,
+                uiState = uiState,
+                onIntent = onIntent,
+                animatedVisibilityScope = animatedVisibilityScope,
+                onExportPdf = onExportPdf,
+                modifier = Modifier.padding(padding)
+            )
         }
     }
 
@@ -180,6 +156,7 @@ fun SharedTransitionScope.CharacterSheetsScreen(
                     stringResource(
                         when (error) {
                             CharacterListError.LOAD -> R.string.character_load_failed
+                            CharacterListError.REORDER -> R.string.character_reorder_failed
                             CharacterListError.IMPORT -> R.string.failure_import
                             CharacterListError.EMPTY_IMPORT -> R.string.import_file_empty
                             CharacterListError.EXPORT -> R.string.failure_export
@@ -192,17 +169,13 @@ fun SharedTransitionScope.CharacterSheetsScreen(
             confirmButton = {
                 if (error != CharacterListError.EMPTY_IMPORT && error != CharacterListError.EMPTY_SELECTION) {
                     TextButton(onClick = { onIntent(CharacterListIntent.Retry) }) {
-                        Text(
-                            stringResource(R.string.character_retry)
-                        )
+                        Text(stringResource(R.string.character_retry))
                     }
                 }
             },
             dismissButton = {
                 TextButton(onClick = { onIntent(CharacterListIntent.DismissError) }) {
-                    Text(
-                        stringResource(R.string.cancel)
-                    )
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )
@@ -233,12 +206,12 @@ fun SharedTransitionScope.CharactersContent(
     uiState: CharacterListState,
     modifier: Modifier = Modifier,
     listView: ListView = ListView.LIST,
-    windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
     onIntent: (CharacterListIntent) -> Unit,
     onExportPdf: (Character) -> Unit,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     val fabSpacing = 72.dp
+    var isFabExpanded by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier
@@ -246,6 +219,41 @@ fun SharedTransitionScope.CharactersContent(
             .consumeWindowInsets(PaddingValues(bottom = fabSpacing)),
         contentAlignment = Alignment.TopCenter
     ) {
+        AnimatedVisibility(
+            !uiState.isSelectionMode,
+            enter = fadeIn() + slideInVertically { -it / 2 },
+            exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 24.dp)
+                .zIndex(1f)
+        ) {
+            ExpandableFab(
+                expanded = isFabExpanded,
+                onExpandedChange = { isFabExpanded = it },
+                onLoad = { onIntent(CharacterListIntent.ImportClicked) },
+                onSave = { onIntent(CharacterListIntent.EnterSelectionMode) },
+                onCreate = { onIntent(CharacterListIntent.CreateClicked) },
+                saveEnabled = uiState.characters.isNotEmpty(),
+            )
+        }
+        SelectionBottomBar(
+            title = stringResource(R.string.q_delete_character),
+            confirmMsg = pluralStringResource(
+                R.plurals.q_confirm_text_characters,
+                uiState.selectedIds.size,
+                uiState.selectedIds.size
+            ),
+            isSelectionMode = uiState.isSelectionMode,
+            isAllSelected = uiState.isAllSelected,
+            actionsEnabled = uiState.selectedIds.isNotEmpty(),
+            onExportSelected = { onIntent(CharacterListIntent.ExportClicked) },
+            onDeleteSelected = { onIntent(CharacterListIntent.DeleteSelectedConfirmed) },
+            onToggleSelectAll = { onIntent(CharacterListIntent.SelectAllClicked) },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .zIndex(1f)
+        )
         when (listView) {
             ListView.LIST -> {
                 CharactersList(
@@ -253,13 +261,11 @@ fun SharedTransitionScope.CharactersContent(
                     onIntent = onIntent,
                     onExportPdf = onExportPdf,
                     animatedVisibilityScope = animatedVisibilityScope,
-                    fabSpacing = fabSpacing
                 )
             }
 
             ListView.GRID -> {
                 CharactersGrid(
-                    windowSizeClass = windowSizeClass,
                     uiState = uiState,
                     onIntent = onIntent,
                     onExportPdf = onExportPdf,
@@ -276,40 +282,67 @@ fun SharedTransitionScope.CharactersList(
     uiState: CharacterListState,
     onIntent: (CharacterListIntent) -> Unit,
     onExportPdf: (Character) -> Unit,
-    fabSpacing: Dp,
     animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier
 ) {
     val listState = rememberLazyListState()
-    LazyColumn(
-        state = listState,
-        contentPadding = PaddingValues(
-            start = 8.dp,
-            top = 8.dp,
-            end = 8.dp,
-            bottom = 8.dp + fabSpacing
-        ),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier.widthIn(max = 840.dp)
-    ) {
-        itemsIndexed(uiState.characters, key = { _, item -> item.id }) { index, character ->
-            val topCorners = if (uiState.characters.size == 1 || index == 0) 16.dp else 4.dp
-            val bottomCorners =
-                if (uiState.characters.size == 1 || index == uiState.characters.lastIndex) 16.dp else 4.dp
+    val hapticFeedback = LocalHapticFeedback.current
+    val reorderState = rememberReorderableLazyListState(listState) { from, to ->
+        onIntent(CharacterListIntent.MoveCharacter(from.key as Long, to.key as Long))
+        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+    }
+    Entrance(modifier = modifier.widthIn(max = 840.dp)) {
+        LazyColumn(
+            state = listState,
+            contentPadding = PaddingValues(
+                start = 8.dp,
+                top = 8.dp,
+                end = 8.dp,
+                bottom = Dimens.Fab.BottomPadding
+            ),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            itemsIndexed(uiState.characters, key = { _, item -> item.id }) { index, character ->
+                val topCorners = if (uiState.characters.size == 1 || index == 0) 16.dp else 4.dp
+                val bottomCorners =
+                    if (uiState.characters.size == 1 || index == uiState.characters.lastIndex) 16.dp else 4.dp
 
-            val itemActions =
-                rememberCharacterItemActions(character, uiState, onIntent, onExportPdf)
+                val itemActions =
+                    rememberCharacterItemActions(character, uiState, onIntent, onExportPdf)
 
-            CharacterListItem(
-                character = character,
-                defaultTopCorners = topCorners,
-                defaultBottomCorners = bottomCorners,
-                isSelected = uiState.selectedIds.contains(character.id),
-                isSelectionMode = uiState.isSelectionMode,
-                itemActions = itemActions,
-                animatedVisibilityScope = animatedVisibilityScope,
-                modifier = Modifier.animateItem()
-            )
+                ReorderableItem(reorderState, key = character.id) { isDragging ->
+                    val progress = remember(character.id) { Animatable(0f) }
+
+                    LaunchedEffect(character.id) {
+                        progress.animateTo(
+                            targetValue = 1f,
+                            animationSpec = tween(
+                                durationMillis = 400,
+                                delayMillis = index.coerceAtMost(4) * 100,
+                                easing = FastOutSlowInEasing,
+                            ),
+                        )
+                    }
+
+                    CharacterListItem(
+                        character = character,
+                        defaultTopCorners = topCorners,
+                        defaultBottomCorners = bottomCorners,
+                        isSelected = uiState.selectedIds.contains(character.id),
+                        isSelectionMode = uiState.isSelectionMode,
+                        isDragging = isDragging,
+                        reorderScope = this,
+                        itemActions = itemActions,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        modifier = Modifier
+                            .animateItem()
+                            .graphicsLayer {
+                                alpha = progress.value
+                                translationY = 24.dp.toPx() * (1f - progress.value)
+                            },
+                    )
+                }
+            }
         }
     }
 }
@@ -318,13 +351,18 @@ fun SharedTransitionScope.CharactersList(
 fun SharedTransitionScope.CharactersGrid(
     uiState: CharacterListState,
     modifier: Modifier = Modifier,
-    windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass,
     onIntent: (CharacterListIntent) -> Unit,
     onExportPdf: (Character) -> Unit,
     fabSpacing: Dp,
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
+    val windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
     val gridState = rememberLazyStaggeredGridState()
+    val hapticFeedback = LocalHapticFeedback.current
+    val reorderState = rememberReorderableLazyStaggeredGridState(gridState) { from, to ->
+        onIntent(CharacterListIntent.MoveCharacter(from.key as Long, to.key as Long))
+        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+    }
     val columnCount = when {
         windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EXPANDED_LOWER_BOUND) -> 3
         windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND) -> 3
@@ -347,18 +385,17 @@ fun SharedTransitionScope.CharactersGrid(
         items(uiState.characters, key = { it.id }) { character ->
             val itemActions =
                 rememberCharacterItemActions(character, uiState, onIntent, onExportPdf)
-            CharacterGridItem(
-                character = character,
-                isSelected = uiState.selectedIds.contains(character.id),
-                isSelectionMode = uiState.isSelectionMode,
-                itemActions = itemActions,
-                animatedVisibilityScope = animatedVisibilityScope,
-                modifier = Modifier.animateItem(
-                    fadeInSpec = tween(600),
-                    placementSpec = null,
-                    fadeOutSpec = tween(200)
+            ReorderableItem(reorderState, key = character.id) { isDragging ->
+                CharacterGridItem(
+                    character = character,
+                    isSelected = uiState.selectedIds.contains(character.id),
+                    isSelectionMode = uiState.isSelectionMode,
+                    isDragging = isDragging,
+                    reorderScope = this,
+                    itemActions = itemActions,
+                    animatedVisibilityScope = animatedVisibilityScope,
                 )
-            )
+            }
         }
     }
 }
@@ -381,7 +418,8 @@ fun rememberCharacterItemActions(
             },
             onToggleSelection = { onIntent(CharacterListIntent.SelectionToggled(character.id)) },
             onDelete = { onIntent(CharacterListIntent.DeleteConfirmed(character.id)) },
-            onExport = { onExportPdf(character) }
+            onExport = { onExportPdf(character) },
+            onReorderFinished = { onIntent(CharacterListIntent.ReorderFinished) },
         )
     }
 }

@@ -180,6 +180,7 @@ fun RaceCreateScreen(
                         fieldState = uiState.traits,
                         onValueChange = { onIntent(RaceFormIntent.TraitsChanged(it)) },
                         label = stringResource(R.string.traits),
+                        placeHolder = { Text(stringResource(R.string.placeholder_traits)) },
                         onFocusChanged = { onIntent(RaceFormIntent.TraitsFocusChanged(it)) },
                         maxLines = 2,
                         isRequired = true

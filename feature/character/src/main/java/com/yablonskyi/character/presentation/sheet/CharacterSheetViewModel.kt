@@ -97,6 +97,7 @@ class CharacterSheetViewModel @Inject constructor(
             }
             CharacterSheetIntent.OpenSettings -> emit(CharacterSheetEffect.OpenSettings(id))
             CharacterSheetIntent.ManageSpells -> emit(CharacterSheetEffect.ManageSpells(id))
+            CharacterSheetIntent.OpenDiceHistory -> emit(CharacterSheetEffect.OpenDiceHistory(id))
             CharacterSheetIntent.BackClicked -> emit(CharacterSheetEffect.Back)
             CharacterSheetIntent.DismissError -> {
                 reduce(CharacterSheetMutation.ClearErrors)

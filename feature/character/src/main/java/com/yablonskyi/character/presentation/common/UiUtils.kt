@@ -1,9 +1,7 @@
 package com.yablonskyi.character.presentation.common
 
-import com.yablonskyi.character.presentation.settings.SpellSettings
-
-import com.yablonskyi.character.presentation.sheet.model.SpellFilter
 import com.yablonskyi.character.presentation.sheet.model.AttackUiModel
+import com.yablonskyi.character.presentation.sheet.model.SpellFilter
 import com.yablonskyi.model.character.Ability
 import com.yablonskyi.model.character.AbilityBlock
 import com.yablonskyi.model.character.Attack
@@ -349,7 +347,7 @@ object UiUtils {
             name = attack.name,
             toHit = calculator.getToHitModifier().let { if (it >= 0) "+$it" else "$it" },
             damage = calculator.getDamageString(),
-            originalAttack = attack
+            calculator = calculator
         )
     }
 }
