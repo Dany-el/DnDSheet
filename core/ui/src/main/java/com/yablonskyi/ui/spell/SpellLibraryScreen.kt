@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -234,8 +233,8 @@ fun SpellLibraryScreen(
                                         progress.animateTo(
                                             targetValue = 1f,
                                             animationSpec = tween(
-                                                durationMillis = 400,
-                                                delayMillis = index.coerceAtMost(4) * 100,
+                                                durationMillis = 300,
+                                                delayMillis = index.coerceAtMost(2) * 100,
                                                 easing = FastOutSlowInEasing,
                                             ),
                                         )

@@ -103,8 +103,8 @@ fun NavGraphBuilder.compendiumGraph(
     }
 
     composable<CompendiumRaceDetailsRoute>(
-        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
-        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
+        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
     ) {
         val viewModel = hiltViewModel<RaceDetailsViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -145,8 +145,8 @@ fun NavGraphBuilder.compendiumGraph(
     }
 
     composable<CompendiumRaceCreateRoute>(
-        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
-        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
+        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
     ) {
         val viewModel = hiltViewModel<RaceFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -169,8 +169,8 @@ fun NavGraphBuilder.compendiumGraph(
     }
 
     composable<CompendiumRaceUpdateRoute>(
-        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
-        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
+        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
     ) {
         val viewModel = hiltViewModel<RaceFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -237,8 +237,8 @@ fun NavGraphBuilder.compendiumGraph(
     }
 
     composable<CompendiumClassDetailsRoute>(
-        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
-        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
+        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
     ) {
         val viewModel = hiltViewModel<ClassDetailsViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -279,8 +279,8 @@ fun NavGraphBuilder.compendiumGraph(
     }
 
     composable<CompendiumClassCreateRoute>(
-        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
-        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
+        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
     ) {
         val viewModel = hiltViewModel<ClassFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -303,8 +303,8 @@ fun NavGraphBuilder.compendiumGraph(
     }
 
     composable<CompendiumClassUpdateRoute>(
-        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
-        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
+        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
     ) {
         val viewModel = hiltViewModel<ClassFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -370,8 +370,8 @@ fun NavGraphBuilder.compendiumGraph(
     }
 
     composable<CompendiumSpellUpdateRoute>(
-        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
-        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
+        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
     ) {
         val viewModel = hiltViewModel<SpellFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()

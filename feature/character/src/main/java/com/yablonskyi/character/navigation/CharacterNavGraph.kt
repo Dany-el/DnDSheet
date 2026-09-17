@@ -41,11 +41,11 @@ fun NavGraphBuilder.characterGraph(
         )
     }
     composable<CharacterSettingsRoute>(
-        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
-        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
+        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
     ) { CharacterSettingsRouteContent(onBack) }
     composable<DiceHistoryRoute>(
-        enterTransition = NavAnimation.RightSideSlideAnimation.enterSlideTransition,
-        exitTransition = NavAnimation.RightSideSlideAnimation.exitSlideTransition
+        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
+        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
     ) { DiceHistoryRouteContent(onBack) }
 }

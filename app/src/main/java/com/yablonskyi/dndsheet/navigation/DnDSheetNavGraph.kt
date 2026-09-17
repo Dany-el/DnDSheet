@@ -2,8 +2,6 @@ package com.yablonskyi.dndsheet.navigation
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
@@ -36,6 +34,7 @@ import com.yablonskyi.navigation.CharacterSheetsRoute
 import com.yablonskyi.pdf.html.HtmlToPdfConverter
 import com.yablonskyi.settings.AppSettingsViewModel
 import com.yablonskyi.settings.settingsGraph
+import com.yablonskyi.ui.animation.navigation.NavAnimation
 import com.yablonskyi.ui.settings.ListView
 import com.yablonskyi.wizard.navigation.CharacterCreationWizardRoute
 import com.yablonskyi.wizard.navigation.wizardGraph
@@ -60,8 +59,8 @@ fun DnDSheetNavGraph(
         NavHost(
             navController = navController,
             startDestination = CharacterSheetsRoute,
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None },
+            enterTransition = { NavAnimation.FadeTransition.enterTransition },
+            exitTransition = { NavAnimation.FadeTransition.exitTransition },
             modifier = modifier
         ) {
             characterGraph(

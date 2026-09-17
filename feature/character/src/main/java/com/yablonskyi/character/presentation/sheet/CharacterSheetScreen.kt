@@ -117,7 +117,7 @@ fun SharedTransitionScope.CharacterSheetScreen(
                 // Sheets
                 val activeSheet = uiState.editor
                 val sheetState = rememberBottomSheetState(
-                    initialValue = SheetValue.Expanded,
+                    initialValue = SheetValue.Hidden,
                 )
                 val closeSheet: () -> Unit = remember(scope, sheetState, onIntent) {
                     {

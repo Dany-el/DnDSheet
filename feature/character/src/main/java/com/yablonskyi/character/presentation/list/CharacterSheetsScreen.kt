@@ -1,12 +1,17 @@
 package com.yablonskyi.character.presentation.list
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,11 +21,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,9 +46,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewDynamicColors
@@ -56,7 +65,6 @@ import com.yablonskyi.character.presentation.list.components.CharacterListItem
 import com.yablonskyi.character.presentation.list.components.CharactersTopAppBar
 import com.yablonskyi.model.character.Character
 import com.yablonskyi.ui.R
-import com.yablonskyi.ui.animation.utils.Entrance
 import com.yablonskyi.ui.animation.utils.StartupSlide
 import com.yablonskyi.ui.settings.ListView
 import com.yablonskyi.ui.theme.Dimens
@@ -67,11 +75,6 @@ import com.yablonskyi.ui.utils.SelectionBottomBar
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 import sh.calvin.reorderable.rememberReorderableLazyStaggeredGridState
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.graphics.graphicsLayer
 
 @Stable
 data class CharacterItemActions(
@@ -213,6 +216,9 @@ fun SharedTransitionScope.CharactersContent(
     val fabSpacing = 72.dp
     var isFabExpanded by remember { mutableStateOf(false) }
 
+    val lazyListState = rememberLazyListState()
+    val lazyGridState = rememberLazyStaggeredGridState()
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -254,92 +260,37 @@ fun SharedTransitionScope.CharactersContent(
                 .align(Alignment.BottomCenter)
                 .zIndex(1f)
         )
-        when (listView) {
-            ListView.LIST -> {
-                CharactersList(
-                    uiState = uiState,
-                    onIntent = onIntent,
-                    onExportPdf = onExportPdf,
-                    animatedVisibilityScope = animatedVisibilityScope,
-                )
-            }
-
-            ListView.GRID -> {
-                CharactersGrid(
-                    uiState = uiState,
-                    onIntent = onIntent,
-                    onExportPdf = onExportPdf,
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    fabSpacing = fabSpacing
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun SharedTransitionScope.CharactersList(
-    uiState: CharacterListState,
-    onIntent: (CharacterListIntent) -> Unit,
-    onExportPdf: (Character) -> Unit,
-    animatedVisibilityScope: AnimatedVisibilityScope,
-    modifier: Modifier = Modifier
-) {
-    val listState = rememberLazyListState()
-    val hapticFeedback = LocalHapticFeedback.current
-    val reorderState = rememberReorderableLazyListState(listState) { from, to ->
-        onIntent(CharacterListIntent.MoveCharacter(from.key as Long, to.key as Long))
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
-    }
-    Entrance(modifier = modifier.widthIn(max = 840.dp)) {
-        LazyColumn(
-            state = listState,
-            contentPadding = PaddingValues(
-                start = 8.dp,
-                top = 8.dp,
-                end = 8.dp,
-                bottom = Dimens.Fab.BottomPadding
-            ),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            itemsIndexed(uiState.characters, key = { _, item -> item.id }) { index, character ->
-                val topCorners = if (uiState.characters.size == 1 || index == 0) 16.dp else 4.dp
-                val bottomCorners =
-                    if (uiState.characters.size == 1 || index == uiState.characters.lastIndex) 16.dp else 4.dp
-
-                val itemActions =
-                    rememberCharacterItemActions(character, uiState, onIntent, onExportPdf)
-
-                ReorderableItem(reorderState, key = character.id) { isDragging ->
-                    val progress = remember(character.id) { Animatable(0f) }
-
-                    LaunchedEffect(character.id) {
-                        progress.animateTo(
-                            targetValue = 1f,
-                            animationSpec = tween(
-                                durationMillis = 400,
-                                delayMillis = index.coerceAtMost(4) * 100,
-                                easing = FastOutSlowInEasing,
-                            ),
-                        )
-                    }
-
-                    CharacterListItem(
-                        character = character,
-                        defaultTopCorners = topCorners,
-                        defaultBottomCorners = bottomCorners,
-                        isSelected = uiState.selectedIds.contains(character.id),
-                        isSelectionMode = uiState.isSelectionMode,
-                        isDragging = isDragging,
-                        reorderScope = this,
-                        itemActions = itemActions,
+        AnimatedContent(
+            targetState = listView,
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopCenter,
+            transitionSpec = {
+                (
+                        fadeIn(tween(220, delayMillis = 90)) togetherWith
+                                fadeOut(tween(90))
+                        ).using(null)
+            },
+            label = "CharacterListGridTransition",
+        ) { targetView ->
+            when (targetView) {
+                ListView.LIST -> {
+                    CharactersList(
+                        uiState = uiState,
+                        lazyListState = lazyListState,
+                        onIntent = onIntent,
+                        onExportPdf = onExportPdf,
                         animatedVisibilityScope = animatedVisibilityScope,
-                        modifier = Modifier
-                            .animateItem()
-                            .graphicsLayer {
-                                alpha = progress.value
-                                translationY = 24.dp.toPx() * (1f - progress.value)
-                            },
+                    )
+                }
+
+                ListView.GRID -> {
+                    CharactersGrid(
+                        uiState = uiState,
+                        lazyGridState = lazyGridState,
+                        onIntent = onIntent,
+                        onExportPdf = onExportPdf,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        fabSpacing = fabSpacing,
                     )
                 }
             }
@@ -348,8 +299,78 @@ fun SharedTransitionScope.CharactersList(
 }
 
 @Composable
+fun SharedTransitionScope.CharactersList(
+    uiState: CharacterListState,
+    lazyListState: LazyListState,
+    onIntent: (CharacterListIntent) -> Unit,
+    onExportPdf: (Character) -> Unit,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    modifier: Modifier = Modifier
+) {
+    val hapticFeedback = LocalHapticFeedback.current
+    val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        onIntent(CharacterListIntent.MoveCharacter(from.key as Long, to.key as Long))
+        hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
+    }
+    LazyColumn(
+        state = lazyListState,
+        contentPadding = PaddingValues(
+            start = 8.dp,
+            top = 8.dp,
+            end = 8.dp,
+            bottom = Dimens.Fab.BottomPadding
+        ),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.widthIn(max = 840.dp)
+    ) {
+        itemsIndexed(uiState.characters, key = { _, item -> item.id }) { index, character ->
+            val topCorners = if (uiState.characters.size == 1 || index == 0) 16.dp else 4.dp
+            val bottomCorners =
+                if (uiState.characters.size == 1 || index == uiState.characters.lastIndex) 16.dp else 4.dp
+
+            val itemActions =
+                rememberCharacterItemActions(character, uiState, onIntent, onExportPdf)
+
+            ReorderableItem(reorderState, key = character.id) { isDragging ->
+                val progress = remember(character.id) { Animatable(0f) }
+
+                LaunchedEffect(character.id) {
+                    progress.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            delayMillis = index.coerceAtMost(2) * 100,
+                            easing = FastOutSlowInEasing,
+                        ),
+                    )
+                }
+
+                CharacterListItem(
+                    character = character,
+                    defaultTopCorners = topCorners,
+                    defaultBottomCorners = bottomCorners,
+                    isSelected = uiState.selectedIds.contains(character.id),
+                    isSelectionMode = uiState.isSelectionMode,
+                    isDragging = isDragging,
+                    reorderScope = this,
+                    itemActions = itemActions,
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    modifier = Modifier
+                        .animateItem()
+                        .graphicsLayer {
+                            alpha = progress.value
+                            translationY = 24.dp.toPx() * (1f - progress.value)
+                        },
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun SharedTransitionScope.CharactersGrid(
     uiState: CharacterListState,
+    lazyGridState: LazyStaggeredGridState,
     modifier: Modifier = Modifier,
     onIntent: (CharacterListIntent) -> Unit,
     onExportPdf: (Character) -> Unit,
@@ -357,9 +378,8 @@ fun SharedTransitionScope.CharactersGrid(
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     val windowSizeClass: WindowSizeClass = currentWindowAdaptiveInfo().windowSizeClass
-    val gridState = rememberLazyStaggeredGridState()
     val hapticFeedback = LocalHapticFeedback.current
-    val reorderState = rememberReorderableLazyStaggeredGridState(gridState) { from, to ->
+    val reorderState = rememberReorderableLazyStaggeredGridState(lazyGridState) { from, to ->
         onIntent(CharacterListIntent.MoveCharacter(from.key as Long, to.key as Long))
         hapticFeedback.performHapticFeedback(HapticFeedbackType.SegmentFrequentTick)
     }
@@ -370,7 +390,7 @@ fun SharedTransitionScope.CharactersGrid(
     }
 
     LazyVerticalStaggeredGrid(
-        state = gridState,
+        state = lazyGridState,
         columns = StaggeredGridCells.Fixed(columnCount),
         contentPadding = PaddingValues(
             start = 8.dp,
@@ -382,10 +402,23 @@ fun SharedTransitionScope.CharactersGrid(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = modifier.widthIn(max = 840.dp)
     ) {
-        items(uiState.characters, key = { it.id }) { character ->
+        itemsIndexed(uiState.characters, key = { _, c -> c.id }) { index, character ->
             val itemActions =
                 rememberCharacterItemActions(character, uiState, onIntent, onExportPdf)
             ReorderableItem(reorderState, key = character.id) { isDragging ->
+                val progress = remember(character.id) { Animatable(0f) }
+
+                LaunchedEffect(character.id) {
+                    progress.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            delayMillis = index.coerceAtMost(2) * 100,
+                            easing = FastOutSlowInEasing,
+                        ),
+                    )
+                }
+
                 CharacterGridItem(
                     character = character,
                     isSelected = uiState.selectedIds.contains(character.id),
@@ -394,6 +427,12 @@ fun SharedTransitionScope.CharactersGrid(
                     reorderScope = this,
                     itemActions = itemActions,
                     animatedVisibilityScope = animatedVisibilityScope,
+                    modifier = Modifier
+                        .animateItem()
+                        .graphicsLayer {
+                            alpha = progress.value
+                            translationY = 24.dp.toPx() * (1f - progress.value)
+                        },
                 )
             }
         }

@@ -8,13 +8,13 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -39,6 +39,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -121,11 +122,15 @@ fun MainScreen(
                             }
 
                             AnimatedVisibility(
-                                visibleState = navVisibility, // Replaces visible = isNavVisible
-                                enter = slideInVertically(tween(350)) { height -> height } +
-                                        fadeIn(tween(250)),
-                                exit = slideOutVertically(tween(250)) { height -> height } +
-                                        fadeOut(tween(200)),
+                                visibleState = navVisibility,
+                                enter = expandVertically(
+                                    animationSpec = tween(350),
+                                    expandFrom = Alignment.Top,
+                                ) + fadeIn(tween(250)),
+                                exit = shrinkVertically(
+                                    animationSpec = tween(250),
+                                    shrinkTowards = Alignment.Top,
+                                ) + fadeOut(tween(200)),
                             ) {
                                 NavigationBar {
                                     topLevelRoutes.forEach { item ->

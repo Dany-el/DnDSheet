@@ -13,17 +13,13 @@ sealed interface NavAnimation {
     /**
      * Right to Left Slide Animation
      */
-    object RightSideSlideAnimation : NavAnimation {
+    object SlideTransition : NavAnimation {
 
         private const val DURATION_MILLIS = 400
 
         val enterSlideTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards EnterTransition?) =
             {
-                fadeIn(
-                    animationSpec = tween(
-                        DURATION_MILLIS, easing = LinearEasing
-                    )
-                ) + slideIntoContainer(
+                slideIntoContainer(
                     animationSpec = tween(DURATION_MILLIS, easing = LinearEasing),
                     towards = AnimatedContentTransitionScope.SlideDirection.Start
                 )
@@ -31,14 +27,17 @@ sealed interface NavAnimation {
 
         val exitSlideTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards ExitTransition?) =
             {
-                fadeOut(
-                    animationSpec = tween(
-                        DURATION_MILLIS, easing = LinearEasing
-                    )
-                ) + slideOutOfContainer(
+                slideOutOfContainer(
                     animationSpec = tween(DURATION_MILLIS, easing = LinearEasing),
                     towards = AnimatedContentTransitionScope.SlideDirection.End
                 )
             }
+    }
+
+    object FadeTransition: NavAnimation {
+        private const val DURATION_MILLIS = 400
+
+        val enterTransition = fadeIn(tween(DURATION_MILLIS))
+        val exitTransition = fadeOut(tween(DURATION_MILLIS))
     }
 }

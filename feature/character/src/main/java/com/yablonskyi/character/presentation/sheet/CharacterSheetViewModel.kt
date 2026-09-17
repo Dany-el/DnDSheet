@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.yablonskyi.character.navigation.CharacterSheetRoute
+import com.yablonskyi.character.presentation.common.CharacterLoadStatus
+import com.yablonskyi.character.presentation.common.CharacterTransitionCache
 import com.yablonskyi.character.presentation.common.CharacterUiError
 import com.yablonskyi.character.presentation.sheet.mapper.*
 import com.yablonskyi.character.presentation.sheet.model.*
@@ -25,10 +27,18 @@ class CharacterSheetViewModel @Inject constructor(
     private val characters: CharacterRepository,
     private val spells: SpellRepository,
     private val attacks: AttackRepository,
+    transitionCache: CharacterTransitionCache,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val id = savedStateHandle.toRoute<CharacterSheetRoute>().id
+    private val initialCharacter = transitionCache.take(id)
     private val mutableState = MutableStateFlow(CharacterSheetState(
+        character = initialCharacter,
+        status = if (initialCharacter != null) {
+            CharacterLoadStatus.CONTENT
+        } else {
+            CharacterLoadStatus.LOADING
+        },
         leftSelectedTab = restoredTab("left", CharacterTab.ABILITIES),
         rightSelectedTab = restoredTab("right", CharacterTab.SPELLS),
         lessDetails = savedStateHandle["lessDetails"] ?: false,

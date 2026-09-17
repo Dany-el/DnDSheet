@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yablonskyi.character.platform.print.CharacterPrintCoordinator
+import com.yablonskyi.character.presentation.common.CharacterTransitionCache
 import com.yablonskyi.domain.CharacterSheetHtmlRenderer
 import com.yablonskyi.domain.repository.CharacterRepository
 import com.yablonskyi.domain.repository.CharacterFileRepository
@@ -26,6 +27,7 @@ class CharacterListViewModel @Inject constructor(
     private val repository: CharacterRepository,
     htmlRenderer: CharacterSheetHtmlRenderer,
     private val files: CharacterFileRepository,
+    private val transitionCache: CharacterTransitionCache,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(CharacterListState(
@@ -66,7 +68,13 @@ class CharacterListViewModel @Inject constructor(
             is CharacterListIntent.SelectionToggled -> reduce(CharacterListMutation.ToggleSelection(intent.id))
             CharacterListIntent.SelectAllClicked -> reduce(CharacterListMutation.SelectAll)
             CharacterListIntent.ClearSelection -> reduce(CharacterListMutation.ClearSelection)
-            is CharacterListIntent.CharacterClicked -> emit(CharacterListEffect.OpenCharacter(intent.id))
+            is CharacterListIntent.CharacterClicked -> {
+                state.value.allCharacters
+                    .firstOrNull { it.id == intent.id }
+                    ?.let(transitionCache::put)
+
+                emit(CharacterListEffect.OpenCharacter(intent.id))
+            }
             CharacterListIntent.CreateClicked -> emit(CharacterListEffect.CreateCharacter)
             CharacterListIntent.ToggleListView -> emit(CharacterListEffect.ToggleListView)
             is CharacterListIntent.DeleteConfirmed -> delete(setOf(intent.id))

@@ -386,8 +386,8 @@ fun LazyListScope.collapsibleRacesList(
                 progress.animateTo(
                     targetValue = 1f,
                     animationSpec = tween(
-                        durationMillis = 400,
-                        delayMillis = index.coerceAtMost(4) * 100,
+                        durationMillis = 300,
+                        delayMillis = index.coerceAtMost(2) * 100,
                         easing = FastOutSlowInEasing,
                     ),
                 )
