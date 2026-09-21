@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    testImplementation(libs.junit)
     implementation(libs.androidx.annotation)
     implementation(libs.kotlinx.serialization.json)
 }

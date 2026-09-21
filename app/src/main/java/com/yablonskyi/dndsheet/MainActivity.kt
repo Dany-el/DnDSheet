@@ -1,11 +1,13 @@
 package com.yablonskyi.dndsheet
 
 import android.content.Intent
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.play.core.splitcompat.SplitCompat
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,6 +25,11 @@ import kotlin.getValue
 class MainActivity : AppCompatActivity() {
     private val viewModel: AppSettingsViewModel by viewModels()
     private val updateViewModel: UpdateViewModel by viewModels()
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(newBase)
+        SplitCompat.installActivity(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()

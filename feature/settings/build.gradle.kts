@@ -7,6 +7,8 @@ android {
 }
 
 dependencies {
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
     // For user authentication
     implementation(libs.play.services.auth)
     // For the Google Drive API

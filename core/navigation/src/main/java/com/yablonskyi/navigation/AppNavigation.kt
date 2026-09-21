@@ -10,3 +10,6 @@ object CompendiumRoute
 
 @Serializable
 object AppSettingsRoute
+
+@Serializable
+object LanguagesRoute

@@ -19,5 +19,8 @@ dependencies {
     implementation(project(":core:model"))
     implementation(libs.okhttp3)
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.play.feature.delivery)
     implementation(libs.kotlinx.serialization.json)
 }

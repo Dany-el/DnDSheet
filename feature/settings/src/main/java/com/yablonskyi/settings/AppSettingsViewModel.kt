@@ -2,9 +2,7 @@ package com.yablonskyi.settings
 
 import android.content.Context
 import androidx.annotation.StringRes
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Immutable
-import androidx.core.os.LocaleListCompat
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.lifecycle.ViewModel
@@ -12,12 +10,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
 import com.yablonskyi.domain.repository.CharacterRepository
 import com.yablonskyi.model.character.CharacterSheet
-import com.yablonskyi.data.rulebook.BuiltInRulebookLoader
 import com.yablonskyi.data.utils.CharacterBackupCodec
 import com.yablonskyi.data.utils.decodeBase64ToImage
 import com.yablonskyi.data.utils.encodeImageToBase64
 import com.yablonskyi.domain.provider.AppVersionProvider
-import com.yablonskyi.settings.LanguageChangeHelper.getActiveLanguageCode
+import com.yablonskyi.domain.provider.AppLanguageManager
+import com.yablonskyi.domain.repository.LanguageDownloadRepository
+import com.yablonskyi.model.language.LanguageDownloadOperation
 import com.yablonskyi.settings.repository.SettingsRepository
 import com.yablonskyi.settings.utils.AppLanguage
 import com.yablonskyi.settings.utils.AppTheme
@@ -30,6 +29,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -41,11 +41,12 @@ import javax.inject.Inject
 class AppSettingsViewModel @Inject constructor(
     private val repository: SettingsRepository,
     private val charRepository: CharacterRepository,
-    private val rulebookLoader: BuiltInRulebookLoader,
+    private val appLanguageManager: AppLanguageManager,
+    private val languageDownloadRepository: LanguageDownloadRepository,
     versionProvider: AppVersionProvider
 ) : ViewModel() {
 
-    private val _language = MutableStateFlow(getActiveLanguageCode())
+    private val _language = MutableStateFlow(appLanguageManager.currentLanguageCode())
     val language: StateFlow<String> = _language
 
     private val _isSyncing = MutableStateFlow(false)
@@ -57,7 +58,17 @@ class AppSettingsViewModel @Inject constructor(
     val appVersion: String = versionProvider.versionName
 
     init {
-        _language.value = getActiveLanguageCode()
+        _language.value = appLanguageManager.currentLanguageCode()
+        viewModelScope.launch {
+            languageDownloadRepository.state.collectLatest { deliveryState ->
+                val installed = deliveryState.operation as? LanguageDownloadOperation.Installed
+                if (installed?.shouldApply == true) {
+                    appLanguageManager.applyLanguage(installed.languageCode)
+                    _language.value = installed.languageCode
+                    languageDownloadRepository.clearTerminalState()
+                }
+            }
+        }
     }
 
     val uiState: StateFlow<AppSettingsState> =
@@ -78,21 +89,8 @@ class AppSettingsViewModel @Inject constructor(
         }
     }
 
-    fun updateLanguage(code: String) {
-        val localeList = if (code == AppLanguage.SYSTEM.code) {
-            LocaleListCompat.getEmptyLocaleList()
-        } else {
-            LocaleListCompat.forLanguageTags(code)
-        }
-
-        rulebookLoader.invalidateCache()
-        AppCompatDelegate.setApplicationLocales(localeList)
-
-        _language.value = code
-    }
-
     fun syncLanguageWithSystem() {
-        _language.value = getActiveLanguageCode()
+        _language.value = appLanguageManager.currentLanguageCode()
     }
 
     fun updateListView(listView: ListView) {

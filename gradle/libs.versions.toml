@@ -35,6 +35,7 @@ materialIconsExtended = "1.7.8"
 navigationCompose = "2.9.8"
 okhttp3 = "5.5.0"
 playServicesAuth = "21.5.1"
+playFeatureDelivery = "2.1.0"
 roomRuntime = "2.8.4"
 ksp = "2.3.2"
 coil = "2.7.0"
@@ -111,6 +112,7 @@ androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", ve
 androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterface", version.ref = "exifinterface" }
 okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp3" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+play-feature-delivery = { module = "com.google.android.play:feature-delivery", version.ref = "playFeatureDelivery" }
 androidx-compose-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "animation" }
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
