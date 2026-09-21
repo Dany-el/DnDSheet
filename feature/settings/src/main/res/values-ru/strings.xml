@@ -22,4 +22,25 @@
     <string name="language_ukrainian">Українська</string>
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Темная</string>
+    <string name="languages_title">Языки</string>
+    <string name="languages_navigate_back">Назад</string>
+    <string name="language_installed">Установлен</string>
+    <string name="language_selected">Выбранный язык</string>
+    <string name="language_preparing">Подготовка языка: %1$s…</string>
+    <string name="language_downloading">Загрузка языка: %1$s…</string>
+    <string name="language_downloading_percent">Загрузка языка: %1$s… %2$d%%</string>
+    <string name="language_installing">Установка языка: %1$s…</string>
+    <string name="language_canceling">Отмена загрузки…</string>
+    <string name="language_cancel">Отменить</string>
+    <string name="language_retry">Повторить</string>
+    <string name="language_download_canceled">Загрузка языка отменена.</string>
+    <string name="language_slow_connection">Загрузка занимает больше времени, чем ожидалось. Возможно, соединение медленное.</string>
+    <string name="language_no_internet">Нет подключения к интернету. Проверьте соединение и повторите попытку.</string>
+    <string name="language_error_icon">Ошибка</string>
+    <string name="language_network_error">Не удалось загрузить язык. Проверьте соединение и повторите попытку.</string>
+    <string name="language_storage_error">Недостаточно места для загрузки языка.</string>
+    <string name="language_play_unavailable">Загрузка языков через Google Play недоступна на этом устройстве.</string>
+    <string name="language_app_not_owned">Установите приложение из Google Play, чтобы загружать языки.</string>
+    <string name="language_unknown_error">Не удалось загрузить язык.</string>
+    <string name="app_is_up_to_date">Установлена актуальная версия приложения.</string>
 </resources>

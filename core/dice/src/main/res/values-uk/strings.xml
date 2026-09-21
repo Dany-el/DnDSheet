@@ -6,4 +6,7 @@
     <string name="roll_type_attack">Атака</string>
     <string name="roll_type_save">Ряткидок</string>
     <string name="roll_type_roll">Кидок</string>
+    <string name="result_pinned">Результат закріплено</string>
+    <string name="roll_die">Кинути к%1$d</string>
+    <string name="roll_dice">Кинути кості</string>
 </resources>

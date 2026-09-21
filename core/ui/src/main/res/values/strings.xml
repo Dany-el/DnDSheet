@@ -455,4 +455,13 @@
     <string name="dice_history_error_title">Dice history unavailable</string>
     <string name="dice_history_error_message">Could not load or update dice history. Please try again.</string>
     <string name="placeholder_traits">First traits, second trait, third trait …</string>
+    <string name="change_setting">Change %1$s</string>
+    <string name="character_profile">Character profile</string>
+    <string name="fallback_profile">Fallback character profile</string>
+    <string name="add_photo">Add photo</string>
+    <string name="reorder_character">Reorder %1$s</string>
+    <string name="saving_throw_proficiency">Saving throw proficiency: %1$s</string>
+    <string name="proficiency_level">Proficiency level: %1$s</string>
+    <string name="subtract">Subtract</string>
+    <string name="localized_description">Localized description</string>
 </resources>

@@ -5,4 +5,7 @@
     <string name="roll_type_attack">Attack</string>
     <string name="roll_type_save">Save Throw</string>
     <string name="roll_type_roll">Roll</string>
+    <string name="result_pinned">Result pinned</string>
+    <string name="roll_die">Roll d%1$d</string>
+    <string name="roll_dice">Roll dice</string>
 </resources>

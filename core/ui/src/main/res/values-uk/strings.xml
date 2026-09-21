@@ -476,4 +476,13 @@
     <string name="dice_history_error_title">Історія кидків недоступна</string>
     <string name="dice_history_error_message">Не вдалося завантажити або оновити історію кидків. Спробуйте ще раз.</string>
     <string name="placeholder_traits">Перша навичка, друга навичка, третя навичка …</string>
+    <string name="change_setting">Змінити: %1$s</string>
+    <string name="character_profile">Портрет персонажа</string>
+    <string name="fallback_profile">Стандартний портрет персонажа</string>
+    <string name="add_photo">Додати фото</string>
+    <string name="reorder_character">Змінити порядок: %1$s</string>
+    <string name="saving_throw_proficiency">Володіння рятівним кидком: %1$s</string>
+    <string name="proficiency_level">Рівень володіння: %1$s</string>
+    <string name="subtract">Зменшити</string>
+    <string name="localized_description">Локалізований опис</string>
 </resources>

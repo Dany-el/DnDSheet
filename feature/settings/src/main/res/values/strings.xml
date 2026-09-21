@@ -23,4 +23,24 @@
     <string name="language_ukrainian">Ukrainian</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
+    <string name="languages_title">Languages</string>
+    <string name="languages_navigate_back">Navigate back</string>
+    <string name="language_installed">Installed</string>
+    <string name="language_selected">Selected language</string>
+    <string name="language_preparing">Preparing %1$s…</string>
+    <string name="language_downloading">Downloading %1$s…</string>
+    <string name="language_downloading_percent">Downloading %1$s… %2$d%%</string>
+    <string name="language_installing">Installing %1$s…</string>
+    <string name="language_canceling">Canceling download…</string>
+    <string name="language_cancel">Cancel</string>
+    <string name="language_retry">Retry</string>
+    <string name="language_download_canceled">Language download canceled.</string>
+    <string name="language_slow_connection">The download is taking longer than expected. Your connection may be slow.</string>
+    <string name="language_no_internet">No internet connection. Check your connection and try again.</string>
+    <string name="language_error_icon">Error</string>
+    <string name="language_network_error">The language could not be downloaded. Check your connection and try again.</string>
+    <string name="language_storage_error">There is not enough storage to download this language.</string>
+    <string name="language_play_unavailable">Google Play language downloads are unavailable on this device.</string>
+    <string name="language_app_not_owned">Install this app from Google Play to download languages.</string>
+    <string name="language_unknown_error">The language could not be downloaded.</string>
 </resources>

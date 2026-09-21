@@ -469,4 +469,13 @@
     <string name="dice_history_error_title">История бросков недоступна</string>
     <string name="dice_history_error_message">Не удалось загрузить или обновить историю бросков. Попробуйте ещё раз.</string>
     <string name="placeholder_traits">Первое умение, второе умение, третье умение …</string>
+    <string name="change_setting">Изменить: %1$s</string>
+    <string name="character_profile">Портрет персонажа</string>
+    <string name="fallback_profile">Стандартный портрет персонажа</string>
+    <string name="add_photo">Добавить фото</string>
+    <string name="reorder_character">Изменить порядок: %1$s</string>
+    <string name="saving_throw_proficiency">Владение спасброском: %1$s</string>
+    <string name="proficiency_level">Уровень владения: %1$s</string>
+    <string name="subtract">Уменьшить</string>
+    <string name="localized_description">Локализованное описание</string>
 </resources>

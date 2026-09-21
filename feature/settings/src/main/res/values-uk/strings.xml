@@ -22,4 +22,25 @@
     <string name="theme_light">Світла</string>
     <string name="theme_dark">Темна</string>
     <string name="language_english">Англійська</string>
+    <string name="languages_title">Мови</string>
+    <string name="languages_navigate_back">Назад</string>
+    <string name="language_installed">Встановлено</string>
+    <string name="language_selected">Вибрана мова</string>
+    <string name="language_preparing">Підготовка мови: %1$s…</string>
+    <string name="language_downloading">Завантаження мови: %1$s…</string>
+    <string name="language_downloading_percent">Завантаження мови: %1$s… %2$d%%</string>
+    <string name="language_installing">Встановлення мови: %1$s…</string>
+    <string name="language_canceling">Скасування завантаження…</string>
+    <string name="language_cancel">Скасувати</string>
+    <string name="language_retry">Повторити</string>
+    <string name="language_download_canceled">Завантаження мови скасовано.</string>
+    <string name="language_slow_connection">Завантаження триває довше, ніж очікувалося. Можливо, з’єднання повільне.</string>
+    <string name="language_no_internet">Немає підключення до інтернету. Перевірте з’єднання та повторіть спробу.</string>
+    <string name="language_error_icon">Помилка</string>
+    <string name="language_network_error">Не вдалося завантажити мову. Перевірте з’єднання та повторіть спробу.</string>
+    <string name="language_storage_error">Недостатньо місця для завантаження мови.</string>
+    <string name="language_play_unavailable">Завантаження мов через Google Play недоступне на цьому пристрої.</string>
+    <string name="language_app_not_owned">Встановіть застосунок із Google Play, щоб завантажувати мови.</string>
+    <string name="language_unknown_error">Не вдалося завантажити мову.</string>
+    <string name="app_is_up_to_date">Встановлено актуальну версію застосунку.</string>
 </resources>
