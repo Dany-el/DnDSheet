@@ -1,12 +1,24 @@
 package com.yablonskyi.ui.animation.navigation
 
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 
 sealed interface NavAnimation {
@@ -15,29 +27,78 @@ sealed interface NavAnimation {
      */
     object SlideTransition : NavAnimation {
 
-        private const val DURATION_MILLIS = 400
+        private const val DURATION_MILLIS = 350
 
         val enterSlideTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards EnterTransition?) =
             {
-                slideIntoContainer(
+                scaleIn(
+                    initialScale = 0.8f
+                ) + slideIntoContainer(
                     animationSpec = tween(DURATION_MILLIS, easing = LinearEasing),
-                    towards = AnimatedContentTransitionScope.SlideDirection.Start
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left
                 )
             }
 
         val exitSlideTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards ExitTransition?) =
             {
-                slideOutOfContainer(
+                scaleOut(
+                    targetScale = 0.8f
+                ) + slideOutOfContainer(
                     animationSpec = tween(DURATION_MILLIS, easing = LinearEasing),
-                    towards = AnimatedContentTransitionScope.SlideDirection.End
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right
+                )
+            }
+
+        val popEnterSlideTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) =
+            {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(durationMillis = DURATION_MILLIS, easing = LinearEasing)
+                ) + scaleIn(
+                    initialScale = 0.8f
+                )
+            }
+
+        val popExitSlideTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition) =
+            {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(durationMillis = DURATION_MILLIS, easing = LinearEasing)
+                ) + scaleOut(
+                    targetScale = 0.8f
                 )
             }
     }
 
-    object FadeTransition: NavAnimation {
-        private const val DURATION_MILLIS = 400
+    object FadeTransition : NavAnimation {
+        private const val DURATION_MILLIS = 300
 
         val enterTransition = fadeIn(tween(DURATION_MILLIS))
         val exitTransition = fadeOut(tween(DURATION_MILLIS))
+    }
+}
+
+@Composable
+fun AnimatedContentScope.roundDuringNavigation(
+    modifier: Modifier = Modifier,
+    cornerRadius: Dp = 28.dp,
+): Modifier {
+    val animatedCornerRadius by transition.animateDp(
+        transitionSpec = {
+            tween(durationMillis = 350)
+        },
+        label = "navigationCornerRadius",
+    ) { state ->
+        when (state) {
+            EnterExitState.PreEnter,
+            EnterExitState.PostExit -> cornerRadius
+
+            EnterExitState.Visible -> 0.dp
+        }
+    }
+
+    return modifier.graphicsLayer {
+        shape = RoundedCornerShape(animatedCornerRadius)
+        clip = animatedCornerRadius > 0.dp
     }
 }

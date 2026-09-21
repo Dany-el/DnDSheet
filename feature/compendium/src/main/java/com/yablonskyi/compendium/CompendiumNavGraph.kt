@@ -1,15 +1,22 @@
 package com.yablonskyi.compendium
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.yablonskyi.compendium.classes.ui.ClassCreateScreen
@@ -40,14 +47,16 @@ import com.yablonskyi.compendium.spells.viewmodel.SpellFormEffect
 import com.yablonskyi.compendium.spells.viewmodel.SpellFormViewModel
 import com.yablonskyi.navigation.CompendiumRoute
 import com.yablonskyi.ui.animation.navigation.NavAnimation
+import com.yablonskyi.ui.animation.navigation.roundDuringNavigation
 import com.yablonskyi.ui.spell.SpellLibraryScreen
 import com.yablonskyi.ui.spell.SpellsEffect
 import com.yablonskyi.ui.spell.SpellsIntent
-import com.yablonskyi.ui.utils.LoadingDialog
 import com.yablonskyi.ui.utils.rememberFileOperationHandler
 
 fun NavGraphBuilder.compendiumGraph(
     actions: CompendiumNavActions,
+    enterAnimation: AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards EnterTransition? = NavAnimation.SlideTransition.enterSlideTransition,
+    exitAnimation: AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards ExitTransition? = NavAnimation.SlideTransition.exitSlideTransition,
 ) {
     composable<CompendiumRoute> {
         val viewModel = hiltViewModel<CompendiumViewModel>()
@@ -103,8 +112,9 @@ fun NavGraphBuilder.compendiumGraph(
     }
 
     composable<CompendiumRaceDetailsRoute>(
-        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
-        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
+        enterTransition = enterAnimation,
+        exitTransition = exitAnimation,
+        popEnterTransition = { EnterTransition.None },
     ) {
         val viewModel = hiltViewModel<RaceDetailsViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -132,10 +142,11 @@ fun NavGraphBuilder.compendiumGraph(
                     }
                 }
         }
-
-        if (uiState.isLoading) {
-            LoadingDialog()
-        } else {
+        Box(
+            modifier = roundDuringNavigation(
+                modifier = Modifier.fillMaxSize(),
+            ),
+        ) {
             RaceDetailsScreen(
                 uiState = uiState,
                 snackbarHostState = snackbarHostState,
@@ -145,8 +156,8 @@ fun NavGraphBuilder.compendiumGraph(
     }
 
     composable<CompendiumRaceCreateRoute>(
-        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
-        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
+        enterTransition = enterAnimation,
+        exitTransition = exitAnimation,
     ) {
         val viewModel = hiltViewModel<RaceFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -162,15 +173,21 @@ fun NavGraphBuilder.compendiumGraph(
                 }
         }
 
-        RaceCreateScreen(
-            uiState = uiState,
-            onIntent = viewModel::onIntent,
-        )
+        Box(
+            modifier = roundDuringNavigation(
+                modifier = Modifier.fillMaxSize(),
+            ),
+        ) {
+            RaceCreateScreen(
+                uiState = uiState,
+                onIntent = viewModel::onIntent,
+            )
+        }
     }
 
     composable<CompendiumRaceUpdateRoute>(
-        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
-        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
+        enterTransition = enterAnimation,
+        exitTransition = exitAnimation,
     ) {
         val viewModel = hiltViewModel<RaceFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -186,9 +203,11 @@ fun NavGraphBuilder.compendiumGraph(
                 }
         }
 
-        if (uiState.isLoading) {
-            LoadingDialog()
-        } else {
+        Box(
+            modifier = roundDuringNavigation(
+                modifier = Modifier.fillMaxSize(),
+            ),
+        ) {
             RaceCreateScreen(
                 uiState = uiState,
                 onIntent = viewModel::onIntent,
@@ -237,8 +256,9 @@ fun NavGraphBuilder.compendiumGraph(
     }
 
     composable<CompendiumClassDetailsRoute>(
-        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
-        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
+        enterTransition = enterAnimation,
+        exitTransition = exitAnimation,
+        popEnterTransition = { EnterTransition.None },
     ) {
         val viewModel = hiltViewModel<ClassDetailsViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -267,9 +287,11 @@ fun NavGraphBuilder.compendiumGraph(
                 }
         }
 
-        if (uiState.isLoading) {
-            LoadingDialog()
-        } else {
+        Box(
+            modifier = roundDuringNavigation(
+                modifier = Modifier.fillMaxSize(),
+            ),
+        ) {
             ClassDetailsScreen(
                 uiState = uiState,
                 snackbarHostState = snackbarHostState,
@@ -279,8 +301,8 @@ fun NavGraphBuilder.compendiumGraph(
     }
 
     composable<CompendiumClassCreateRoute>(
-        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
-        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
+        enterTransition = enterAnimation,
+        exitTransition = exitAnimation,
     ) {
         val viewModel = hiltViewModel<ClassFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -296,15 +318,21 @@ fun NavGraphBuilder.compendiumGraph(
                 }
         }
 
-        ClassCreateScreen(
-            uiState = uiState,
-            onIntent = viewModel::onIntent,
-        )
+        Box(
+            modifier = roundDuringNavigation(
+                modifier = Modifier.fillMaxSize(),
+            ),
+        ) {
+            ClassCreateScreen(
+                uiState = uiState,
+                onIntent = viewModel::onIntent,
+            )
+        }
     }
 
     composable<CompendiumClassUpdateRoute>(
-        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
-        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
+        enterTransition = enterAnimation,
+        exitTransition = exitAnimation,
     ) {
         val viewModel = hiltViewModel<ClassFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -320,9 +348,11 @@ fun NavGraphBuilder.compendiumGraph(
                 }
         }
 
-        if (uiState.isLoading) {
-            LoadingDialog()
-        } else {
+        Box(
+            modifier = roundDuringNavigation(
+                modifier = Modifier.fillMaxSize(),
+            ),
+        ) {
             ClassCreateScreen(
                 uiState = uiState,
                 onIntent = viewModel::onIntent,
@@ -370,8 +400,8 @@ fun NavGraphBuilder.compendiumGraph(
     }
 
     composable<CompendiumSpellUpdateRoute>(
-        enterTransition = NavAnimation.SlideTransition.enterSlideTransition,
-        exitTransition = NavAnimation.SlideTransition.exitSlideTransition
+        enterTransition = enterAnimation,
+        exitTransition = exitAnimation,
     ) {
         val viewModel = hiltViewModel<SpellFormViewModel>()
         val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -387,9 +417,11 @@ fun NavGraphBuilder.compendiumGraph(
                 }
         }
 
-        if (uiState.isLoading) {
-            LoadingDialog()
-        } else {
+        Box(
+            modifier = roundDuringNavigation(
+                modifier = Modifier.fillMaxSize(),
+            ),
+        ) {
             SpellCreateScreen(
                 uiState = uiState,
                 onIntent = viewModel::onIntent,
