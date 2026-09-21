@@ -84,7 +84,7 @@ fun HealthEditSheetContent(
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Close",
+                    contentDescription = stringResource(R.string.close),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -157,7 +157,7 @@ fun HealthEditSheetContent(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.LocalHospital,
-                            contentDescription = ""
+                            contentDescription = null
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(stringResource(R.string.btn_full_heal))
@@ -179,7 +179,7 @@ fun HealthEditSheetContent(
                     ) {
                         Icon(
                             painter = painterResource(R.drawable.ic_skull),
-                            contentDescription = ""
+                            contentDescription = null
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(stringResource(R.string.btn_you_are_dead))
@@ -222,7 +222,7 @@ fun HealthEditSheetContent(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Healing,
-                            contentDescription = "Heal"
+                            contentDescription = stringResource(R.string.heal)
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(stringResource(R.string.heal))
@@ -248,7 +248,7 @@ fun HealthEditSheetContent(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.WaterDrop,
-                            contentDescription = "Heal"
+                            contentDescription = stringResource(R.string.heal)
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(stringResource(R.string.damage))

@@ -81,7 +81,7 @@ fun CharacterItemImage(
         if (imagePath != null) {
             AsyncImage(
                 model = imagePath,
-                contentDescription = "Character Profile",
+                contentDescription = stringResource(R.string.character_profile),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
@@ -89,7 +89,7 @@ fun CharacterItemImage(
             Box {
                 Icon(
                     imageVector = Icons.Default.NoPhotography,
-                    contentDescription = "Fallback profile",
+                    contentDescription = stringResource(R.string.fallback_profile),
                     modifier = Modifier
                         .align(Alignment.Center)
                         .size(32.dp)
@@ -125,7 +125,10 @@ fun CharacterItemTrailingAction(
                 )
             },
         ) {
-            Icon(Icons.Rounded.DragHandle, contentDescription = "Reorder $characterName")
+            Icon(
+                Icons.Rounded.DragHandle,
+                contentDescription = stringResource(R.string.reorder_character, characterName),
+            )
         }
     } else {
         var menuExpanded by remember { mutableStateOf(false) }
@@ -147,7 +150,7 @@ fun CharacterItemTrailingAction(
                 onClick = { menuExpanded = true },
                 modifier = Modifier.align(Alignment.TopEnd)
             ) {
-                Icon(Icons.Default.MoreVert, contentDescription = "Options")
+                Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.options))
             }
             SlicedDropdownMenu(
                 expanded = menuExpanded,

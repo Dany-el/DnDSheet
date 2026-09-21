@@ -172,7 +172,10 @@ fun CharactersTopAppBar(
                 var menuExpanded by remember { mutableStateOf(false) }
                 Box {
                     IconButton(onClick = { menuExpanded = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "More Options")
+                        Icon(
+                            Icons.Default.MoreVert,
+                            contentDescription = stringResource(R.string.more_options)
+                        )
                     }
                     SlicedDropdownMenu(
                         expanded = menuExpanded,
@@ -196,9 +199,9 @@ fun CharactersTopAppBar(
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = topBarColor,
-            titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            navigationIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            actionIconContentColor = MaterialTheme.colorScheme.onSurface,
+            navigationIconContentColor = MaterialTheme.colorScheme.onSurface
+        ),
     )
 }

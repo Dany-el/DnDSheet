@@ -213,7 +213,7 @@ fun ModifierRow(
                 ) {
                     Icon(
                         imageVector = icon,
-                        contentDescription = "Saving throw proficiency: $isProficient",
+                        contentDescription = stringResource(R.string.saving_throw_proficiency, isProficient),
                         tint = tint,
                         modifier = Modifier.size(24.dp)
                     )

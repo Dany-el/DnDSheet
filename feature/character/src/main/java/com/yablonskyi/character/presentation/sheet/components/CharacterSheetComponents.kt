@@ -139,14 +139,14 @@ fun CharacterTopAppBar(
                     if (imagePath != null) {
                         AsyncImage(
                             model = imagePath,
-                            contentDescription = "Character Profile",
+                            contentDescription = stringResource(R.string.character_profile),
                             contentScale = ContentScale.Crop,
                             modifier = Modifier.fillMaxSize()
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Default.NoPhotography,
-                            contentDescription = "Add Photo",
+                            contentDescription = stringResource(R.string.add_photo),
                             modifier = Modifier
                                 .padding(12.dp)
                                 .fillMaxSize()
@@ -187,7 +187,7 @@ fun CharacterTopAppBar(
             IconButton(onClick = onNavigateBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.back),
                 )
             }
         },
@@ -195,7 +195,7 @@ fun CharacterTopAppBar(
             var menuExpanded by remember { mutableStateOf(false) }
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "More Options")
+                    Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_options))
                 }
                 SlicedDropdownMenu(
                     expanded = menuExpanded,
@@ -654,14 +654,14 @@ fun ExpandedTopAppBar(
                         if (imagePath != null) {
                             AsyncImage(
                                 model = imagePath,
-                                contentDescription = "Character Profile",
+                                contentDescription = stringResource(R.string.character_profile),
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier.fillMaxSize()
                             )
                         } else {
                             Icon(
                                 imageVector = Icons.Default.Person,
-                                contentDescription = "Add Photo",
+                                contentDescription = stringResource(R.string.add_photo),
                                 modifier = Modifier
                                     .padding(16.dp)
                                     .fillMaxSize()
@@ -746,7 +746,7 @@ fun ExpandedTopAppBar(
             IconButton(onClick = onNavigateBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
+                    contentDescription = stringResource(R.string.back),
                 )
             }
         },

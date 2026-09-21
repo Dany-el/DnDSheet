@@ -167,7 +167,7 @@ fun DiceRollResultBox(
             if (diceState.isPinned) {
                 Icon(
                     imageVector = Icons.Default.PushPin,
-                    contentDescription = "Result pinned",
+                    contentDescription = stringResource(R.string.result_pinned),
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .align(Alignment.TopEnd)

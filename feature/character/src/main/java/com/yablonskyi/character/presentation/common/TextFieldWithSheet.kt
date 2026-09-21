@@ -127,7 +127,7 @@ private fun EditBottomSheet(
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = { onDismiss(text) }) {
-                    Icon(Icons.Default.Close, contentDescription = "Close")
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close))
                 }
             }
 

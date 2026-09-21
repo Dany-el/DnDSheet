@@ -93,7 +93,7 @@ fun UpdateAttackSheet(
                 fontWeight = FontWeight.SemiBold
             )
             IconButton(onClick = onDismiss) {
-                Icon(Icons.Default.Close, contentDescription = "Close")
+                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close))
             }
         }
         Spacer(modifier = Modifier.height(16.dp))

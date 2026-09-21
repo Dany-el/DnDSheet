@@ -97,7 +97,7 @@ fun CharacterSettingsScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description",
+                            contentDescription = stringResource(R.string.localized_description),
                         )
                     }
                 },

@@ -65,7 +65,6 @@ import com.yablonskyi.character.presentation.list.components.CharacterListItem
 import com.yablonskyi.character.presentation.list.components.CharactersTopAppBar
 import com.yablonskyi.model.character.Character
 import com.yablonskyi.ui.R
-import com.yablonskyi.ui.animation.utils.StartupSlide
 import com.yablonskyi.ui.settings.ListView
 import com.yablonskyi.ui.theme.Dimens
 import com.yablonskyi.ui.theme.DnDSheetTheme
@@ -114,13 +113,11 @@ fun SharedTransitionScope.CharacterSheetsScreen(
         contentWindowInsets = screenInsets,
         modifier = modifier,
         topBar = {
-            StartupSlide(fromY = (-32).dp) {
-                CharactersTopAppBar(
-                    listView = listView,
-                    uiState = uiState,
-                    onIntent = onIntent,
-                )
-            }
+            CharactersTopAppBar(
+                listView = listView,
+                uiState = uiState,
+                onIntent = onIntent,
+            )
         },
     ) { padding ->
         if (uiState.isLoading) {

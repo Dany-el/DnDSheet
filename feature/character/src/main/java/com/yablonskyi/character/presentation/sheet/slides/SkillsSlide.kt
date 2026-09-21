@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.yablonskyi.character.presentation.sheet.mapper.SkillUiModel
 import com.yablonskyi.model.character.ProficiencyLevel
 import com.yablonskyi.model.character.Skill
+import com.yablonskyi.ui.R
 import com.yablonskyi.ui.theme.Dimens
 import com.yablonskyi.ui.utils.formatModifier
 import com.yablonskyi.ui.utils.listItemShape
@@ -182,7 +183,7 @@ fun ProficiencyToggle(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = "Proficiency Level: ${level.name}",
+            contentDescription = stringResource(R.string.proficiency_level, level.name),
             tint = tint,
             modifier = Modifier.size(24.dp)
         )

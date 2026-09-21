@@ -136,7 +136,7 @@ fun DiceRollFloatingActionButton(
                     ) {
                         Icon(
                             painter = painterResource(id = dice.iconRes),
-                            contentDescription = "Roll d${dice.sides}",
+                            contentDescription = stringResource(R.string.roll_die, dice.sides),
                             modifier = Modifier.size(32.dp)
                         )
                         Text(
@@ -217,7 +217,7 @@ fun DiceRollFloatingActionButton(
             icon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_dice_d20),
-                    contentDescription = "Roll dice",
+                    contentDescription = stringResource(R.string.roll_dice),
                     modifier = Modifier.size(32.dp)
                 )
             },

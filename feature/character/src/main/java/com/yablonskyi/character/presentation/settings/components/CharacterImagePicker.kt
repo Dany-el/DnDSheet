@@ -106,14 +106,14 @@ fun CharacterProfilePicture(
         if (currentImagePath != null) {
             AsyncImage(
                 model = currentImagePath,
-                contentDescription = "Character Profile",
+                contentDescription = stringResource(R.string.character_profile),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
         } else {
             Icon(
                 imageVector = Icons.Default.NoPhotography,
-                contentDescription = "Add Photo",
+                contentDescription = stringResource(R.string.add_photo),
                 modifier = Modifier
                     .padding(32.dp)
                     .fillMaxSize()

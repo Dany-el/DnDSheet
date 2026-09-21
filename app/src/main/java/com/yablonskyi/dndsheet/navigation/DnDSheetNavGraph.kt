@@ -31,10 +31,10 @@ import com.yablonskyi.compendium.navigateToCompendiumRaces
 import com.yablonskyi.compendium.navigateToCompendiumSpellUpdate
 import com.yablonskyi.compendium.navigateToCompendiumSpellsLibrary
 import com.yablonskyi.navigation.CharacterSheetsRoute
+import com.yablonskyi.navigation.LanguagesRoute
 import com.yablonskyi.pdf.html.HtmlToPdfConverter
 import com.yablonskyi.settings.AppSettingsViewModel
 import com.yablonskyi.settings.settingsGraph
-import com.yablonskyi.ui.animation.navigation.NavAnimation
 import com.yablonskyi.ui.settings.ListView
 import com.yablonskyi.wizard.navigation.CharacterCreationWizardRoute
 import com.yablonskyi.wizard.navigation.wizardGraph
@@ -59,8 +59,6 @@ fun DnDSheetNavGraph(
         NavHost(
             navController = navController,
             startDestination = CharacterSheetsRoute,
-            enterTransition = { NavAnimation.FadeTransition.enterTransition },
-            exitTransition = { NavAnimation.FadeTransition.exitTransition },
             modifier = modifier
         ) {
             characterGraph(
@@ -108,7 +106,10 @@ fun DnDSheetNavGraph(
                     back = { navController.popBackStack() }
                 )
             )
-            settingsGraph()
+            settingsGraph(
+                onOpenLanguages = { navController.navigate(LanguagesRoute) },
+                onNavigateBack = { navController.popBackStack() },
+            )
             wizardGraph(
                 onCharacterCreated = { id ->
                     navController.navigate(CharacterSheetRoute(id = id)) {

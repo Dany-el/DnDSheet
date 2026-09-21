@@ -153,7 +153,7 @@ fun CoinRow(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_remove),
-                    contentDescription = "Subtract",
+                    contentDescription = stringResource(R.string.subtract),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -168,7 +168,7 @@ fun CoinRow(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add",
+                    contentDescription = stringResource(R.string.add),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
