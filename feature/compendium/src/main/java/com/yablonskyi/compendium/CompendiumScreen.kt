@@ -133,6 +133,7 @@ private fun CompendiumCard(
 ) {
     OutlinedCard(
         onClick = onClick,
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.outlinedCardColors(
             containerColor = CardDefaults.outlinedCardColors().containerColor
         ),
