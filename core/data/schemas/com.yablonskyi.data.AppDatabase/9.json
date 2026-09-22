@@ -1,0 +1,782 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 9,
+    "identityHash": "fbbde6e841cde8eb8d50ad452627fa99",
+    "entities": [
+      {
+        "tableName": "character",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sortOrder` INTEGER NOT NULL DEFAULT 0, `name` TEXT NOT NULL, `level` INTEGER NOT NULL, `imagePath` TEXT, `current_hp` INTEGER NOT NULL, `max_hp` INTEGER NOT NULL, `temp_hp` INTEGER NOT NULL, `hit_dice` TEXT NOT NULL, `class` TEXT NOT NULL, `subclass` TEXT NOT NULL, `race` TEXT NOT NULL, `speed` INTEGER NOT NULL, `armor_class` INTEGER NOT NULL, `shield` INTEGER NOT NULL, `initiative_bonus` INTEGER NOT NULL, `proficiencies` TEXT NOT NULL, `traits` TEXT NOT NULL, `feats` TEXT NOT NULL, `inventory` TEXT NOT NULL, `backstory` TEXT NOT NULL, `notes` TEXT NOT NULL, `skill_proficiencies` TEXT NOT NULL, `savingThrowProficiencies` TEXT NOT NULL, `passivePerceptionBonus` INTEGER NOT NULL, `hasJackOfAllTrades` INTEGER NOT NULL, `money_gold` INTEGER NOT NULL, `money_silver` INTEGER NOT NULL, `money_copper` INTEGER NOT NULL, `spell_settings_spell_ability` TEXT, `spell_settings_spell_dc_misc_bonus` INTEGER NOT NULL, `spell_settings_spell_attack_misc_bonus` INTEGER NOT NULL, `spell_settings_spell_slots` TEXT NOT NULL, `abilities_strength` INTEGER NOT NULL, `abilities_dexterity` INTEGER NOT NULL, `abilities_constitution` INTEGER NOT NULL, `abilities_intelligence` INTEGER NOT NULL, `abilities_wisdom` INTEGER NOT NULL, `abilities_charisma` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sortOrder",
+            "columnName": "sortOrder",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imagePath",
+            "columnName": "imagePath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "currentHp",
+            "columnName": "current_hp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxHp",
+            "columnName": "max_hp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tempHp",
+            "columnName": "temp_hp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hitDice",
+            "columnName": "hit_dice",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "charClass",
+            "columnName": "class",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "subClass",
+            "columnName": "subclass",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "race",
+            "columnName": "race",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "speed",
+            "columnName": "speed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "armorClass",
+            "columnName": "armor_class",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shield",
+            "columnName": "shield",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "initiativeMiscBonus",
+            "columnName": "initiative_bonus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "proficiencies",
+            "columnName": "proficiencies",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "traits",
+            "columnName": "traits",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "feats",
+            "columnName": "feats",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inventory",
+            "columnName": "inventory",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "backstory",
+            "columnName": "backstory",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "skillProficiencies",
+            "columnName": "skill_proficiencies",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "savingThrowProficiencies",
+            "columnName": "savingThrowProficiencies",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "passivePerceptionBonus",
+            "columnName": "passivePerceptionBonus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hasJackOfAllTrades",
+            "columnName": "hasJackOfAllTrades",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "coins.gold",
+            "columnName": "money_gold",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "coins.silver",
+            "columnName": "money_silver",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "coins.copper",
+            "columnName": "money_copper",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spellSettings.spellCastingAbility",
+            "columnName": "spell_settings_spell_ability",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "spellSettings.dcMiscBonus",
+            "columnName": "spell_settings_spell_dc_misc_bonus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spellSettings.attackMiscBonus",
+            "columnName": "spell_settings_spell_attack_misc_bonus",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spellSettings.spellSlots",
+            "columnName": "spell_settings_spell_slots",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "abilityBlock.strength",
+            "columnName": "abilities_strength",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "abilityBlock.dexterity",
+            "columnName": "abilities_dexterity",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "abilityBlock.constitution",
+            "columnName": "abilities_constitution",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "abilityBlock.intelligence",
+            "columnName": "abilities_intelligence",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "abilityBlock.wisdom",
+            "columnName": "abilities_wisdom",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "abilityBlock.charisma",
+            "columnName": "abilities_charisma",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "spells",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`spellId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `school` TEXT NOT NULL, `level` TEXT NOT NULL, `castTime` TEXT NOT NULL, `rangeType` TEXT NOT NULL, `rangeValue` INTEGER, `components` TEXT NOT NULL, `material` TEXT, `isRitual` INTEGER NOT NULL, `duration` TEXT NOT NULL, `isConcentration` INTEGER NOT NULL, `attackType` TEXT NOT NULL, `saveStat` TEXT, `damageType` TEXT, `damageDice` TEXT, `description` TEXT NOT NULL, `higherLevels` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "spellId",
+            "columnName": "spellId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "school",
+            "columnName": "school",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "level",
+            "columnName": "level",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "castTime",
+            "columnName": "castTime",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rangeType",
+            "columnName": "rangeType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rangeValue",
+            "columnName": "rangeValue",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "components",
+            "columnName": "components",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "material",
+            "columnName": "material",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isRitual",
+            "columnName": "isRitual",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "duration",
+            "columnName": "duration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isConcentration",
+            "columnName": "isConcentration",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attackType",
+            "columnName": "attackType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saveStat",
+            "columnName": "saveStat",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "damageType",
+            "columnName": "damageType",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "damageDice",
+            "columnName": "damageDice",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "higherLevels",
+            "columnName": "higherLevels",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "spellId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_spells_name",
+            "unique": true,
+            "columnNames": [
+              "name"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_spells_name` ON `${TABLE_NAME}` (`name`)"
+          }
+        ]
+      },
+      {
+        "tableName": "attacks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`attackId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `characterId` INTEGER NOT NULL, `name` TEXT NOT NULL, `attackType` TEXT NOT NULL, `ability` TEXT NOT NULL, `is_proficient` INTEGER NOT NULL, `bonus_attack` INTEGER NOT NULL, `bonus_damage` INTEGER NOT NULL, `damageDice` TEXT NOT NULL, `damageType` TEXT NOT NULL, `range` TEXT NOT NULL, `notes` TEXT NOT NULL, FOREIGN KEY(`characterId`) REFERENCES `character`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "attackId",
+            "columnName": "attackId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "characterId",
+            "columnName": "characterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attackType",
+            "columnName": "attackType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ability",
+            "columnName": "ability",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isProficient",
+            "columnName": "is_proficient",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bonusToHit",
+            "columnName": "bonus_attack",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bonusToDamage",
+            "columnName": "bonus_damage",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "damageDice",
+            "columnName": "damageDice",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "damageType",
+            "columnName": "damageType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "range",
+            "columnName": "range",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "attackId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_attacks_characterId",
+            "unique": false,
+            "columnNames": [
+              "characterId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_attacks_characterId` ON `${TABLE_NAME}` (`characterId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "character",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "characterId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "character_spell_cross_ref",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`characterId` INTEGER NOT NULL, `spellId` INTEGER NOT NULL, PRIMARY KEY(`characterId`, `spellId`), FOREIGN KEY(`characterId`) REFERENCES `character`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE , FOREIGN KEY(`spellId`) REFERENCES `spells`(`spellId`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "characterId",
+            "columnName": "characterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spellId",
+            "columnName": "spellId",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "characterId",
+            "spellId"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_character_spell_cross_ref_characterId",
+            "unique": false,
+            "columnNames": [
+              "characterId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_character_spell_cross_ref_characterId` ON `${TABLE_NAME}` (`characterId`)"
+          },
+          {
+            "name": "index_character_spell_cross_ref_spellId",
+            "unique": false,
+            "columnNames": [
+              "spellId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_character_spell_cross_ref_spellId` ON `${TABLE_NAME}` (`spellId`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "character",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "characterId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "spells",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "spellId"
+            ],
+            "referencedColumns": [
+              "spellId"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "races",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `size` TEXT NOT NULL, `speed` INTEGER NOT NULL, `abilityBonuses` TEXT NOT NULL, `grantedSkills` TEXT NOT NULL, `traits` TEXT NOT NULL, `description` TEXT NOT NULL, `isHomebrew` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "size",
+            "columnName": "size",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "speed",
+            "columnName": "speed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "abilityBonuses",
+            "columnName": "abilityBonuses",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "grantedSkills",
+            "columnName": "grantedSkills",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "traits",
+            "columnName": "traits",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isHomebrew",
+            "columnName": "isHomebrew",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "classes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `hitDice` TEXT NOT NULL, `primaryAbility` TEXT NOT NULL, `savingThrows` TEXT NOT NULL, `skillChoiceCount` INTEGER NOT NULL, `availableSkills` TEXT NOT NULL, `spellcastingAbility` TEXT, `description` TEXT NOT NULL, `isHomebrew` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hitDice",
+            "columnName": "hitDice",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "primaryAbility",
+            "columnName": "primaryAbility",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "savingThrows",
+            "columnName": "savingThrows",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "skillChoiceCount",
+            "columnName": "skillChoiceCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "availableSkills",
+            "columnName": "availableSkills",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spellcastingAbility",
+            "columnName": "spellcastingAbility",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isHomebrew",
+            "columnName": "isHomebrew",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "dice_rolls",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `characterId` INTEGER NOT NULL, `label` TEXT NOT NULL, `numbers` TEXT NOT NULL, `modifier` INTEGER, `result` INTEGER NOT NULL, `dices` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, FOREIGN KEY(`characterId`) REFERENCES `character`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "characterId",
+            "columnName": "characterId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "label",
+            "columnName": "label",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numbers",
+            "columnName": "numbers",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifier",
+            "columnName": "modifier",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "result",
+            "columnName": "result",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dices",
+            "columnName": "dices",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_dice_rolls_characterId_timestamp_id",
+            "unique": false,
+            "columnNames": [
+              "characterId",
+              "timestamp",
+              "id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_dice_rolls_characterId_timestamp_id` ON `${TABLE_NAME}` (`characterId`, `timestamp`, `id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "character",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "characterId"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'fbbde6e841cde8eb8d50ad452627fa99')"
+    ]
+  }
+}
