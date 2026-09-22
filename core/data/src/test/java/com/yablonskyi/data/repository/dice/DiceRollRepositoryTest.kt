@@ -2,6 +2,7 @@ package com.yablonskyi.data.repository.dice
 
 import com.yablonskyi.data.dao.DiceRollDao
 import com.yablonskyi.data.entity.DiceRollEntity
+import com.yablonskyi.domain.backup.BackupAccessGate
 import com.yablonskyi.model.dice.DiceGroup
 import com.yablonskyi.model.dice.SavedDiceRoll
 import kotlinx.coroutines.flow.Flow
@@ -16,7 +17,8 @@ class DiceRollRepositoryTest {
     @Test
     fun givenStoredRolls_whenObservedAndCleared_thenMapsAndScopesHistory() = runTest {
         val dao = FakeDiceRollDao()
-        val repository = DiceRollRepositoryImpl(dao)
+        val gate = BackupAccessGate().apply { recover { } }
+        val repository = DiceRollRepositoryImpl(dao, gate)
         repository.addDiceRoll(roll(1, "first", 100)).getOrThrow()
         repository.addDiceRoll(roll(2, "other", 200)).getOrThrow()
 
