@@ -3,6 +3,7 @@ package com.yablonskyi.data.repository.character
 import com.yablonskyi.data.dao.SpellDao
 import com.yablonskyi.data.mapper.toEntity
 import com.yablonskyi.data.mapper.toModel
+import com.yablonskyi.domain.backup.BackupAccessGate
 import com.yablonskyi.domain.repository.SpellRepository
 import com.yablonskyi.model.character.CharacterSpellCrossRef
 import com.yablonskyi.model.character.Spell
@@ -11,26 +12,27 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class SpellRepositoryImpl @Inject constructor(
-    private val spellDao: SpellDao
+    private val spellDao: SpellDao,
+    private val backupGate: BackupAccessGate,
 ) : SpellRepository {
     override suspend fun insertSpell(spell: Spell): Long {
-        return spellDao.insertSpell(spell.toEntity())
+        return backupGate.access { spellDao.insertSpell(spell.toEntity()) }
     }
 
     override suspend fun updateSpell(spell: Spell) {
-        spellDao.updateSpell(spell.toEntity())
+        backupGate.access { spellDao.updateSpell(spell.toEntity()) }
     }
 
     override suspend fun insertSpells(spells: List<Spell>) {
-        spellDao.insertSpells(spells.map { it.toEntity() })
+        backupGate.access { spellDao.insertSpells(spells.map { it.toEntity() }) }
     }
 
     override suspend fun deleteSpell(spell: Spell) {
-        spellDao.deleteSpell(spell.toEntity())
+        backupGate.access { spellDao.deleteSpell(spell.toEntity()) }
     }
 
     override suspend fun deleteSpells(spells: List<Spell>) {
-        spellDao.deleteSpells(spells.map { it.toEntity() })
+        backupGate.access { spellDao.deleteSpells(spells.map { it.toEntity() }) }
     }
 
     override fun getAllSpellsInLibrary(): Flow<List<Spell>> {
@@ -38,11 +40,11 @@ class SpellRepositoryImpl @Inject constructor(
     }
 
     override suspend fun assignSpellToCharacter(crossRef: CharacterSpellCrossRef) {
-        spellDao.assignSpellToCharacter(crossRef.toEntity())
+        backupGate.access { spellDao.assignSpellToCharacter(crossRef.toEntity()) }
     }
 
     override suspend fun removeSpellFromCharacter(charId: Long, spellId: Long) {
-        spellDao.removeSpellFromCharacter(charId, spellId)
+        backupGate.access { spellDao.removeSpellFromCharacter(charId, spellId) }
     }
 
     override fun getCharacterSpells(charId: Long): Flow<List<Spell>> {

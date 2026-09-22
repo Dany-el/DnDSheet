@@ -8,6 +8,7 @@ import com.yablonskyi.data.dao.SpellDao
 import com.yablonskyi.data.entity.CharacterSpellCrossRefEntity
 import com.yablonskyi.data.mapper.toEntity
 import com.yablonskyi.data.mapper.toModel
+import com.yablonskyi.domain.backup.BackupAccessGate
 import com.yablonskyi.domain.repository.CharacterRepository
 import com.yablonskyi.model.character.Character
 import com.yablonskyi.model.character.CharacterSheet
@@ -20,53 +21,54 @@ class CharacterRepositoryImpl @Inject constructor(
     private val characterDao: CharacterDao,
     private val attackDao: AttackDao,
     private val spellDao: SpellDao,
+    private val backupGate: BackupAccessGate,
 ) : CharacterRepository {
     override suspend fun reorderCharacters(orderedIds: List<Long>) {
-        characterDao.reorderCharacters(orderedIds)
+        backupGate.access { characterDao.reorderCharacters(orderedIds) }
     }
 
     override suspend fun insertCharacter(character: Character): Long {
-        return database.withTransaction {
+        return backupGate.access { database.withTransaction {
             val position = characterDao.findCharacterById(character.id)?.sortOrder
                 ?: characterDao.nextSortOrder()
             characterDao.insertCharacter(character.toEntity().copy(sortOrder = position))
-        }
+        } }
     }
 
     override suspend fun insertCharacters(sheets: List<CharacterSheet>) {
-        database.withTransaction {
+        backupGate.access { database.withTransaction {
             insertSheetsInternal(sheets)
-        }
+        } }
     }
 
     override suspend fun restoreCharacters(sheets: List<CharacterSheet>) {
-        database.withTransaction {
+        backupGate.access { database.withTransaction {
             characterDao.deleteAllCharacters()
             insertSheetsInternal(sheets)
-        }
+        } }
     }
 
-    override suspend fun applyChange(id: Long, change: com.yablonskyi.domain.character.CharacterChange): Character = database.withTransaction {
+    override suspend fun applyChange(id: Long, change: com.yablonskyi.domain.character.CharacterChange): Character = backupGate.access { database.withTransaction {
         val entity = characterDao.findCharacterById(id) ?: error("Character no longer exists")
         val current = entity.toModel()
         val updated = com.yablonskyi.domain.character.applyCharacterChange(current, change)
         characterDao.updateCharacter(updated.toEntity().copy(sortOrder = entity.sortOrder))
         updated
-    }
+    } }
 
     override suspend fun updateCharacter(character: Character) {
-        database.withTransaction {
+        backupGate.access { database.withTransaction {
             val current = characterDao.findCharacterById(character.id) ?: error("Character no longer exists")
             characterDao.updateCharacter(character.toEntity().copy(sortOrder = current.sortOrder))
-        }
+        } }
     }
 
     override suspend fun deleteCharacter(character: Character) {
-        characterDao.deleteCharacter(character.toEntity())
+        backupGate.access { characterDao.deleteCharacter(character.toEntity()) }
     }
 
     override suspend fun deleteCharacters(characters: List<Character>) {
-        characterDao.deleteCharacters(characters.map { it.toEntity() })
+        backupGate.access { characterDao.deleteCharacters(characters.map { it.toEntity() }) }
     }
 
     override fun getCharacterById(id: Long): Flow<Character?> {

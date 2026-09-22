@@ -8,6 +8,7 @@ import androidx.core.net.toUri
 import com.yablonskyi.data.di.CharacterIoDispatcher
 import com.yablonskyi.data.utils.getRotationDegrees
 import com.yablonskyi.data.utils.rotateBitmap
+import com.yablonskyi.domain.backup.BackupAccessGate
 import com.yablonskyi.domain.character.CharacterChange
 import com.yablonskyi.domain.repository.CharacterImageRepository
 import com.yablonskyi.domain.repository.CharacterRepository
@@ -27,12 +28,13 @@ import javax.inject.Singleton
 class CharacterImageRepositoryImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val characters: CharacterRepository,
+    private val backupGate: BackupAccessGate,
     @param:CharacterIoDispatcher private val io: CoroutineDispatcher,
 ) : CharacterImageRepository {
     private val replacements = Mutex()
 
-    override suspend fun replace(characterId: Long, uri: String) = replacements.withLock {
-        withContext(io) {
+    override suspend fun replace(characterId: Long, uri: String) = backupGate.access {
+        replacements.withLock { withContext(io) {
             val current = characters.getCharacterById(characterId).first()
                 ?: error("Character no longer exists")
             val source = uri.toUri()
@@ -71,6 +73,6 @@ class CharacterImageRepositoryImpl @Inject constructor(
                 if (!committed) file.delete()
             }
             Unit
-        }
+        } }
     }
 }

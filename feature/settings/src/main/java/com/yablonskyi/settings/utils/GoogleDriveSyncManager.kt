@@ -10,6 +10,7 @@ import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
 import com.google.api.services.drive.model.File
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
@@ -75,6 +76,8 @@ class GoogleDriveSyncManager(private val context: Context) {
             }
 
             Result.success(Unit)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (e: Exception) {
             e.printStackTrace()
             Result.failure(e)
@@ -95,6 +98,8 @@ class GoogleDriveSyncManager(private val context: Context) {
 
             val jsonString = outputStream.toString("UTF-8")
             Result.success(jsonString)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (e: Exception) {
             e.printStackTrace()
             Result.failure(e)
@@ -116,6 +121,8 @@ class GoogleDriveSyncManager(private val context: Context) {
             } else {
                 Result.success(Unit)
             }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (e: Exception) {
             e.printStackTrace()
             Result.failure(e)
@@ -134,6 +141,8 @@ class GoogleDriveSyncManager(private val context: Context) {
 
             Result.success(existingFileId != null)
 
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (e: Exception) {
             e.printStackTrace()
             Result.failure(e)

@@ -405,4 +405,6 @@
         <item quantity="other">%d заклинання</item>
     </plurals>
     <string name="app_is_up_to_date">Додаток оновлено до останньої версії.</string>
+    <string name="backup_recovery_failed_title">Потрібне відновлення</string>
+    <string name="backup_recovery_failed_message">Не вдалося завершити попереднє відновлення. Повторіть спробу перед використанням персонажів.</string>
 </resources>

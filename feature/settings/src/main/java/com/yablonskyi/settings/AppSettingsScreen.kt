@@ -2,10 +2,6 @@ package com.yablonskyi.settings
 
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,35 +12,25 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.automirrored.filled.ViewList
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SystemUpdate
-import androidx.compose.material.icons.filled.Update
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -58,26 +44,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.core.layout.WindowSizeClass
-import com.yablonskyi.model.update.AppUpdate
-import com.yablonskyi.settings.update.UpdateViewModel
 import com.yablonskyi.settings.utils.AppLanguage
 import com.yablonskyi.settings.utils.AppTheme
-import com.yablonskyi.ui.R
 import com.yablonskyi.ui.settings.ListView
 import com.yablonskyi.ui.theme.Dimens
 import kotlinx.coroutines.launch
+import com.yablonskyi.ui.R as UiR
 
 data class SheetOption<T>(
     val value: T,
@@ -93,6 +73,7 @@ enum class ActiveSettingsSheet {
 @Composable
 fun AppSettingsScreen(
     onOpenLanguages: () -> Unit,
+    onOpenBackupRestore: () -> Unit,
     viewModel: AppSettingsViewModel = hiltViewModel(LocalActivity.current as ComponentActivity),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -103,13 +84,12 @@ fun AppSettingsScreen(
     val isWideScreen =
         windowSizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_MEDIUM_LOWER_BOUND)
 
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        stringResource(R.string.settings),
+                        stringResource(UiR.string.settings),
                         fontWeight = FontWeight.SemiBold,
                         textAlign = if (isWideScreen) TextAlign.Center else TextAlign.Left,
                         modifier = Modifier.fillMaxWidth()
@@ -131,32 +111,56 @@ fun AppSettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .consumeWindowInsets(innerPadding)
-                .imePadding(),
+                .consumeWindowInsets(innerPadding),
             contentAlignment = Alignment.TopCenter
         ) {
             Column(
-                modifier = Modifier.widthIn(max = 840.dp),
+                verticalArrangement = Arrangement.spacedBy(Dimens.Spacing.XSmall),
+                modifier = Modifier
+                    .widthIn(max = Dimens.Content.MaxWidth)
+                    .fillMaxSize()
+                    .padding(Dimens.Spacing.Small),
             ) {
+                val topShape = RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp,
+                    bottomStart = 0.dp,
+                    bottomEnd = 0.dp
+                )
+
+                val middleShape = RoundedCornerShape(0.dp)
+
+                val bottomShape = RoundedCornerShape(
+                    topStart = 0.dp,
+                    topEnd = 0.dp,
+                    bottomStart = 16.dp,
+                    bottomEnd = 16.dp
+                )
+
                 // THEME
                 SettingsActionRow(
-                    title = stringResource(R.string.appearance),
+                    title = stringResource(UiR.string.appearance),
+                    shape = topShape,
                     currentValue = stringResource(state.theme.label),
                     onClick = { activeSheet = ActiveSettingsSheet.THEME }
                 )
-
-                HorizontalDivider()
 
                 val language =
                     AppLanguage.entries.first { it.code == state.languageCode }
 
                 SettingsActionRow(
-                    title = stringResource(R.string.language),
+                    title = stringResource(UiR.string.language),
+                    shape = middleShape,
                     currentValue = stringResource(language.label),
                     onClick = onOpenLanguages
                 )
 
-                HorizontalDivider()
+                SettingsActionRow(
+                    title = stringResource(R.string.backup_restore_title),
+                    shape = bottomShape,
+                    currentValue = "",
+                    onClick = onOpenBackupRestore,
+                )
 
                 /*
                 // UPDATES
@@ -311,7 +315,7 @@ fun AppSettingsScreen(
                 */
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    text = viewModel.appVersion,
+                    text = "v${viewModel.appVersion} (build ${viewModel.codeVersion})",
                     style = MaterialTheme.typography.labelMedium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -319,6 +323,7 @@ fun AppSettingsScreen(
             }
         }
     }
+
 
     /*
     if (showDeleteDialog) {
@@ -361,7 +366,7 @@ fun AppSettingsScreen(
     }
 }
 
-@Composable
+/*@Composable
 fun DeleteBackupDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
@@ -393,38 +398,44 @@ fun DeleteBackupDialog(
             }
         }
     )
-}
-
+}*/
 @Composable
 fun SettingsActionRow(
     title: String,
+    shape: CornerBasedShape,
     currentValue: String,
     onClick: () -> Unit
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 20.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+    OutlinedCard(
+        shape = shape,
+        onClick = onClick,
+        modifier = Modifier.heightIn(min = 48.dp)
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Text(
-                text = currentValue,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = stringResource(R.string.change_setting, title),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = currentValue,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = stringResource(UiR.string.change_setting, title),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
@@ -483,7 +494,7 @@ fun <T> SelectionBottomSheet(
     }
 }
 
-@Composable
+/*@Composable
 fun UpdatesRow(
     updateState: UpdateViewModel.UpdateState,
     onCheckUpdate: () -> Unit,
@@ -660,4 +671,4 @@ fun UpdatesRow(
             )
         }
     }
-}
+}*/

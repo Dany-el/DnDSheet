@@ -2,6 +2,8 @@ package com.yablonskyi.data.repository.dice
 
 import com.yablonskyi.data.dao.DiceRollDao
 import com.yablonskyi.data.entity.DiceRollEntity
+import com.yablonskyi.domain.backup.BackupAccessGate
+import com.yablonskyi.domain.backup.BackupRecoveryRequiredException
 import com.yablonskyi.domain.repository.DiceRollRepository
 import com.yablonskyi.model.dice.SavedDiceRoll
 import kotlinx.coroutines.CancellationException
@@ -11,16 +13,17 @@ import javax.inject.Inject
 
 class DiceRollRepositoryImpl @Inject constructor(
     private val dao: DiceRollDao,
+    private val backupGate: BackupAccessGate,
 ) : DiceRollRepository {
     override fun observeDiceRolls(characterId: Long): Flow<List<SavedDiceRoll>> =
         dao.observeDiceRolls(characterId).map { rolls -> rolls.map(DiceRollEntity::toModel) }
 
     override suspend fun addDiceRoll(diceRoll: SavedDiceRoll): Result<Long> = resultOf {
-        dao.insert(diceRoll.toEntity())
+        backupGate.access { dao.insert(diceRoll.toEntity()) }
     }
 
     override suspend fun clearDiceRolls(characterId: Long): Result<Unit> = resultOf {
-        dao.clear(characterId)
+        backupGate.access { dao.clear(characterId) }
     }
 }
 
@@ -28,6 +31,8 @@ private inline fun <T> resultOf(block: () -> T): Result<T> = try {
     Result.success(block())
 } catch (cancelled: CancellationException) {
     throw cancelled
+} catch (recovery: BackupRecoveryRequiredException) {
+    throw recovery
 } catch (error: Exception) {
     Result.failure(DiceRollStorageException(error))
 }

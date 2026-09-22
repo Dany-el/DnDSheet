@@ -15,6 +15,7 @@ import com.yablonskyi.domain.repository.CharacterRepository
 import com.yablonskyi.domain.repository.ClassRepository
 import com.yablonskyi.domain.repository.RaceRepository
 import com.yablonskyi.domain.repository.SpellRepository
+import com.yablonskyi.domain.backup.BackupAccessGate
 import com.yablonskyi.data.repository.character.AttackRepositoryImpl
 import com.yablonskyi.data.repository.character.CharacterRepositoryImpl
 import com.yablonskyi.data.repository.compendium.ClassRepositoryImpl
@@ -50,6 +51,7 @@ object AppModule {
                 MIGRATION_6_7,
                 MIGRATION_7_8,
                 MIGRATION_8_9,
+                MIGRATION_9_10,
             )
             .build()
     }
@@ -81,24 +83,27 @@ object AppModule {
         spellDao: SpellDao,
         attackDao: AttackDao,
         characterDao: CharacterDao,
+        backupGate: BackupAccessGate,
     ): CharacterRepository {
-        return CharacterRepositoryImpl(db, characterDao, attackDao, spellDao)
+        return CharacterRepositoryImpl(db, characterDao, attackDao, spellDao, backupGate)
     }
 
     @Provides
     @Singleton
     fun provideSpellRepository(
-        spellDao: SpellDao
+        spellDao: SpellDao,
+        backupGate: BackupAccessGate,
     ): SpellRepository {
-        return SpellRepositoryImpl(spellDao)
+        return SpellRepositoryImpl(spellDao, backupGate)
     }
 
     @Provides
     @Singleton
     fun provideAttackRepository(
-        attackDao: AttackDao
+        attackDao: AttackDao,
+        backupGate: BackupAccessGate,
     ): AttackRepository {
-        return AttackRepositoryImpl(attackDao)
+        return AttackRepositoryImpl(attackDao, backupGate)
     }
 
     @Provides
@@ -111,15 +116,23 @@ object AppModule {
     @Singleton
     fun provideRaceRepository(
         loader: BuiltInRulebookLoader,
-        dao: RaceDao
-    ): RaceRepository = RaceRepositoryImpl(loader, dao)
+        dao: RaceDao,
+        backupGate: BackupAccessGate,
+    ): RaceRepository = RaceRepositoryImpl(loader, dao, backupGate)
 
     @Provides
     @Singleton
     fun provideClassRepository(
         loader: BuiltInRulebookLoader,
-        dao: ClassDao
-    ): ClassRepository = ClassRepositoryImpl(loader, dao)
+        dao: ClassDao,
+        backupGate: BackupAccessGate,
+    ): ClassRepository = ClassRepositoryImpl(loader, dao, backupGate)
+}
+
+val MIGRATION_9_10 = object : Migration(9, 10) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("CREATE TABLE IF NOT EXISTS `restore_commit` (`id` INTEGER NOT NULL, `operationId` TEXT NOT NULL, PRIMARY KEY(`id`))")
+    }
 }
 
 val MIGRATION_7_8 = object : Migration(7, 8) {

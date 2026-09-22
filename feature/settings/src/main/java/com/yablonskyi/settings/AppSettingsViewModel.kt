@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
 import com.yablonskyi.domain.repository.CharacterRepository
+import com.yablonskyi.domain.backup.BackupAccessGate
 import com.yablonskyi.model.character.CharacterSheet
 import com.yablonskyi.data.utils.CharacterBackupCodec
 import com.yablonskyi.data.utils.decodeBase64ToImage
@@ -24,6 +25,7 @@ import com.yablonskyi.settings.utils.GoogleDriveSyncManager
 import com.yablonskyi.ui.settings.ListView
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -43,6 +45,7 @@ class AppSettingsViewModel @Inject constructor(
     private val charRepository: CharacterRepository,
     private val appLanguageManager: AppLanguageManager,
     private val languageDownloadRepository: LanguageDownloadRepository,
+    private val backupGate: BackupAccessGate,
     versionProvider: AppVersionProvider
 ) : ViewModel() {
 
@@ -56,6 +59,7 @@ class AppSettingsViewModel @Inject constructor(
     val isBackupAvailable: StateFlow<Boolean> = _isBackupAvailable.asStateFlow()
 
     val appVersion: String = versionProvider.versionName
+    val codeVersion: Long = versionProvider.versionCode
 
     init {
         _language.value = appLanguageManager.currentLanguageCode()
@@ -128,33 +132,35 @@ class AppSettingsViewModel @Inject constructor(
             _isSyncing.value = true
 
             try {
-                val jsonString = withContext(Dispatchers.IO) {
-                    val sheets = charRepository.getAllCharacterSheets()
+                backupGate.access {
+                    val jsonString = withContext(Dispatchers.IO) {
+                        val sheets = charRepository.getAllCharacterSheets()
 
-                    val sheetsForExport = sheets.map { sheet ->
-                        val base64String = encodeImageToBase64(sheet.character.imagePath)
+                        val sheetsForExport = sheets.map { sheet ->
+                            val base64String = encodeImageToBase64(sheet.character.imagePath)
 
-                        sheet.copy(
-                            character = sheet.character.copy(imagePath = base64String)
-                        )
+                            sheet.copy(
+                                character = sheet.character.copy(imagePath = base64String)
+                            )
+                        }
+                        CharacterBackupCodec.encode(sheetsForExport)
                     }
-                    CharacterBackupCodec.encode(sheetsForExport)
+
+                    val syncManager = GoogleDriveSyncManager(context)
+                    val result = syncManager.uploadBackup(jsonString)
+
+                    if (result.isSuccess) {
+                        val currentTime = LocalDateTime.now().format(
+                            DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")
+                        )
+                        repository.saveLastSyncTime(currentTime)
+                        _isBackupAvailable.value = true
+                    } else {
+                        result.exceptionOrNull()?.printStackTrace()
+                    }
                 }
-
-                val syncManager = GoogleDriveSyncManager(context)
-                val result = syncManager.uploadBackup(jsonString)
-
-                if (result.isSuccess) {
-                    val currentTime = LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")
-                    )
-                    repository.saveLastSyncTime(currentTime)
-                    _isBackupAvailable.value = true
-                } else {
-                    val error = result.exceptionOrNull()
-                    error?.printStackTrace()
-                }
-
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
@@ -170,36 +176,38 @@ class AppSettingsViewModel @Inject constructor(
             _isSyncing.value = true
 
             try {
-                val syncManager = GoogleDriveSyncManager(context)
-                val result = syncManager.downloadBackup()
+                backupGate.access {
+                    val syncManager = GoogleDriveSyncManager(context)
+                    val result = syncManager.downloadBackup()
 
-                if (result.isSuccess) {
-                    val jsonString = result.getOrNull() ?: return@launch
+                    if (result.isSuccess) {
+                        val jsonString = result.getOrNull() ?: return@access
 
-                    withContext(Dispatchers.IO) {
-                        val downloadedSheets: List<CharacterSheet> =
-                            CharacterBackupCodec.decode(jsonString)
+                        withContext(Dispatchers.IO) {
+                            val downloadedSheets: List<CharacterSheet> =
+                                CharacterBackupCodec.decode(jsonString)
 
-                        val restoredSheets = downloadedSheets.map { sheet ->
-                            val newLocalPath =
-                                decodeBase64ToImage(context, sheet.character.imagePath)
+                            val restoredSheets = downloadedSheets.map { sheet ->
+                                val newLocalPath =
+                                    decodeBase64ToImage(context, sheet.character.imagePath)
 
-                            sheet.copy(
-                                character = sheet.character.copy(imagePath = newLocalPath)
-                            )
+                                sheet.copy(
+                                    character = sheet.character.copy(imagePath = newLocalPath)
+                                )
+                            }
+                            charRepository.restoreCharacters(restoredSheets)
                         }
-                        charRepository.restoreCharacters(restoredSheets)
+                        val currentTime = LocalDateTime.now().format(
+                            DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")
+                        )
+                        repository.saveLastSyncTime(currentTime)
+
+                    } else {
+                        result.exceptionOrNull()?.printStackTrace()
                     }
-                    val currentTime = LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")
-                    )
-                    repository.saveLastSyncTime(currentTime)
-
-                } else {
-                    val error = result.exceptionOrNull()
-                    error?.printStackTrace()
                 }
-
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {

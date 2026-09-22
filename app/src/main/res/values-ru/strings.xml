@@ -399,4 +399,6 @@
     </plurals>
     <string name="app_is_up_to_date">Приложение обновлено до последней версии.</string>
 
+    <string name="backup_recovery_failed_title">Требуется восстановление</string>
+    <string name="backup_recovery_failed_message">Не удалось завершить предыдущее восстановление. Повторите попытку перед использованием персонажей.</string>
 </resources>

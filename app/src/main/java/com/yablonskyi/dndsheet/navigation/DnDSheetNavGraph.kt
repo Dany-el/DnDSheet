@@ -30,6 +30,7 @@ import com.yablonskyi.compendium.navigateToCompendiumRaceUpdate
 import com.yablonskyi.compendium.navigateToCompendiumRaces
 import com.yablonskyi.compendium.navigateToCompendiumSpellUpdate
 import com.yablonskyi.compendium.navigateToCompendiumSpellsLibrary
+import com.yablonskyi.navigation.BackupRestoreRoute
 import com.yablonskyi.navigation.CharacterSheetsRoute
 import com.yablonskyi.navigation.LanguagesRoute
 import com.yablonskyi.pdf.html.HtmlToPdfConverter
@@ -108,6 +109,7 @@ fun DnDSheetNavGraph(
             )
             settingsGraph(
                 onOpenLanguages = { navController.navigate(LanguagesRoute) },
+                onOpenBackupRestore = { navController.navigate(BackupRestoreRoute) },
                 onNavigateBack = { navController.popBackStack() },
             )
             wizardGraph(

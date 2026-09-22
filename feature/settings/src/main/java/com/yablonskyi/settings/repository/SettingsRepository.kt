@@ -19,9 +19,10 @@ import javax.inject.Singleton
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 @Singleton
-class SettingsRepository @Inject constructor(
-    @param:ApplicationContext private val context: Context
+class SettingsRepository internal constructor(
+    private val store: DataStore<Preferences>,
 ) {
+    @Inject constructor(@ApplicationContext context: Context) : this(context.dataStore)
 
     private object Keys {
         val THEME = stringPreferencesKey("app_theme")
@@ -30,7 +31,7 @@ class SettingsRepository @Inject constructor(
         val LAST_SYNC_TIME = stringPreferencesKey("last_sync_time")
     }
 
-    val appSettings: Flow<AppSettingsState> = context.dataStore.data
+    val appSettings: Flow<AppSettingsState> = store.data
         .map { preferences ->
             val themeString = preferences[Keys.THEME] ?: AppTheme.SYSTEM.name
             val listViewString = preferences[Keys.LIST_VIEW] ?: ListView.LIST.name
@@ -51,19 +52,19 @@ class SettingsRepository @Inject constructor(
         }
 
     suspend fun saveTheme(theme: AppTheme) {
-        context.dataStore.edit { preferences ->
+        store.edit { preferences ->
             preferences[Keys.THEME] = theme.name
         }
     }
 
     suspend fun saveListView(listView: ListView) {
-        context.dataStore.edit { preferences ->
+        store.edit { preferences ->
             preferences[Keys.LIST_VIEW] = listView.name
         }
     }
 
     suspend fun saveUserEmail(email: String?) {
-        context.dataStore.edit { preferences ->
+        store.edit { preferences ->
             if (email != null) {
                 preferences[Keys.USER_EMAIL] = email
             } else {
@@ -73,15 +74,16 @@ class SettingsRepository @Inject constructor(
     }
 
     suspend fun saveLastSyncTime(time: String) {
-        context.dataStore.edit { preferences ->
+        store.edit { preferences ->
             preferences[Keys.LAST_SYNC_TIME] = time
         }
     }
 
     suspend fun clearSyncData() {
-        context.dataStore.edit { preferences ->
+        store.edit { preferences ->
             preferences.remove(Keys.USER_EMAIL)
             preferences.remove(Keys.LAST_SYNC_TIME)
         }
     }
+
 }

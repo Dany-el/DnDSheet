@@ -1,7 +1,6 @@
 package com.yablonskyi.data.provider
 
 import android.content.Context
-import android.content.pm.PackageInfo
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.content.pm.PackageInfoCompat

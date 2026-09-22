@@ -12,4 +12,7 @@ object CompendiumRoute
 object AppSettingsRoute
 
 @Serializable
+object BackupRestoreRoute
+
+@Serializable
 object LanguagesRoute

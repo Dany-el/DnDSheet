@@ -6,6 +6,7 @@ import androidx.core.net.toUri
 import com.yablonskyi.data.di.CharacterIoDispatcher
 import com.yablonskyi.data.utils.encodeImageToBase64
 import com.yablonskyi.data.utils.CharacterBackupCodec
+import com.yablonskyi.domain.backup.BackupAccessGate
 import com.yablonskyi.domain.repository.CharacterFileRepository
 import com.yablonskyi.domain.repository.CharacterRepository
 import com.yablonskyi.model.character.CharacterSheet
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class CharacterFileRepositoryImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val characters: CharacterRepository,
+    private val backupGate: BackupAccessGate,
     @param:CharacterIoDispatcher private val io: CoroutineDispatcher,
 ) : CharacterFileRepository {
     override suspend fun read(uri: String): List<CharacterSheet> = withContext(io) {
@@ -34,7 +36,7 @@ class CharacterFileRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun import(sheets: List<CharacterSheet>) = withContext(io) {
+    override suspend fun import(sheets: List<CharacterSheet>) = backupGate.access { withContext(io) {
         val created = mutableListOf<File>()
         var committed = false
         try {
@@ -52,9 +54,9 @@ class CharacterFileRepositoryImpl @Inject constructor(
         } finally {
             if (!committed) created.forEach { it.delete() }
         }
-    }
+    } }
 
-    override suspend fun export(uri: String, characterIds: List<Long>) = withContext(io) {
+    override suspend fun export(uri: String, characterIds: List<Long>) = backupGate.access { withContext(io) {
         val sheets = characters.getCharacterSheetsByIds(characterIds)
         require(sheets.isNotEmpty()) { "No characters to save" }
         val exported = sheets.map { sheet ->
@@ -63,5 +65,5 @@ class CharacterFileRepositoryImpl @Inject constructor(
         val output = context.contentResolver.openOutputStream(uri.toUri())
             ?: throw IOException("Cannot open destination")
         output.bufferedWriter().use { it.write(CharacterBackupCodec.encode(exported)) }
-    }
+    } }
 }

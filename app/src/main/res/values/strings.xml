@@ -363,6 +363,8 @@
     <string name="check_for_updates">Check for updates</string>
     <string name="update_ready">Ready to install</string>
     <string name="retry">Retry</string>
+    <string name="backup_recovery_failed_title">Recovery required</string>
+    <string name="backup_recovery_failed_message">The previous restore could not be completed. Retry before using your characters.</string>
     <string name="placeholder_char_name">John Watson</string>
     <string name="app_is_up_to_date">App is up to date.</string>
     <string name="install_apk">Install downloaded APK</string>
