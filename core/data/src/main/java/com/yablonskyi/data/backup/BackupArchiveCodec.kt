@@ -9,8 +9,10 @@ import com.yablonskyi.model.backup.BackupManifest
 import com.yablonskyi.model.backup.BackupRecordCounts
 import com.yablonskyi.model.backup.BackupValidationLimits
 import com.yablonskyi.model.backup.BackupValidator
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -60,7 +62,9 @@ internal class BackupArchiveCodec(
         createdAt: Instant,
     ): File {
         currentCoroutineContext().ensureActive()
-        val file = Files.createTempFile(parent.toPath(), "backup-", ".zip").toFile()
+        val file = withContext(Dispatchers.IO) {
+            Files.createTempFile(parent.toPath(), "backup-", ".zip")
+        }.toFile()
         try {
             val dataBytes = json.encodeToString(data).toByteArray(Charsets.UTF_8)
             limit(dataBytes.size.toLong(), limits.dataBytes)
@@ -106,66 +110,102 @@ internal class BackupArchiveCodec(
     suspend fun read(archive: File, parent: File): StagedBackup {
         currentCoroutineContext().ensureActive()
         limit(archive.length(), limits.archiveBytes)
-        val directory = Files.createTempDirectory(parent.toPath(), "restore-").toFile()
+        val directory = withContext(Dispatchers.IO) {
+            Files.createTempDirectory(parent.toPath(), "restore-")
+        }.toFile()
         try {
-            ZipFile(archive).use { zip ->
-                val entries = linkedMapOf<String, ZipEntry>()
-                val iterator = zip.entries()
-                var declaredTotal = 0L
-                while (iterator.hasMoreElements()) {
-                    currentCoroutineContext().ensureActive()
-                    val entry = iterator.nextElement()
-                    limit(entries.size.toLong() + 1, limits.entries.toLong())
-                    valid(!entry.isDirectory && (entry.name == "manifest.json" || entry.name == "data.json" || imagePath.matches(entry.name)),
-                        "Unsafe or unexpected ZIP entry")
-                    valid(entries.put(entry.name, entry) == null, "Duplicate ZIP entry")
-                    valid(entry.size >= 0, "Missing entry size")
-                    val maximum = when (entry.name) {
-                        "manifest.json" -> limits.manifestBytes
-                        "data.json" -> limits.dataBytes
-                        else -> limits.imageBytes
-                    }
-                    limit(entry.size, maximum)
-                    limit(entry.size, limits.totalBytes - declaredTotal)
-                    declaredTotal += entry.size
-                }
-                valid("manifest.json" in entries && "data.json" in entries, "Missing required section")
-                var actualTotal = 0L
-                suspend fun extract(name: String): Pair<File, Digest> {
-                    val entry = entries.getValue(name)
-                    val target = File(directory, name).canonicalFile
-                    valid(target.toPath().startsWith(directory.canonicalFile.toPath()), "Unsafe extraction path")
-                    Files.createDirectories(requireNotNull(target.parentFile).toPath())
-                    val digest = target.outputStream().use { output ->
-                        zip.getInputStream(entry).use { input ->
-                            copyCancellable(input, output, minOf(entry.size, limits.totalBytes - actualTotal))
+            return withContext(Dispatchers.IO) {
+                ZipFile(archive).use { zip ->
+                    val entries = linkedMapOf<String, ZipEntry>()
+                    val iterator = zip.entries()
+                    var declaredTotal = 0L
+                    while (iterator.hasMoreElements()) {
+                        currentCoroutineContext().ensureActive()
+                        val entry = iterator.nextElement()
+                        limit(entries.size.toLong() + 1, limits.entries.toLong())
+                        valid(
+                            !entry.isDirectory && (entry.name == "manifest.json" || entry.name == "data.json" || imagePath.matches(
+                                entry.name
+                            )),
+                            "Unsafe or unexpected ZIP entry"
+                        )
+                        valid(entries.put(entry.name, entry) == null, "Duplicate ZIP entry")
+                        valid(entry.size >= 0, "Missing entry size")
+                        val maximum = when (entry.name) {
+                            "manifest.json" -> limits.manifestBytes
+                            "data.json" -> limits.dataBytes
+                            else -> limits.imageBytes
                         }
+                        limit(entry.size, maximum)
+                        limit(entry.size, limits.totalBytes - declaredTotal)
+                        declaredTotal += entry.size
                     }
-                    actualTotal += digest.size
-                    valid(digest.size == entry.size && digest.crc == entry.crc, "Corrupt ZIP entry")
-                    return target to digest
+                    valid(
+                        "manifest.json" in entries && "data.json" in entries,
+                        "Missing required section"
+                    )
+                    var actualTotal = 0L
+                    suspend fun extract(name: String): Pair<File, Digest> {
+                        val entry = entries.getValue(name)
+                        val target = File(directory, name).canonicalFile
+                        valid(
+                            target.toPath().startsWith(directory.canonicalFile.toPath()),
+                            "Unsafe extraction path"
+                        )
+                        Files.createDirectories(requireNotNull(target.parentFile).toPath())
+                        val digest = target.outputStream().use { output ->
+                            zip.getInputStream(entry).use { input ->
+                                copyCancellable(
+                                    input,
+                                    output,
+                                    minOf(entry.size, limits.totalBytes - actualTotal)
+                                )
+                            }
+                        }
+                        actualTotal += digest.size
+                        valid(
+                            digest.size == entry.size && digest.crc == entry.crc,
+                            "Corrupt ZIP entry"
+                        )
+                        return target to digest
+                    }
+
+                    val manifest =
+                        json.decodeFromString<BackupManifest>(readJson(extract("manifest.json").first))
+                    BackupValidator.validateManifest(manifest, validationLimits)
+                    valid(
+                        entries.keys == (setOf(
+                            "manifest.json",
+                            "data.json"
+                        ) + manifest.assets.map { it.path }), "Unexpected or missing assets"
+                    )
+                    val (dataFile, dataDigest) = extract("data.json")
+                    valid(dataDigest.sha256 == manifest.dataSha256, "Data checksum mismatch")
+                    val wireData = readJson(dataFile)
+                    val data = when (manifest.formatVersion) {
+                        1 -> json.decodeFromString<BackupDataV1>(wireData).also {
+                            BackupValidator.validate(manifest, it, validationLimits)
+                        }.toV2()
+
+                        2 -> json.decodeFromString<BackupDataV2>(wireData)
+                        else -> error("Manifest version was validated")
+                    }
+                    // Validate converted legacy notes before the staged restore becomes visible.
+                    if (manifest.formatVersion == 2) BackupValidator.validate(
+                        manifest,
+                        data,
+                        validationLimits
+                    )
+                    for (asset in manifest.assets) {
+                        currentCoroutineContext().ensureActive()
+                        val (_, digest) = extract(asset.path)
+                        valid(
+                            digest.size == asset.sizeBytes && digest.sha256 == asset.sha256,
+                            "Image checksum mismatch"
+                        )
+                    }
+                    return@withContext StagedBackup(directory, manifest, data)
                 }
-                val manifest = json.decodeFromString<BackupManifest>(readJson(extract("manifest.json").first))
-                BackupValidator.validateManifest(manifest, validationLimits)
-                valid(entries.keys == (setOf("manifest.json", "data.json") + manifest.assets.map { it.path }), "Unexpected or missing assets")
-                val (dataFile, dataDigest) = extract("data.json")
-                valid(dataDigest.sha256 == manifest.dataSha256, "Data checksum mismatch")
-                val wireData = readJson(dataFile)
-                val data = when (manifest.formatVersion) {
-                    1 -> json.decodeFromString<BackupDataV1>(wireData).also {
-                        BackupValidator.validate(manifest, it, validationLimits)
-                    }.toV2()
-                    2 -> json.decodeFromString<BackupDataV2>(wireData)
-                    else -> error("Manifest version was validated")
-                }
-                // Validate converted legacy notes before the staged restore becomes visible.
-                if (manifest.formatVersion == 2) BackupValidator.validate(manifest, data, validationLimits)
-                for (asset in manifest.assets) {
-                    currentCoroutineContext().ensureActive()
-                    val (_, digest) = extract(asset.path)
-                    valid(digest.size == asset.sizeBytes && digest.sha256 == asset.sha256, "Image checksum mismatch")
-                }
-                return StagedBackup(directory, manifest, data)
             }
         } catch (failure: Throwable) {
             cleanup(directory, failure)
@@ -186,8 +226,11 @@ internal class BackupArchiveCodec(
                 bytes.write(buffer, 0, count)
             }
         }
-        val text = Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
-            .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes.toByteArray())).toString()
+        val text = withContext(Dispatchers.IO) {
+            Charsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT)
+                .decode(ByteBuffer.wrap(bytes.toByteArray()))
+        }.toString()
         // Bound nesting before the recursive JSON decoder sees untrusted content.
         var depth = 0
         var quoted = false
@@ -218,11 +261,15 @@ internal class BackupArchiveCodec(
         var size = 0L
         while (true) {
             context.ensureActive()
-            val count = input.read(buffer)
+            val count = withContext(Dispatchers.IO) {
+                input.read(buffer)
+            }
             context.ensureActive()
             if (count < 0) break
             limit(count.toLong(), maximum - size)
-            output.write(buffer, 0, count)
+            withContext(Dispatchers.IO) {
+                output.write(buffer, 0, count)
+            }
             sha.update(buffer, 0, count)
             crc.update(buffer, 0, count)
             size += count
