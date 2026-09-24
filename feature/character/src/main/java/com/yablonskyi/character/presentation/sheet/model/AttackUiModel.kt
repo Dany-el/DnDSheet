@@ -9,5 +9,8 @@ data class AttackUiModel(
     val name: String,
     val toHit: String,
     val damage: String,
-    val calculator: AttackCalculator
+    val calculator: AttackCalculator,
+    val description: String = calculator.attack.notes,
+    val usages: Set<com.yablonskyi.model.character.AttackUsage> = calculator.attack.usages,
+    val canRollDamage: Boolean = calculator.attack.damageMode == com.yablonskyi.model.character.DamageMode.DICE
 )

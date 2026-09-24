@@ -16,14 +16,11 @@ class AttackCalculator(val character: Character, val attack: Attack) {
     }
 
     fun getDamageString(): String {
-        if (attack.ability == Ability.NONE) return ""
-
-        // TODO Ability modifier does not count on bonus action
-        val abilityMod = character.getAbilityMod(attack.ability)
-
-        val totalBonus = abilityMod + attack.bonusToDamage
-
-        // "1d6 + 3" or "1d6 - 1"
+        val abilityMod = if (attack.ability == Ability.NONE) 0 else character.getAbilityMod(attack.ability)
+        val totalBonus = attack.damageAbilityModifier.contribution(abilityMod).toLong() + attack.bonusToDamage
+        if (attack.damageMode == com.yablonskyi.model.character.DamageMode.FIXED) {
+            return (attack.fixedDamage.toLong() + totalBonus).coerceIn(0, Int.MAX_VALUE.toLong()).toString()
+        }
         val sign = if (totalBonus >= 0) "+" else "-"
         return "${attack.damageDice} $sign ${abs(totalBonus)}"
     }

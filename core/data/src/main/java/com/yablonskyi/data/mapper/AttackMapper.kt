@@ -16,6 +16,10 @@ fun AttackEntity.toModel() = Attack(
     damageType = damageType,
     range = range,
     notes = notes,
+    damageMode = damageMode,
+    fixedDamage = fixedDamage,
+    usages = usages,
+    damageAbilityModifier = damageAbilityModifier,
 )
 
 fun Attack.toEntity() = AttackEntity(
@@ -31,4 +35,8 @@ fun Attack.toEntity() = AttackEntity(
     damageType = damageType,
     range = range,
     notes = notes,
+    damageMode = damageMode,
+    fixedDamage = fixedDamage,
+    usages = usages,
+    damageAbilityModifier = damageAbilityModifier,
 )
