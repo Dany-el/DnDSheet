@@ -314,9 +314,6 @@
           <div><dt>{{ t('spells.components') }}</dt><dd>{% for component in spell.components %}{{ t('components.' ~ component) }}{% if not loop.last %}, {% endif %}{% endfor %}</dd></div>
         </dl>
         {% if spell.material | default('') %}<p class="spell-material"><strong>{{ t('spells.material') }}</strong> {{ spell.material }}</p>{% endif %}
-        {% if spell.attackType | default('NONE') != 'NONE' or spell.saveStat | default('') or spell.damageDice | default('') %}
-        <p class="spell-material">{% if spell.attackType | default('NONE') != 'NONE' %}{{ t('attack_types.' ~ spell.attackType) }}. {% endif %}{% if spell.saveStat | default('') %}{{ t('spells.save', ability=t('ability_abbreviations.' ~ spell.saveStat)) }} {% endif %}{% if spell.damageDice | default('') %}{{ spell.damageDice }}{% if spell.damageType | default('') %} {{ t('damage_types.' ~ spell.damageType) }}{% endif %}{% endif %}</p>
-        {% endif %}
         <div class="spell-description">{{ multiline(spell.description) }}</div>
         {% if spell.higherLevels | default('') %}<h3>{{ t('spells.higher_levels') }}</h3><div class="spell-description">{{ multiline(spell.higherLevels) }}</div>{% endif %}
       </section>

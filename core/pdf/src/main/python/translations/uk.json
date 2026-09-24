@@ -5,7 +5,7 @@
     "inventory": "Інвентар і монети", "skills": "Навички", "spellcasting": "Заклинання",
     "features_traits": "Особливості й риси", "feats": "Таланти",
     "proficiencies_languages": "Володіння й мови", "character_story": "Історія персонажа",
-    "portrait": "Портрет", "backstory": "Передісторія", "notes_page": "Нотатки, союзники й організації",
+    "portrait": "Портрет", "backstory": "Передісторія", "notes_page": "Нотатки",
     "notes": "Нотатки", "spell_descriptions": "Описи заклинань"
   },
   "fields": {

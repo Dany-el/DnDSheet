@@ -5,7 +5,7 @@
     "inventory": "Инвентарь и монеты", "skills": "Навыки", "spellcasting": "Заклинания",
     "features_traits": "Особенности и черты", "feats": "Черты",
     "proficiencies_languages": "Владения и языки", "character_story": "История персонажа",
-    "portrait": "Портрет", "backstory": "Предыстория", "notes_page": "Заметки, союзники и организации",
+    "portrait": "Портрет", "backstory": "Предыстория", "notes_page": "Заметки",
     "notes": "Заметки", "spell_descriptions": "Описания заклинаний"
   },
   "fields": {
