@@ -6,13 +6,16 @@ import org.junit.Test
 
 class CharacterChangeApplierTest {
     private val level = SpellLevel.entries[1]
+    private val note = Note("15412a7e-37e6-4e8a-92cb-af49e0759032", "Notes")
 
     @Test fun givenSuccessiveFieldEdits_whenApplied_thenPreservesEarlierEdit() {
-        val initial = Character(name = "Old", notes = "Old notes")
+        val originalNote = Note("15412a7e-37e6-4e8a-92cb-af49e0759032", "Notes", RichText(plainText = "Old notes"))
+        val initial = Character(name = "Old", notes = listOf(originalNote))
         val renamed = applyCharacterChange(initial, CharacterChange.Text(CharacterTextField.NAME, "Hero"))
-        val updated = applyCharacterChange(renamed, CharacterChange.Text(CharacterTextField.NOTES, "New notes"))
+        val updatedNote = originalNote.copy(text = RichText(plainText = "New notes"))
+        val updated = applyCharacterChange(renamed, CharacterChange.UpdateNote(originalNote, updatedNote))
         assertEquals("Hero", updated.name)
-        assertEquals("New notes", updated.notes)
+        assertEquals(listOf(updatedNote), updated.notes)
     }
 
     @Test fun givenUsedSlots_whenMaximumReduced_thenClampsUsedSlots() {
@@ -36,5 +39,35 @@ class CharacterChangeApplierTest {
         assertEquals(30, updated.currentHp)
         assertEquals(0, updated.tempHp)
         assertEquals(SpellSlot(current = 0, max = 3), updated.spellSettings.spellSlots[level])
+    }
+
+    @Test fun givenExistingNote_whenAddedAgain_thenIsIdempotentButConflictingIdFails() {
+        val character = Character(notes = listOf(note))
+        assertEquals(character, applyCharacterChange(character, CharacterChange.AddNote(note)))
+        assertThrows(IllegalStateException::class.java) {
+            applyCharacterChange(character, CharacterChange.AddNote(note.copy(topic = "Other")))
+        }
+    }
+
+    @Test fun givenAnotherNoteChanged_whenUpdatingThenDeleting_thenPreservesOrderAndOtherContent() {
+        val second = Note("2daf9b4b-c786-4fc8-a023-c417d3327373", "Second")
+        val updated = note.copy(text = RichText(plainText = "Changed"))
+        val current = Character(notes = listOf(note, second), name = "Hero")
+        val saved = applyCharacterChange(current, CharacterChange.UpdateNote(note, updated))
+        assertEquals(listOf(updated, second), saved.notes)
+        assertEquals("Hero", saved.name)
+        assertEquals(listOf(second), applyCharacterChange(saved, CharacterChange.DeleteNote(note.id)).notes)
+        assertEquals(listOf(second), applyCharacterChange(saved.copy(notes = listOf(second)), CharacterChange.DeleteNote(note.id)).notes)
+    }
+
+    @Test fun givenStaleOrMissingNote_whenUpdated_thenFails() {
+        val changed = note.copy(topic = "Someone else's edit")
+        val draft = note.copy(topic = "My edit")
+        assertThrows(IllegalStateException::class.java) {
+            applyCharacterChange(Character(notes = listOf(changed)), CharacterChange.UpdateNote(note, draft))
+        }
+        assertThrows(IllegalStateException::class.java) {
+            applyCharacterChange(Character(), CharacterChange.UpdateNote(note, draft))
+        }
     }
 }

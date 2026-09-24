@@ -12,6 +12,7 @@ import com.yablonskyi.domain.backup.BackupAccessGate
 import com.yablonskyi.domain.repository.CharacterRepository
 import com.yablonskyi.model.character.Character
 import com.yablonskyi.model.character.CharacterSheet
+import com.yablonskyi.model.character.validateNotes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -28,6 +29,7 @@ class CharacterRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insertCharacter(character: Character): Long {
+        character.notes.validateNotes()
         return backupGate.access { database.withTransaction {
             val position = characterDao.findCharacterById(character.id)?.sortOrder
                 ?: characterDao.nextSortOrder()
@@ -52,11 +54,13 @@ class CharacterRepositoryImpl @Inject constructor(
         val entity = characterDao.findCharacterById(id) ?: error("Character no longer exists")
         val current = entity.toModel()
         val updated = com.yablonskyi.domain.character.applyCharacterChange(current, change)
+        updated.notes.validateNotes()
         characterDao.updateCharacter(updated.toEntity().copy(sortOrder = entity.sortOrder))
         updated
     } }
 
     override suspend fun updateCharacter(character: Character) {
+        character.notes.validateNotes()
         backupGate.access { database.withTransaction {
             val current = characterDao.findCharacterById(character.id) ?: error("Character no longer exists")
             characterDao.updateCharacter(character.toEntity().copy(sortOrder = current.sortOrder))
@@ -110,6 +114,7 @@ class CharacterRepositoryImpl @Inject constructor(
 
     private suspend fun insertSheetsInternal(sheets: List<CharacterSheet>) {
         sheets.forEach { sheet ->
+            sheet.character.notes.validateNotes()
             val newCharacter = sheet.character.copy(id = 0)
             val newCharId = characterDao.insertCharacter(
                 newCharacter.toEntity().copy(sortOrder = characterDao.nextSortOrder())

@@ -1,7 +1,7 @@
 package com.yablonskyi.data.backup
 
 import com.yablonskyi.data.entity.CharacterEntity
-import com.yablonskyi.model.backup.BackupCharacter
+import com.yablonskyi.model.backup.BackupCharacterV2
 import com.yablonskyi.data.entity.AttackEntity
 import com.yablonskyi.model.backup.BackupAttack
 import com.yablonskyi.data.entity.DiceRollEntity
@@ -18,7 +18,7 @@ import com.yablonskyi.data.entity.AbilityBlockEntity
 import com.yablonskyi.model.backup.BackupAbilities
 import com.yablonskyi.data.entity.SpellSettingsEntity
 import com.yablonskyi.model.backup.BackupSpellSettings
-import com.yablonskyi.model.backup.BackupDataV1
+import com.yablonskyi.model.backup.BackupDataV2
 import com.yablonskyi.model.backup.BackupMoney
 import com.yablonskyi.model.backup.BackupSpellSlot
 import com.yablonskyi.model.backup.BackupDiceGroup
@@ -26,7 +26,7 @@ import com.yablonskyi.model.character.Money
 import com.yablonskyi.model.character.SpellSlot
 import com.yablonskyi.model.dice.DiceGroup
 
-internal fun CharacterEntity.toBackup(assetIds: Map<String, String>): BackupCharacter = BackupCharacter(
+internal fun CharacterEntity.toBackup(assetIds: Map<String, String>): BackupCharacterV2 = BackupCharacterV2(
     id = id,
     sortOrder = sortOrder,
     name = name,
@@ -58,7 +58,7 @@ internal fun CharacterEntity.toBackup(assetIds: Map<String, String>): BackupChar
     hasJackOfAllTrades = hasJackOfAllTrades,
 )
 
-internal fun BackupCharacter.toEntity(imagePaths: Map<String, String>): CharacterEntity = CharacterEntity(
+internal fun BackupCharacterV2.toEntity(imagePaths: Map<String, String>): CharacterEntity = CharacterEntity(
     id = id,
     sortOrder = sortOrder,
     name = name,
@@ -103,6 +103,10 @@ internal fun AttackEntity.toBackup(): BackupAttack = BackupAttack(
     damageType = damageType,
     range = range,
     notes = notes,
+    damageMode = damageMode,
+    fixedDamage = fixedDamage,
+    usages = usages,
+    damageAbilityModifier = damageAbilityModifier,
 )
 
 internal fun BackupAttack.toEntity(): AttackEntity = AttackEntity(
@@ -118,6 +122,10 @@ internal fun BackupAttack.toEntity(): AttackEntity = AttackEntity(
     damageType = damageType,
     range = range,
     notes = notes,
+    damageMode = damageMode,
+    fixedDamage = fixedDamage,
+    usages = usages,
+    damageAbilityModifier = damageAbilityModifier,
 )
 
 internal fun DiceRollEntity.toBackup(): BackupDiceRoll = BackupDiceRoll(
@@ -276,7 +284,7 @@ internal fun BackupSpellSettings.toEntity(): SpellSettingsEntity = SpellSettings
     spellSlots = spellSlots.mapValues { (_, slot) -> SpellSlot(slot.max, slot.current) },
 )
 
-internal fun BackupRoomSnapshot.toBackup(assetIds: Map<String, String>): BackupDataV1 = BackupDataV1(
+internal fun BackupRoomSnapshot.toBackup(assetIds: Map<String, String>): BackupDataV2 = BackupDataV2(
     characters = characters.map { it.toBackup(assetIds) },
     attacks = attacks.map { it.toBackup() },
     diceRolls = diceRolls.map { it.toBackup() },
@@ -286,7 +294,7 @@ internal fun BackupRoomSnapshot.toBackup(assetIds: Map<String, String>): BackupD
     classes = classes.map { it.toBackup() },
 )
 
-internal fun BackupDataV1.toRoomSnapshot(imagePaths: Map<String, String>): BackupRoomSnapshot = BackupRoomSnapshot(
+internal fun BackupDataV2.toRoomSnapshot(imagePaths: Map<String, String>): BackupRoomSnapshot = BackupRoomSnapshot(
     characters = characters.map { it.toEntity(imagePaths) },
     attacks = attacks.map { it.toEntity() },
     diceRolls = diceRolls.map { it.toEntity() },

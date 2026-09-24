@@ -2,6 +2,8 @@ package com.yablonskyi.domain.character
 
 import com.yablonskyi.model.character.Character
 import com.yablonskyi.model.character.SpellSlot
+import com.yablonskyi.model.character.validateNotes
+import com.yablonskyi.model.character.validateNoteId
 
 fun applyCharacterChange(character: Character, change: CharacterChange): Character = when (change) {
     is CharacterChange.Text -> when (change.field) {
@@ -15,7 +17,6 @@ fun applyCharacterChange(character: Character, change: CharacterChange): Charact
         CharacterTextField.FEATS -> character.copy(feats = change.value)
         CharacterTextField.INVENTORY -> character.copy(inventory = change.value)
         CharacterTextField.BACKSTORY -> character.copy(backstory = change.value)
-        CharacterTextField.NOTES -> character.copy(notes = change.value)
     }
     is CharacterChange.Number -> when (change.field) {
         CharacterNumberField.LEVEL -> character.copy(level = change.value)
@@ -51,6 +52,28 @@ fun applyCharacterChange(character: Character, change: CharacterChange): Charact
     }
     is CharacterChange.JackOfAllTrades -> character.copy(hasJackOfAllTrades = change.enabled)
     is CharacterChange.Image -> character.copy(imagePath = change.path)
+    is CharacterChange.AddNote -> {
+        listOf(change.note).validateNotes()
+        val existing = character.notes.find { it.id == change.note.id }
+        when {
+            existing == change.note -> character
+            existing != null -> throw IllegalStateException("Note ID already exists")
+            else -> character.copy(notes = character.notes + change.note)
+        }
+    }
+    is CharacterChange.UpdateNote -> {
+        require(change.original.id == change.note.id) { "Note ID cannot change" }
+        listOf(change.note).validateNotes()
+        val index = character.notes.indexOfFirst { it.id == change.note.id }
+        check(index >= 0) { "Note no longer exists" }
+        val current = character.notes[index]
+        check(current == change.original || current == change.note) { "Note changed while editing" }
+        character.copy(notes = character.notes.toMutableList().apply { set(index, change.note) })
+    }
+    is CharacterChange.DeleteNote -> {
+        validateNoteId(change.noteId)
+        character.copy(notes = character.notes.filterNot { it.id == change.noteId })
+    }
     CharacterChange.LongRest -> character.copy(currentHp = character.maxHp, tempHp = 0,
         spellSettings = character.spellSettings.copy(spellSlots = character.spellSettings.spellSlots.mapValues { (_, slot) -> slot.copy(current = 0) }))
 }

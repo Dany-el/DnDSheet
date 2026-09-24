@@ -10,6 +10,7 @@ import com.yablonskyi.domain.backup.BackupAccessGate
 import com.yablonskyi.domain.repository.CharacterFileRepository
 import com.yablonskyi.domain.repository.CharacterRepository
 import com.yablonskyi.model.character.CharacterSheet
+import com.yablonskyi.model.character.validateNotes
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -37,6 +38,7 @@ class CharacterFileRepositoryImpl @Inject constructor(
     }
 
     override suspend fun import(sheets: List<CharacterSheet>) = backupGate.access { withContext(io) {
+        sheets.forEach { it.character.notes.validateNotes() }
         val created = mutableListOf<File>()
         var committed = false
         try {

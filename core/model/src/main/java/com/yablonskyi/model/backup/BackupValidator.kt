@@ -2,6 +2,7 @@ package com.yablonskyi.model.backup
 
 import java.time.Instant
 import java.time.format.DateTimeParseException
+import com.yablonskyi.model.character.validateNotes
 
 enum class BackupValidationFailure { UNSUPPORTED_VERSION, INVALID_DATA, SIZE_LIMIT_EXCEEDED }
 
@@ -30,18 +31,18 @@ data class BackupValidationLimits(
 /** Structural validation only: the archive reader must also enforce byte limits and verify hashes. */
 object BackupValidator {
     const val FORMAT = "dnd-sheet-backup"
-    const val VERSION = 1
+    const val VERSION = 2
     private val sha256 = Regex("[0-9a-f]{64}")
     private val assetId = Regex("[A-Za-z0-9_-]{1,100}")
     private val assetPath = Regex("images/[A-Za-z0-9_-]{1,100}\\.[A-Za-z0-9]{1,10}")
 
-    /** Call before decoding version-specific data. No older formats are supported yet. */
+    /** Call before decoding version-specific data. */
     fun validateManifest(
         manifest: BackupManifest,
         limits: BackupValidationLimits = BackupValidationLimits(),
     ) {
         check(manifest.format == FORMAT, "Unknown backup format")
-        if (manifest.formatVersion != VERSION) {
+        if (manifest.formatVersion !in 1..VERSION) {
             throw BackupValidationException(BackupValidationFailure.UNSUPPORTED_VERSION, "Unsupported backup version")
         }
         check(manifest.createdAt.endsWith("Z"), "Creation time must be UTC")
@@ -83,6 +84,37 @@ object BackupValidator {
         limits: BackupValidationLimits = BackupValidationLimits(),
     ) {
         validateManifest(manifest, limits)
+        check(manifest.formatVersion == 1, "Wrong data version")
+        validateRecords(manifest, data, limits)
+    }
+
+    fun validate(
+        manifest: BackupManifest,
+        data: BackupDataV2,
+        limits: BackupValidationLimits = BackupValidationLimits(),
+    ) {
+        check(manifest.formatVersion == 2, "Wrong data version")
+        validateNormalized(manifest, data, limits)
+    }
+
+    /** Revalidates already-decoded staged content, including converted version 1 archives. */
+    fun validateNormalized(
+        manifest: BackupManifest,
+        data: BackupDataV2,
+        limits: BackupValidationLimits = BackupValidationLimits(),
+    ) {
+        validateManifest(manifest, limits)
+        data.characters.forEach { character ->
+            try {
+                character.notes.validateNotes()
+            } catch (failure: IllegalArgumentException) {
+                invalid(failure.message ?: "Invalid character notes")
+            }
+        }
+        validateRecords(manifest, data.toV1ForValidation(), limits)
+    }
+
+    private fun validateRecords(manifest: BackupManifest, data: BackupDataV1, limits: BackupValidationLimits) {
         check(manifest.counts == BackupRecordCounts(
             data.characters.size, data.attacks.size, data.diceRolls.size, data.spells.size,
             data.characterSpells.size, data.races.size, data.classes.size,
@@ -97,6 +129,7 @@ object BackupValidator {
         check(data.races.all { it.id.isNotBlank() } && data.classes.all { it.id.isNotBlank() }, "Empty library ID")
         unique(data.characterSpells.map { it.characterId to it.spellId }, "character spell associations")
         check(data.attacks.all { it.characterId in characters }, "Attack references missing character")
+        check(data.attacks.all { it.usages.isNotEmpty() && it.fixedDamage >= 0 }, "Invalid attack damage or usage")
         check(data.diceRolls.all { it.characterId in characters }, "Roll references missing character")
         check(data.characterSpells.all { it.characterId in characters && it.spellId in spells },
             "Association references missing record")

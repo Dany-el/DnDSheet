@@ -1,6 +1,9 @@
 package com.yablonskyi.model.backup
 
 import com.yablonskyi.model.character.Ability
+import com.yablonskyi.model.character.DamageMode
+import com.yablonskyi.model.character.AttackUsage
+import com.yablonskyi.model.character.DamageAbilityModifier
 import com.yablonskyi.model.character.AttackType
 import com.yablonskyi.model.character.Component
 import com.yablonskyi.model.character.DamageType
@@ -92,6 +95,10 @@ data class BackupAttack(
     val damageType: DamageType,
     val range: String,
     val notes: String,
+    val damageMode: DamageMode = DamageMode.DICE,
+    val fixedDamage: Int = 0,
+    val usages: Set<AttackUsage> = setOf(AttackUsage.ACTION),
+    val damageAbilityModifier: DamageAbilityModifier = DamageAbilityModifier.FULL,
 )
 
 @Serializable

@@ -16,8 +16,11 @@ sealed interface CharacterChange {
     data class SlotUsed(val level: SpellLevel, val delta: Int) : CharacterChange
     data class JackOfAllTrades(val enabled: Boolean) : CharacterChange
     data class Image(val path: String?) : CharacterChange
+    data class AddNote(val note: Note) : CharacterChange
+    data class UpdateNote(val original: Note, val note: Note) : CharacterChange
+    data class DeleteNote(val noteId: String) : CharacterChange
     data object LongRest : CharacterChange
 }
 
-enum class CharacterTextField { NAME, RACE, CHAR_CLASS, SUB_CLASS, HIT_DICE, PROFICIENCIES, TRAITS, FEATS, INVENTORY, BACKSTORY, NOTES }
+enum class CharacterTextField { NAME, RACE, CHAR_CLASS, SUB_CLASS, HIT_DICE, PROFICIENCIES, TRAITS, FEATS, INVENTORY, BACKSTORY }
 enum class CharacterNumberField { LEVEL, CURRENT_HP, MAX_HP, TEMP_HP, SPEED, ARMOR_CLASS, SHIELD, INITIATIVE_MISC_BONUS, PASSIVE_PERCEPTION_BONUS, DC_MISC_BONUS, ATTACK_MISC_BONUS }

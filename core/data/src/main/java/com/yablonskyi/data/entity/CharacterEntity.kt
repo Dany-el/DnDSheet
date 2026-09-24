@@ -5,11 +5,10 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.yablonskyi.model.character.Ability
-import com.yablonskyi.model.character.AbilityBlock
 import com.yablonskyi.model.character.Money
+import com.yablonskyi.model.character.Note
 import com.yablonskyi.model.character.ProficiencyLevel
 import com.yablonskyi.model.character.Skill
-import com.yablonskyi.model.character.SpellSettings
 
 @Entity(tableName = "character")
 data class CharacterEntity(
@@ -39,7 +38,7 @@ data class CharacterEntity(
     val feats: String = "",
     val inventory: String = "",
     val backstory: String = "",
-    val notes: String = "",
+    val notes: List<Note> = emptyList(),
     // Spells
     @Embedded(prefix = "spell_settings_")
     val spellSettings: SpellSettingsEntity = SpellSettingsEntity(),

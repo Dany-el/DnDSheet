@@ -24,7 +24,7 @@ internal class BackupRestoreCoordinator(
 
     suspend fun restore(staged: StagedBackup) = withContext(io) {
         gate.access {
-            BackupValidator.validate(staged.manifest, staged.data)
+            BackupValidator.validateNormalized(staged.manifest, staged.data)
             check(journalStore.read() == null && dao.committedRestore() == null) { "Pending restore must be recovered" }
             val journal = journalStore.newJournal(staged, dao.characters().mapNotNull { it.imagePath })
             gate.requireRecovery()

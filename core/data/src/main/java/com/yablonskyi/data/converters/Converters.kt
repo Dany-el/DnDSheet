@@ -6,6 +6,7 @@ import com.yablonskyi.model.character.AttackType
 import com.yablonskyi.model.character.Component
 import com.yablonskyi.model.character.DamageType
 import com.yablonskyi.model.character.MagicSchool
+import com.yablonskyi.model.character.Note
 import com.yablonskyi.model.character.ProficiencyLevel
 import com.yablonskyi.model.character.Skill
 import com.yablonskyi.model.character.SpellCastTime
@@ -13,8 +14,6 @@ import com.yablonskyi.model.character.SpellDuration
 import com.yablonskyi.model.character.SpellLevel
 import com.yablonskyi.model.character.SpellRangeType
 import com.yablonskyi.model.character.SpellSlot
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 private val appJson = Json {
@@ -23,6 +22,12 @@ private val appJson = Json {
 }
 
 class Converters {
+    @TypeConverter
+    fun fromNotes(notes: List<Note>): String = NotesCodec.encode(notes)
+
+    @TypeConverter
+    fun toNotes(value: String): List<Note> = NotesCodec.decode(value)
+
     @TypeConverter
     fun fromSkillMap(value: Map<Skill, ProficiencyLevel>): String {
         return appJson.encodeToString(value)
@@ -142,4 +147,11 @@ class Converters {
     @TypeConverter
     fun toStringList(data: String): List<String> =
         if (data.isBlank()) emptyList() else data.split("|||")
+
+    @TypeConverter fun damageModeToString(value: com.yablonskyi.model.character.DamageMode): String = value.name
+    @TypeConverter fun stringToDamageMode(value: String): com.yablonskyi.model.character.DamageMode = com.yablonskyi.model.character.DamageMode.valueOf(value)
+    @TypeConverter fun damageModifierToString(value: com.yablonskyi.model.character.DamageAbilityModifier): String = value.name
+    @TypeConverter fun stringToDamageModifier(value: String): com.yablonskyi.model.character.DamageAbilityModifier = com.yablonskyi.model.character.DamageAbilityModifier.valueOf(value)
+    @TypeConverter fun attackUsagesToString(value: Set<com.yablonskyi.model.character.AttackUsage>): String = value.sortedBy { it.ordinal }.joinToString(",") { it.name }
+    @TypeConverter fun stringToAttackUsages(value: String): Set<com.yablonskyi.model.character.AttackUsage> = value.split(",").filter { it.isNotEmpty() }.map { com.yablonskyi.model.character.AttackUsage.valueOf(it) }.toSet()
 }

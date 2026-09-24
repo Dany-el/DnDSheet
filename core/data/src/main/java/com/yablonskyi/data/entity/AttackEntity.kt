@@ -6,6 +6,9 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.yablonskyi.model.character.Ability
+import com.yablonskyi.model.character.DamageMode
+import com.yablonskyi.model.character.AttackUsage
+import com.yablonskyi.model.character.DamageAbilityModifier
 import com.yablonskyi.model.character.AttackType
 import com.yablonskyi.model.character.DamageType
 
@@ -34,4 +37,8 @@ data class AttackEntity(
     val damageType: DamageType = DamageType.SLASHING,
     val range: String = "5",
     val notes: String = "",
+    @ColumnInfo(defaultValue = "'DICE'") val damageMode: DamageMode = DamageMode.DICE,
+    @ColumnInfo(defaultValue = "0") val fixedDamage: Int = 0,
+    @ColumnInfo(defaultValue = "'ACTION'") val usages: Set<AttackUsage> = setOf(AttackUsage.ACTION),
+    @ColumnInfo(defaultValue = "'FULL'") val damageAbilityModifier: DamageAbilityModifier = DamageAbilityModifier.FULL,
 )

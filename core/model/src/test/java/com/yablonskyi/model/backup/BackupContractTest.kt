@@ -11,6 +11,10 @@ import com.yablonskyi.model.character.SpellCastTime
 import com.yablonskyi.model.character.SpellDuration
 import com.yablonskyi.model.character.SpellLevel
 import com.yablonskyi.model.character.SpellRangeType
+import com.yablonskyi.model.character.Note
+import com.yablonskyi.model.character.RichText
+import com.yablonskyi.model.character.TextFormat
+import com.yablonskyi.model.character.TextSpan
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -19,6 +23,24 @@ import org.junit.Assert.assertThrows
 import org.junit.Test
 
 class BackupContractTest {
+    @Test
+    fun givenFormattedV2Notes_whenSerialized_thenRoundTripsAndValidates() {
+        val data = populatedData().toV2().let { v2 ->
+            v2.copy(characters = v2.characters.map { character ->
+                character.copy(notes = listOf(Note(
+                    "15412a7e-37e6-4e8a-92cb-af49e0759032", "Travel",
+                    RichText(plainText = "Forest", spans = listOf(TextSpan(0, 6, TextFormat.BOLD))),
+                )))
+            })
+        }
+        val v2Manifest = metadataFor(populatedData()).copy(formatVersion = 2)
+        BackupValidator.validate(v2Manifest, data)
+        assertEquals(data, Json.decodeFromString<BackupDataV2>(Json.encodeToString(data)))
+        val corrupt = data.copy(characters = data.characters.map {
+            it.copy(notes = listOf(it.notes.single().copy(text = RichText(version = 2))))
+        })
+        assertThrows(BackupValidationException::class.java) { BackupValidator.validate(v2Manifest, corrupt) }
+    }
     @Test
     fun givenBackup_whenSerialized_thenContainsOnlyContentSections() {
         val document = Json.parseToJsonElement(Json.encodeToString(emptyData)) as kotlinx.serialization.json.JsonObject
@@ -61,7 +83,7 @@ class BackupContractTest {
     @Test
     fun givenNewerVersion_whenValidated_thenReportsUnsupportedVersion() {
         val error = assertThrows(BackupValidationException::class.java) {
-            BackupValidator.validate(manifest.copy(formatVersion = 2), emptyData)
+            BackupValidator.validate(manifest.copy(formatVersion = 3), emptyData)
         }
         assertEquals(BackupValidationFailure.UNSUPPORTED_VERSION, error.failure)
     }

@@ -29,7 +29,7 @@ data class Character(
     val feats: String = "",
     val inventory: String = "",
     val backstory: String = "",
-    val notes: String = "",
+    val notes: List<Note> = emptyList(),
     // Spells
     val spellSettings: SpellSettings = SpellSettings(),
     // Abilities

@@ -39,7 +39,9 @@ class CharacterSheetPdfGenerator @Inject constructor(
                 "subClass"    to character.subClass,
                 "feats"       to character.feats,
                 "inventory"   to character.inventory,
-                "notes"       to character.notes,
+                "notes"       to character.notes.joinToString("\n\n") { note ->
+                    "${note.topic}\n${note.text.plainText}"
+                },
                 "proficiencies" to character.proficiencies,
                 "coins"       to mapOf(
                     "gold" to character.coins.gold,
@@ -80,7 +82,7 @@ class CharacterSheetPdfGenerator @Inject constructor(
                 mapOf(
                     "name"       to attack.name,
                     "bonus"      to modFormat(attack.bonusToHit),
-                    "damage"     to attack.damageDice,
+                    "damage"     to com.yablonskyi.ui.utils.AttackCalculator(character, attack).getDamageString(),
                     "damageType" to attack.damageType.name
                 )
             },

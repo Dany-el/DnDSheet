@@ -3,13 +3,14 @@ package com.yablonskyi.data.backup
 import com.yablonskyi.domain.repository.BackupError
 import com.yablonskyi.model.backup.BackupAsset
 import com.yablonskyi.model.backup.BackupDataV1
+import com.yablonskyi.model.backup.BackupDataV2
+import com.yablonskyi.model.backup.toV2
 import com.yablonskyi.model.backup.BackupManifest
 import com.yablonskyi.model.backup.BackupRecordCounts
 import com.yablonskyi.model.backup.BackupValidationLimits
 import com.yablonskyi.model.backup.BackupValidator
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -38,7 +39,7 @@ internal data class BackupArchiveLimits(
 internal class BackupArchiveException(val error: BackupError, message: String) : IOException(message)
 
 /** Caller owns the returned directory and must remove it after discard/completion. */
-internal data class StagedBackup(val directory: File, val manifest: BackupManifest, val data: BackupDataV1) {
+internal data class StagedBackup(val directory: File, val manifest: BackupManifest, val data: BackupDataV2) {
     val images: Map<String, File> get() = manifest.assets.associate { it.id to File(directory, it.path) }
 }
 
@@ -52,7 +53,7 @@ internal class BackupArchiveCodec(
 
     /** Creates a new private archive. Source images are streamed once; metadata describes those exact bytes. */
     suspend fun write(
-        data: BackupDataV1,
+        data: BackupDataV2,
         images: Map<String, File>,
         parent: File,
         appVersion: String,
@@ -149,8 +150,16 @@ internal class BackupArchiveCodec(
                 valid(entries.keys == (setOf("manifest.json", "data.json") + manifest.assets.map { it.path }), "Unexpected or missing assets")
                 val (dataFile, dataDigest) = extract("data.json")
                 valid(dataDigest.sha256 == manifest.dataSha256, "Data checksum mismatch")
-                val data = json.decodeFromString<BackupDataV1>(readJson(dataFile))
-                BackupValidator.validate(manifest, data, validationLimits)
+                val wireData = readJson(dataFile)
+                val data = when (manifest.formatVersion) {
+                    1 -> json.decodeFromString<BackupDataV1>(wireData).also {
+                        BackupValidator.validate(manifest, it, validationLimits)
+                    }.toV2()
+                    2 -> json.decodeFromString<BackupDataV2>(wireData)
+                    else -> error("Manifest version was validated")
+                }
+                // Validate converted legacy notes before the staged restore becomes visible.
+                if (manifest.formatVersion == 2) BackupValidator.validate(manifest, data, validationLimits)
                 for (asset in manifest.assets) {
                     currentCoroutineContext().ensureActive()
                     val (_, digest) = extract(asset.path)

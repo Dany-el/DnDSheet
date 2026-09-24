@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import com.yablonskyi.character.navigation.CharacterSettingsRoute
 import com.yablonskyi.character.navigation.CharacterSheetRoute
 import com.yablonskyi.character.navigation.DiceHistoryRoute
+import com.yablonskyi.character.navigation.NoteEditorRoute
 import com.yablonskyi.character.navigation.characterGraph
 import com.yablonskyi.characterspells.navigation.CharacterSpellsRoute
 import com.yablonskyi.characterspells.navigation.characterSpellsGraph
@@ -79,6 +80,9 @@ fun DnDSheetNavGraph(
                 },
                 onOpenDiceHistory = { characterId ->
                     navController.navigate(DiceHistoryRoute(characterId))
+                },
+                onOpenNote = { characterId, noteId ->
+                    navController.navigate(NoteEditorRoute(characterId, noteId))
                 },
                 onToggleListView = {
                     val next = if (listViewState.value == ListView.LIST) {
