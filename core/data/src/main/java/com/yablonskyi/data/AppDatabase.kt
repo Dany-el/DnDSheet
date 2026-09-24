@@ -25,7 +25,7 @@ import com.yablonskyi.data.entity.RestoreCommitEntity
     entities = [CharacterEntity::class, SpellEntity::class, AttackEntity::class,
         CharacterSpellCrossRefEntity::class,
         RaceEntity::class, CharacterClassEntity::class, DiceRollEntity::class, RestoreCommitEntity::class],
-    version = 10,
+    version = 12,
     exportSchema = true,
 )
 @TypeConverters(Converters::class, DiceRollConverters::class)

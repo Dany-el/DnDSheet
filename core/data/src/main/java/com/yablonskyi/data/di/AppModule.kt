@@ -5,6 +5,8 @@ import androidx.room.Room
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.yablonskyi.data.AppDatabase
+import com.yablonskyi.data.converters.NotesCodec
+import com.yablonskyi.model.character.legacyNote
 import com.yablonskyi.data.dao.AttackDao
 import com.yablonskyi.data.dao.CharacterDao
 import com.yablonskyi.data.dao.ClassDao
@@ -22,8 +24,6 @@ import com.yablonskyi.data.repository.compendium.ClassRepositoryImpl
 import com.yablonskyi.data.repository.compendium.RaceRepositoryImpl
 import com.yablonskyi.data.repository.character.SpellRepositoryImpl
 import com.yablonskyi.data.rulebook.BuiltInRulebookLoader
-import com.yablonskyi.data.repository.update.UpdateRepositoryImpl
-import com.yablonskyi.domain.repository.UpdateRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -52,6 +52,8 @@ object AppModule {
                 MIGRATION_7_8,
                 MIGRATION_8_9,
                 MIGRATION_9_10,
+                MIGRATION_10_11,
+                MIGRATION_11_12,
             )
             .build()
     }
@@ -132,6 +134,23 @@ object AppModule {
 val MIGRATION_9_10 = object : Migration(9, 10) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("CREATE TABLE IF NOT EXISTS `restore_commit` (`id` INTEGER NOT NULL, `operationId` TEXT NOT NULL, PRIMARY KEY(`id`))")
+    }
+}
+
+val MIGRATION_10_11 = object : Migration(10, 11) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.query("SELECT id, notes FROM character").use { cursor ->
+            val idColumn = cursor.getColumnIndexOrThrow("id")
+            val notesColumn = cursor.getColumnIndexOrThrow("notes")
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(idColumn)
+                val original = cursor.getString(notesColumn)
+                db.execSQL(
+                    "UPDATE character SET notes = ? WHERE id = ?",
+                    arrayOf<Any>(NotesCodec.encode(listOf(legacyNote(original))), id),
+                )
+            }
+        }
     }
 }
 
@@ -391,5 +410,14 @@ val MIGRATION_6_7 = object : Migration(6, 7) {
             )
         """
         )
+    }
+}
+
+val MIGRATION_11_12 = object : Migration(11, 12) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE attacks ADD COLUMN damageMode TEXT NOT NULL DEFAULT 'DICE'")
+        db.execSQL("ALTER TABLE attacks ADD COLUMN fixedDamage INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE attacks ADD COLUMN usages TEXT NOT NULL DEFAULT 'ACTION'")
+        db.execSQL("ALTER TABLE attacks ADD COLUMN damageAbilityModifier TEXT NOT NULL DEFAULT 'FULL'")
     }
 }
