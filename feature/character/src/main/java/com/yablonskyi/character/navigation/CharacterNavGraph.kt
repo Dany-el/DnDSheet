@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.yablonskyi.character.presentation.dicehistory.DiceHistoryRouteContent
 import com.yablonskyi.character.presentation.list.CharacterListRoute
 import com.yablonskyi.character.presentation.settings.CharacterSettingsRouteContent
 import com.yablonskyi.character.presentation.sheet.CharacterSheetRouteContent
+import com.yablonskyi.character.presentation.notes.NoteEditorRouteContent
 import com.yablonskyi.navigation.CharacterSheetsRoute
 import com.yablonskyi.ui.animation.navigation.NavAnimation
 import com.yablonskyi.ui.animation.navigation.roundDuringNavigation
@@ -28,6 +30,7 @@ fun NavGraphBuilder.characterGraph(
     onOpenCharacterSpells: (Long) -> Unit,
     onOpenSettings: (Long) -> Unit,
     onOpenDiceHistory: (Long) -> Unit,
+    onOpenNote: (Long, String?) -> Unit,
     onToggleListView: () -> Unit,
     onBack: () -> Unit,
     onPrintCharacterSheet: suspend (String, String) -> Result<Unit>,
@@ -47,6 +50,7 @@ fun NavGraphBuilder.characterGraph(
             onOpenCharacterSpells,
             onOpenSettings,
             onOpenDiceHistory,
+            onOpenNote,
             onBack,
         )
     }
@@ -69,5 +73,11 @@ fun NavGraphBuilder.characterGraph(
                 modifier = Modifier.fillMaxSize(),
             ),
         ) { DiceHistoryRouteContent(onBack) }
+    }
+    composable<NoteEditorRoute>(
+        enterTransition = enterAnimation,
+        exitTransition = exitAnimation,
+    ) {
+        NoteEditorRouteContent(onBack)
     }
 }

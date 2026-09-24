@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class NoteEditorStatus { LOADING, READY, MISSING_CHARACTER, MISSING_NOTE, ERROR }
 enum class NoteEditorError { LOAD, DRAFT, SAVE, CONFLICT, TOPIC_REQUIRED, STALE_CHARACTER }
@@ -177,7 +178,7 @@ class NoteEditorViewModel @Inject constructor(
         persistJob?.cancel()
         val snapshot = state.value.draft ?: return
         persistJob = viewModelScope.launch {
-            delay(250)
+            delay(250.milliseconds)
             try {
                 drafts.write(snapshot)
             } catch (cancelled: CancellationException) {

@@ -27,14 +27,12 @@ sealed interface NavAnimation {
      */
     object SlideTransition : NavAnimation {
 
-        private const val DURATION_MILLIS = 350
+        private const val DURATION_MILLIS = 300
 
         val enterSlideTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards EnterTransition?) =
             {
-                scaleIn(
-                    initialScale = 0.8f
-                ) + slideIntoContainer(
-                    animationSpec = tween(DURATION_MILLIS, easing = LinearEasing),
+                slideIntoContainer(
+                    animationSpec = tween(DURATION_MILLIS),
                     towards = AnimatedContentTransitionScope.SlideDirection.Left
                 )
             }
@@ -42,9 +40,9 @@ sealed interface NavAnimation {
         val exitSlideTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> @JvmSuppressWildcards ExitTransition?) =
             {
                 scaleOut(
-                    targetScale = 0.8f
+                    targetScale = 0.9f
                 ) + slideOutOfContainer(
-                    animationSpec = tween(DURATION_MILLIS, easing = LinearEasing),
+                    animationSpec = tween(DURATION_MILLIS),
                     towards = AnimatedContentTransitionScope.SlideDirection.Right
                 )
             }
@@ -52,7 +50,7 @@ sealed interface NavAnimation {
         val popEnterSlideTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) =
             {
                 slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
                     animationSpec = tween(durationMillis = DURATION_MILLIS, easing = LinearEasing)
                 ) + scaleIn(
                     initialScale = 0.8f

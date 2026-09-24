@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -68,7 +69,7 @@ fun SharedTransitionScope.CharacterListItem(
     )
     val animatedContainerColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceContainerHighest,
+        else Color.Transparent,
         label = "cardColorAnimation"
     )
 
@@ -91,8 +92,8 @@ fun SharedTransitionScope.CharacterListItem(
     val imageShape = RoundedCornerShape(
         topStart = topCorners,
         bottomStart = bottomCorners,
-        topEnd = 0.dp,
-        bottomEnd = 0.dp
+        topEnd = topCorners,
+        bottomEnd = bottomCorners
     )
 
     OutlinedCard(

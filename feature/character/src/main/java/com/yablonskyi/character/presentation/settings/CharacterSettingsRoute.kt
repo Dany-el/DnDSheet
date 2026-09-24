@@ -16,8 +16,17 @@ import com.yablonskyi.ui.utils.LoadingDialog
 fun CharacterSettingsRouteContent(
     onBack: () -> Unit,
     viewModel: CharacterSettingsViewModel = hiltViewModel(),
+    formViewModel: CharacterSettingsFormViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val form by formViewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(state.character) { state.character?.let { formViewModel.onIntent(CharacterSettingsFormIntent.Synchronize(it)) } }
+    LaunchedEffect(state.formWriteResults) { state.formWriteResults.values.sortedBy { it.write.revision }.forEach { formViewModel.onIntent(CharacterSettingsFormIntent.WriteFinished(it)) } }
+    LaunchedEffect(formViewModel, viewModel) {
+        formViewModel.effects.collect { effect -> when (effect) {
+            is CharacterSettingsFormEffect.ChangeRequested -> viewModel.onIntent(CharacterSettingsIntent.Change(effect.change, effect.write))
+        } }
+    }
     val back by rememberUpdatedState(onBack)
     val picker = rememberCharacterImageLauncher {
         viewModel.onIntent(CharacterSettingsIntent.ImageSelected(it))
@@ -37,6 +46,6 @@ fun CharacterSettingsRouteContent(
         onRetry = { viewModel.onIntent(CharacterSettingsIntent.Retry) },
         onDismissError = { viewModel.onIntent(CharacterSettingsIntent.DismissError) },
         onBack = { viewModel.onIntent(CharacterSettingsIntent.BackClicked) },
-    ) { CharacterSettingsScreen(state, viewModel::onIntent) }
+    ) { CharacterSettingsScreen(form = form, onIntent = viewModel::onIntent, onFormIntent = formViewModel::onIntent) }
     if (state.isSavingImage && state.errors.isEmpty()) LoadingDialog()
 }

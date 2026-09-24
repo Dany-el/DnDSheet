@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SpellSettings(
-    val spellCastingAbility: Ability? = null,
+    val spellCastingAbility: Ability? = Ability.NONE,
     val dcMiscBonus: Int = 0,
     val attackMiscBonus: Int = 0,
     val spellSlots: Map<SpellLevel, SpellSlot> = SpellLevel.entries.filter { !it.isCantrip }.associateWith{ SpellSlot() }

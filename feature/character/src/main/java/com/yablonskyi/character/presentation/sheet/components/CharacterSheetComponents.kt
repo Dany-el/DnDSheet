@@ -28,14 +28,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.NoPhotography
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -78,17 +77,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
+import com.yablonskyi.character.presentation.common.FormWrite
+import com.yablonskyi.character.presentation.common.FormWriteResult
 import com.yablonskyi.character.presentation.sheet.editor.AbilityEditSheetContent
-import com.yablonskyi.character.presentation.sheet.editor.HealthEditSheetContent
-import com.yablonskyi.character.presentation.sheet.editor.UpdateAttackSheet
+import com.yablonskyi.character.presentation.sheet.editor.AttackFormIntent
+import com.yablonskyi.character.presentation.sheet.editor.AttackFormSheet
+import com.yablonskyi.character.presentation.sheet.editor.AttackFormViewModel
+import com.yablonskyi.character.presentation.sheet.editor.HealthFormIntent
+import com.yablonskyi.character.presentation.sheet.editor.HealthFormSheet
+import com.yablonskyi.character.presentation.sheet.editor.HealthFormViewModel
+import com.yablonskyi.character.presentation.sheet.editor.ObserveFormSheetEffects
 import com.yablonskyi.character.presentation.sheet.model.CharacterSheetEditor
 import com.yablonskyi.character.presentation.sheet.model.CharacterTab
 import com.yablonskyi.dice.DiceRollResultBox
 import com.yablonskyi.dice.DiceRollState
+import com.yablonskyi.domain.character.CharacterChange
 import com.yablonskyi.model.character.Ability
 import com.yablonskyi.model.character.Attack
 import com.yablonskyi.model.character.Character
-import com.yablonskyi.model.dice.DiceRoles
+import com.yablonskyi.model.character.Spell
 import com.yablonskyi.ui.R
 import com.yablonskyi.ui.spell.SpellInfoSheet
 import com.yablonskyi.ui.utils.SlicedDropdownMenu
@@ -195,7 +202,10 @@ fun CharacterTopAppBar(
             var menuExpanded by remember { mutableStateOf(false) }
             Box {
                 IconButton(onClick = { menuExpanded = true }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_options))
+                    Icon(
+                        Icons.Default.MoreVert,
+                        contentDescription = stringResource(R.string.more_options)
+                    )
                 }
                 SlicedDropdownMenu(
                     expanded = menuExpanded,
@@ -233,9 +243,11 @@ fun HealthBar(
     modifier: Modifier = Modifier
 ) {
     val hpColor by animateColorAsState(
-        targetValue = if (currentHp > maxHp / 2) Color(0xff529c64) else Color(
-            0xffe34c1e
-        ),
+        targetValue = when {
+            currentHp > maxHp / 2 -> Color(0xff529c64)
+            currentHp > maxHp / 3 -> Color(0xffffb300)
+            else -> Color(0xffe34c1e)
+        },
         animationSpec = tween(500),
         label = "Health Color Animation"
     )
@@ -783,7 +795,7 @@ fun ExpandedTopAppBar(
 @Composable
 fun CharacterDetailsRowExpanded(
     initiativeBonus: Int,
-    onRollClick: (String) -> Unit,
+    onInitiativeRoll: () -> Unit,
     onRestClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -799,7 +811,7 @@ fun CharacterDetailsRowExpanded(
             modifier = Modifier.weight(1f)
         ) {
             TextButton(
-                onClick = { onRollClick("${DiceRoles.D20.roll}${formatModifier(initiativeBonus)}") },
+                onClick = onInitiativeRoll,
                 border = BorderStroke(
                     width = 2.dp,
                     color = MaterialTheme.colorScheme.tertiary
@@ -838,22 +850,37 @@ fun CharacterDetailsRowExpanded(
 fun CharacterSheetBottomSheets(
     activeSheet: CharacterSheetEditor?,
     attacks: List<Attack>,
-    spells: List<com.yablonskyi.model.character.Spell>,
+    spells: List<Spell>,
     character: Character,
     sheetState: SheetState,
     onDismiss: () -> Unit,
     onCloseSheet: () -> Unit,
-    onChange: (com.yablonskyi.domain.character.CharacterChange) -> Unit,
     updateAbility: (Ability, Int) -> Unit,
     saveAttack: (Attack) -> Unit,
-    deleteAttack: (Attack) -> Unit
+    deleteAttack: (Attack) -> Unit,
+    formWriteResult: FormWriteResult? = null,
+    attackFormViewModel: AttackFormViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+    healthFormViewModel: HealthFormViewModel = androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel(),
+    onHealthChange: (CharacterChange.Health, FormWrite) -> Unit,
 ) {
+    ObserveFormSheetEffects(
+        attackFormViewModel,
+        healthFormViewModel,
+        onCloseSheet,
+        saveAttack,
+        deleteAttack,
+        onHealthChange,
+    )
+    LaunchedEffect(activeSheet) {
+        if (activeSheet !is CharacterSheetEditor.EditAttack)
+            attackFormViewModel.onIntent(AttackFormIntent.EndSession)
+        if (activeSheet != CharacterSheetEditor.EditHealth)
+            healthFormViewModel.onIntent(HealthFormIntent.EndSession)
+    }
     activeSheet?.let { sheetConfig ->
         ModalBottomSheet(
             onDismissRequest = onDismiss,
             sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.surface,
-            dragHandle = { BottomSheetDefaults.DragHandle() },
             properties = ModalBottomSheetProperties(
                 shouldDismissOnBackPress = false
             )
@@ -872,23 +899,15 @@ fun CharacterSheetBottomSheets(
                 }
 
                 CharacterSheetEditor.EditHealth -> {
-                    HealthEditSheetContent(
-                        currentHp = character.currentHp,
-                        maxHp = character.maxHp,
-                        tempHp = character.tempHp,
-                        onDismiss = onCloseSheet,
-                        onApply = { newCurrent, newMax, newTemp ->
-                            onChange(com.yablonskyi.domain.character.CharacterChange.Health(newCurrent, newMax, newTemp))
-                        }
-                    )
+                    HealthFormSheet(character, formWriteResult, healthFormViewModel)
                 }
 
                 is CharacterSheetEditor.EditAttack -> {
-                    UpdateAttackSheet(
-                        attack = attacks.firstOrNull { it.attackId == sheetConfig.attackId } ?: Attack(characterId = character.id),
-                        onDismiss = onCloseSheet,
-                        onSave = { result -> saveAttack(result) },
-                        onDelete = { deleteAttack(it) }
+                    val attack = if (sheetConfig.attackId == 0L) Attack(characterId = character.id)
+                    else attacks.firstOrNull { it.attackId == sheetConfig.attackId }
+                    if (attack != null) AttackFormSheet(
+                        viewModel = attackFormViewModel,
+                        attack = attack,
                     )
                 }
 

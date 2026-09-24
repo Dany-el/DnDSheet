@@ -112,7 +112,10 @@ class BackupRoomTest {
 }
 
 internal fun backupFixture() = BackupRoomSnapshot(
-        characters = listOf(CharacterEntity(id = 7, sortOrder = 42, name = "Герой", imagePath = "/old/portrait.jpg", notes = "🐉\nNotes",
+        characters = listOf(CharacterEntity(id = 7, sortOrder = 42, name = "Герой", imagePath = "/old/portrait.jpg", notes = listOf(
+            com.yablonskyi.model.character.Note("15412a7e-37e6-4e8a-92cb-af49e0759032", "Notes",
+            com.yablonskyi.model.character.RichText(plainText = "🐉\nNotes", spans = listOf(
+                com.yablonskyi.model.character.TextSpan(0, 2, com.yablonskyi.model.character.TextFormat.BOLD))))),
             level = 9, currentHp = 12, maxHp = 39, tempHp = 5, hitDice = "2d8", charClass = "Bard",
             subClass = "Lore", race = "Elf", speed = 35, armorClass = 14, shield = 2, coins = Money(11, 22, 33),
             initiativeMiscBonus = 4, proficiencies = "Tools", traits = "Trait", feats = "Feat", inventory = "Lute",

@@ -18,6 +18,11 @@ import com.yablonskyi.model.backup.BackupValidator
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
 import java.security.MessageDigest
 
 class BackupArchiveCodecTest {
@@ -69,6 +74,32 @@ class BackupArchiveCodecTest {
         assertEquals(2, restored.data.spells.size)
     }
 
+    @Test fun givenVersionOneCharacterNotes_whenRead_thenConvertsExactLegacyText() = runTest {
+        val (currentArchive, _) = fullArchive()
+        val legacy = "  🐉\n{\"looks\":\"like JSON\"}  "
+        val previous = rewrite(currentArchive) { entries ->
+            val data = Json.parseToJsonElement(entries.getValue("data.json").toString(Charsets.UTF_8)).jsonObject
+            val characters = data.getValue("characters").jsonArray.mapIndexed { index, element ->
+                JsonObject(element.jsonObject + ("notes" to JsonPrimitive(if (index == 0) legacy else "")))
+            }
+            val dataBytes = JsonObject(data + ("characters" to JsonArray(characters))).toString().toByteArray(Charsets.UTF_8)
+            val manifest = Json.decodeFromString<BackupManifest>(entries.getValue("manifest.json").toString(Charsets.UTF_8))
+            val checksum = MessageDigest.getInstance("SHA-256").digest(dataBytes)
+                .joinToString("") { "%02x".format(it.toInt() and 255) }
+            entries["data.json"] = dataBytes
+            entries["manifest.json"] = Json.encodeToString(manifest.copy(formatVersion = 1, dataSha256 = checksum))
+                .toByteArray(Charsets.UTF_8)
+        }
+
+        val staged = codec.read(previous, temporary.root)
+
+        assertEquals(1, staged.manifest.formatVersion)
+        assertEquals("Notes", staged.data.characters.first().notes.single().topic)
+        assertEquals(legacy, staged.data.characters.first().notes.single().text.plainText)
+        assertEquals("", staged.data.characters.last().notes.single().text.plainText)
+        assertEquals("Attack note", staged.data.attacks.single().notes)
+    }
+
     @Test fun givenChangedDataOrImage_whenRead_thenRejectsChecksumMismatch() = runTest {
         val (archive, _) = fullArchive()
         listOf("data.json", "images/portrait.bin").forEach { name ->
@@ -90,7 +121,7 @@ class BackupArchiveCodecTest {
         val (archive, _) = fullArchive()
         val newer = rewrite(archive) { entries ->
             entries["manifest.json"] = entries.getValue("manifest.json").toString(Charsets.UTF_8)
-                .replace("\"formatVersion\":1", "\"formatVersion\":2").toByteArray()
+                .replace("\"formatVersion\":2", "\"formatVersion\":3").toByteArray()
         }
         assertEquals(BackupValidationFailure.UNSUPPORTED_VERSION,
             expectFailure<BackupValidationException> { codec.read(newer, temporary.root) }.failure)
@@ -141,7 +172,7 @@ class BackupArchiveCodecTest {
         assertEquals(before, temporary.root.list()!!.toSet())
     }
 
-    private suspend fun fullArchive(): Pair<File, com.yablonskyi.model.backup.BackupDataV1> {
+    private suspend fun fullArchive(): Pair<File, com.yablonskyi.model.backup.BackupDataV2> {
         val image = temporary.newFile().apply { writeBytes(byteArrayOf(1, 2, 3, 4)) }
         val data = backupFixture().toBackup(mapOf("/old/portrait.jpg" to "portrait"))
         return codec.write(data, mapOf("portrait" to image), temporary.root, "1", Instant.now()) to data

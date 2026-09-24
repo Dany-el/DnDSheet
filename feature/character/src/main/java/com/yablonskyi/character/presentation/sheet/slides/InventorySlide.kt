@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -118,7 +119,7 @@ fun CoinRow(
             painter = painterResource(icon),
             contentDescription = null,
             tint = Color.Unspecified,
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(48.dp)
         )
 
         Spacer(modifier = Modifier.width(12.dp))
@@ -147,9 +148,10 @@ fun CoinRow(
         Row(verticalAlignment = Alignment.CenterVertically) {
             IconButton(
                 onClick = onSubtract,
+                shape = CircleShape,
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                    .size(36.dp)
+                    .sizeIn(48.dp)
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_remove),
@@ -162,9 +164,10 @@ fun CoinRow(
 
             IconButton(
                 onClick = onAdd,
+                shape = CircleShape,
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
-                    .size(36.dp)
+                    .sizeIn(48.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,

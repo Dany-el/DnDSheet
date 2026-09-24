@@ -29,13 +29,12 @@ import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -95,7 +94,7 @@ fun SpellSlide(
         LazyColumn(
             contentPadding = PaddingValues(
                 start = 4.dp,
-                top = 0.dp,
+                top = 4.dp,
                 end = 4.dp,
                 bottom = Dimens.Fab.BottomPadding
             ),
@@ -107,11 +106,13 @@ fun SpellSlide(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    SpellFiltersRow(
-                        filters = availableFilters,
-                        selectedFilter = currentFilter,
-                        onFilterChange = onFilterChange,
-                    )
+                    if (spells.isNotEmpty()) {
+                        SpellFiltersRow(
+                            filters = availableFilters,
+                            selectedFilter = currentFilter,
+                            onFilterChange = onFilterChange,
+                        )
+                    }
                     SpellCastingRow(
                         savingThrow = spellSaveDC,
                         attackBonus = spellAttackBonus,
@@ -458,15 +459,10 @@ fun SpellCard(
     onSpellClick: (Spell) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    OutlinedCard(
         onClick = { onSpellClick(spell) },
         shape = shape,
-        colors = CardDefaults.cardColors().copy(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLowest,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-        ),
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -476,7 +472,7 @@ fun SpellCard(
                 .padding(16.dp)
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()

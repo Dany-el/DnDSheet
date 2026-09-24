@@ -1,276 +1,155 @@
 package com.yablonskyi.character.presentation.sheet.editor
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.outlined.Healing
-import androidx.compose.material.icons.outlined.LocalHospital
-import androidx.compose.material.icons.outlined.WaterDrop
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.yablonskyi.ui.R
-import com.yablonskyi.ui.theme.DnDSheetTheme
-import com.yablonskyi.ui.utils.IntTextField
+import com.yablonskyi.ui.utils.DnDSheetOutlinedTextField
+
+val damageColor = Color(0xffe34c1e)
+val healingColor = Color(0xff529c64)
 
 @Composable
-fun HealthEditSheetContent(
-    currentHp: Int,
-    maxHp: Int,
-    tempHp: Int,
-    onDismiss: () -> Unit,
-    onApply: (current: Int, max: Int, temp: Int) -> Unit
-) {
-    var localCurrent by rememberSaveable { mutableIntStateOf(currentHp) }
-    var localMax by rememberSaveable { mutableIntStateOf(maxHp) }
-    var localTemp by rememberSaveable { mutableIntStateOf(tempHp) }
-
-    var adjustmentValue by rememberSaveable { mutableIntStateOf(0) }
-
-    fun pushUpdate() {
-        onApply(localCurrent, localMax, localTemp)
+fun HealthEditSheetContent(state: HealthFormUiState, onIntent: (HealthFormIntent) -> Unit) {
+    val focus = LocalFocusManager.current
+    fun action(intent: HealthFormIntent) {
+        focus.clearFocus(); onIntent(intent)
     }
-
-    Column(
-        modifier = Modifier
+    LazyColumn(
+        Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp)
-            .padding(bottom = 48.dp)
+            .padding(16.dp)
+            .imePadding(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.health),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold
-            )
-            IconButton(
-                onClick = {
-                    onDismiss()
-                    pushUpdate()
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.close),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+        item {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(
+                    stringResource(R.string.health),
+                    style = MaterialTheme.typography.headlineSmall
                 )
+                IconButton(
+                    onClick = { onIntent(HealthFormIntent.Dismiss) }
+                ) {
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close))
+                }
             }
         }
-        Spacer(modifier = Modifier.height(24.dp))
-        LazyColumn {
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+        item {
+            listOf(
+                HealthField.CURRENT to R.string.hp_current,
+                HealthField.MAXIMUM to R.string.hp_max,
+                HealthField.TEMPORARY to R.string.hp_temp
+            ).forEach { (field, label) ->
+                HealthInput(state, field, label, onIntent)
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedButton(
+                    onClick = { action(HealthFormIntent.FullHeal) },
+                    enabled = state.maximum.isValid,
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = healingColor,
+                    ),
+                    modifier = Modifier.weight(1f)
+                ) { Text(stringResource(R.string.btn_full_heal)) }
+                OutlinedButton(
+                    onClick = { action(HealthFormIntent.MarkDead) },
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = damageColor,
+                    ),
+                    modifier = Modifier.weight(1f)
                 ) {
-                    IntTextField(
-                        value = localMax,
-                        label = stringResource(R.string.hp_max),
-                        onValueChange = {
-                            if (it < 1000) {
-                                localMax = it
-                                pushUpdate()
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    IntTextField(
-                        value = localCurrent,
-                        label = stringResource(R.string.hp_current),
-                        onValueChange = {
-                            if (it <= localMax) {
-                                localCurrent = it
-                                pushUpdate()
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    IntTextField(
-                        value = localTemp,
-                        label = stringResource(R.string.hp_temp),
-                        onValueChange = {
-                            if (it < 1000) {
-                                localTemp = it
-                                pushUpdate()
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
+                    Text(
+                        stringResource(R.string.btn_you_are_dead)
                     )
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider()
-                Spacer(modifier = Modifier.height(16.dp))
             }
-            item {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    OutlinedButton(
-                        onClick = {
-                            localCurrent = localMax
-                            pushUpdate()
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = Color(0xff529c64)
-                        ),
-                        border = BorderStroke(2.dp, Color(0xff529c64)),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.LocalHospital,
-                            contentDescription = null
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(stringResource(R.string.btn_full_heal))
-                    }
+        }
+        item {
+            HorizontalDivider()
+        }
+        item {
+            HealthInput(state, HealthField.AMOUNT, R.string.amount, onIntent)
 
-                    OutlinedButton(
-                        onClick = {
-                            localCurrent = 0
-                            localTemp = 0
-                            pushUpdate()
-                        },
-                        border = BorderStroke(2.dp, Color(0xffe34c1e)),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = Color(0xffe34c1e)
-                        ),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_skull),
-                            contentDescription = null
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(stringResource(R.string.btn_you_are_dead))
-                    }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedButton(
+                    onClick = { action(HealthFormIntent.Heal) },
+                    enabled = state.isValid && state.amount.isValid,
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = healingColor,
+                    ),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_vital_signs),
+                        contentDescription = stringResource(R.string.heal),
+                        tint = healingColor
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.heal))
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                HorizontalDivider()
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-            item {
-                // Amount Input
-                IntTextField(
-                    value = adjustmentValue,
-                    label = stringResource(R.string.amount),
-                    onValueChange = { adjustmentValue = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                OutlinedButton(
+                    onClick = { action(HealthFormIntent.Damage) },
+                    enabled = state.isValid && state.amount.isValid,
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = damageColor,
+                    ),
+                    modifier = Modifier.weight(1f)
                 ) {
-                    // Heal Button
-                    OutlinedButton(
-                        onClick = {
-                            localCurrent =
-                                (localCurrent + adjustmentValue).coerceAtMost(localMax)
-                            pushUpdate()
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = Color(0xff529c64)
-                        ),
-                        border = BorderStroke(2.dp, Color(0xff529c64)),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Healing,
-                            contentDescription = stringResource(R.string.heal)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(stringResource(R.string.heal))
-                    }
-
-                    // Damage Button
-                    OutlinedButton(
-                        onClick = {
-                            val remainder = localTemp - adjustmentValue
-                            localTemp = remainder.coerceAtLeast(0)
-                            if (remainder < 0) {
-                                localCurrent = (localCurrent + remainder).coerceAtLeast(0)
-                            }
-                            pushUpdate()
-                        },
-                        border = BorderStroke(2.dp, Color(0xffe34c1e)),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = Color(0xffe34c1e)
-                        ),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.WaterDrop,
-                            contentDescription = stringResource(R.string.heal)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(stringResource(R.string.damage))
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.ic_skull),
+                        contentDescription = stringResource(R.string.damage),
+                        tint = damageColor
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.damage))
                 }
             }
         }
     }
 }
 
-@Preview
 @Composable
-private fun HealthEditSheetContentPreview() {
-    DnDSheetTheme {
-        Surface() {
-            HealthEditSheetContent(
-                currentHp = 20,
-                maxHp = 30,
-                tempHp = 0,
-                onDismiss = {},
-                onApply = { _, _, _ -> }
-            )
-        }
-    }
+private fun HealthInput(
+    state: HealthFormUiState,
+    field: HealthField,
+    label: Int,
+    onIntent: (HealthFormIntent) -> Unit
+) {
+    DnDSheetOutlinedTextField(
+        state.field(field),
+        { onIntent(HealthFormIntent.Changed(field, it)) },
+        stringResource(label),
+        { onIntent(HealthFormIntent.FocusChanged(field, it)) },
+        Modifier.fillMaxWidth(),
+        showMaximum = field == HealthField.CURRENT
+    )
 }

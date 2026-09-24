@@ -96,12 +96,15 @@ fun VerticalCharacterLayout(
 
 @Composable
 fun WideCharacterLayout(
-    character: Character,
+    maxHp: Int,
+    currentHp: Int,
+    tempHp: Int,
+    initiativeBonus: Int,
     leftSelectedTab: CharacterTab,
     rightSelectedTab: CharacterTab,
     onLeftTabSelected: (CharacterTab) -> Unit,
     onRightTabSelected: (CharacterTab) -> Unit,
-    onDiceButtonClick: (String) -> Unit,
+    onInitiativeBonusRoll: () -> Unit,
     onRestClick: () -> Unit,
     onHealthClick: () -> Unit,
     tabContent: @Composable (CharacterTab, Modifier) -> Unit,
@@ -134,9 +137,9 @@ fun WideCharacterLayout(
                 )
                 Spacer(Modifier.width(16.dp))
                 HealthBar(
-                    currentHp = character.currentHp,
-                    maxHp = character.maxHp,
-                    tempHp = character.tempHp,
+                    currentHp = currentHp,
+                    maxHp = maxHp,
+                    tempHp = tempHp,
                     onHealthClick = onHealthClick,
                     modifier = Modifier.weight(1f)
                 )
@@ -149,8 +152,8 @@ fun WideCharacterLayout(
                     .fillMaxWidth()
             ) {
                 CharacterDetailsRowExpanded(
-                    initiativeBonus = character.initiativeBonus,
-                    onRollClick = onDiceButtonClick,
+                    initiativeBonus = initiativeBonus,
+                    onInitiativeRoll = onInitiativeBonusRoll,
                     onRestClick = onRestClick,
                     modifier = Modifier.weight(1f)
                 )

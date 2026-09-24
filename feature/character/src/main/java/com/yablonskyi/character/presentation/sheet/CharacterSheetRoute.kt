@@ -18,6 +18,7 @@ fun CharacterSheetRouteContent(
     onOpenCharacterSpells: (Long) -> Unit,
     onOpenSettings: (Long) -> Unit,
     onOpenDiceHistory: (Long) -> Unit,
+    onOpenNote: (Long, String?) -> Unit,
     onBack: () -> Unit,
     viewModel: CharacterSheetViewModel = hiltViewModel(),
     diceViewModel: DiceViewModel = hiltViewModel(),
@@ -29,6 +30,7 @@ fun CharacterSheetRouteContent(
     val spells by rememberUpdatedState(onOpenCharacterSpells)
     val back by rememberUpdatedState(onBack)
     val history by rememberUpdatedState(onOpenDiceHistory)
+    val openNote by rememberUpdatedState(onOpenNote)
     val owner = LocalLifecycleOwner.current
     val characterId = state.character?.id
     LaunchedEffect(diceViewModel, characterId) {
@@ -59,7 +61,8 @@ fun CharacterSheetRouteContent(
                 onDiceIntent = { intent ->
                     characterId?.let { diceViewModel.onIntent(it, intent) }
                 },
-                animatedVisibilityScope,
+                onOpenNote = openNote,
+                animatedVisibilityScope = animatedVisibilityScope,
             )
         }
     }

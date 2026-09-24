@@ -1,7 +1,6 @@
 package com.yablonskyi.character.presentation.dicehistory
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,12 +13,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -29,8 +26,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,11 +48,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.yablonskyi.dice.DiceIntent
 import com.yablonskyi.model.dice.SavedDiceRoll
 import com.yablonskyi.ui.R
+import com.yablonskyi.ui.components.SimpleTopAppBar
 import com.yablonskyi.ui.theme.Dimens
 import com.yablonskyi.ui.utils.formatModifier
 import com.yablonskyi.ui.utils.listItemShape
 import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.math.abs
 
@@ -80,22 +75,12 @@ fun DiceHistoryScreen(
 ) {
     var showClearConfirmation by remember { mutableStateOf(false) }
 
-    val elevatedSurfaceColor =
-        MaterialTheme.colorScheme.surfaceColorAtElevation(Dimens.TopBar.Elevation)
-
     Scaffold(
         modifier = modifier,
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.dice_history)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.navigate_back),
-                        )
-                    }
-                },
+            SimpleTopAppBar(
+                title = stringResource(R.string.dice_history),
+                onNavigateBack = onBack,
                 actions = {
                     IconButton(
                         onClick = { showClearConfirmation = true },
@@ -106,14 +91,7 @@ fun DiceHistoryScreen(
                             contentDescription = stringResource(R.string.clear_dice_history),
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = elevatedSurfaceColor,
-                    scrolledContainerColor = elevatedSurfaceColor,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
-                    actionIconContentColor = MaterialTheme.colorScheme.onSurface,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                }
             )
         },
     ) { padding ->

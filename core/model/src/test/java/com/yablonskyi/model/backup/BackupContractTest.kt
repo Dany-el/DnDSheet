@@ -16,7 +16,6 @@ import com.yablonskyi.model.character.RichText
 import com.yablonskyi.model.character.TextFormat
 import com.yablonskyi.model.character.TextSpan
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows

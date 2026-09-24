@@ -8,6 +8,7 @@ import com.yablonskyi.domain.backup.BackupAccessState
 import com.yablonskyi.domain.repository.*
 import com.yablonskyi.model.backup.*
 import com.yablonskyi.model.character.Character
+import com.yablonskyi.model.character.RichText
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -168,6 +169,25 @@ class FullBackupRepositoryTest {
         }
     }
 
+    @Test fun givenInvalidV2Notes_whenPreparing_thenLeavesLiveDataUntouched() = runTest {
+        withRepository { db, repository, staging, _ ->
+            val original = backupFixture()
+            db.backupDao().replace(original)
+            val character = original.toBackup(mapOf("/old/portrait.jpg" to "portrait"))
+                .characters.first().copy(imageAssetId = null, notes = listOf(
+                    original.characters.first().notes.single().copy(text = RichText(version = 99)),
+                ))
+            val document = archiveDocument(BackupDataV2(
+                listOf(character), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList(),
+            ))
+
+            assertEquals(BackupResult.Failure(BackupError.INVALID_ARCHIVE),
+                repository.prepareRestore { ByteArrayInputStream(document) })
+            assertEquals(original, db.backupDao().snapshot())
+            assertTrue(staging.list()!!.isEmpty())
+        }
+    }
+
     @Test fun givenPreparedRestore_whenReplacedOrDiscarded_thenExpiresTokensAndRemovesStaging() = runTest {
         withRepository { _, repository, staging, _ ->
             val output = ByteArrayOutputStream()
@@ -299,7 +319,6 @@ class FullBackupRepositoryTest {
         data: BackupDataV1,
         transformManifest: (BackupManifest) -> BackupManifest = { it },
     ): ByteArray {
-        val dataBytes = Json.encodeToString(data).toByteArray(Charsets.UTF_8)
         val counts = BackupRecordCounts(
             data.characters.size,
             data.attacks.size,
@@ -309,9 +328,25 @@ class FullBackupRepositoryTest {
             data.races.size,
             data.classes.size,
         )
+        return archiveDocument(Json.encodeToString(data).toByteArray(Charsets.UTF_8), counts, 1, transformManifest)
+    }
+
+    private fun archiveDocument(data: BackupDataV2): ByteArray = archiveDocument(
+        Json.encodeToString(data).toByteArray(Charsets.UTF_8),
+        BackupRecordCounts(data.characters.size, data.attacks.size, data.diceRolls.size, data.spells.size,
+            data.characterSpells.size, data.races.size, data.classes.size),
+        2,
+    )
+
+    private fun archiveDocument(
+        dataBytes: ByteArray,
+        counts: BackupRecordCounts,
+        version: Int,
+        transformManifest: (BackupManifest) -> BackupManifest = { it },
+    ): ByteArray {
         val manifest = transformManifest(BackupManifest(
             format = BackupValidator.FORMAT,
-            formatVersion = BackupValidator.VERSION,
+            formatVersion = version,
             createdAt = "2026-09-21T12:00:00Z",
             sourceAppVersion = "test",
             counts = counts,

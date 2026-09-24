@@ -12,13 +12,18 @@ import kotlinx.coroutines.test.*
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class CharacterSheetViewModelTest {
     @get:Rule val main = MainDispatcherRule()
     private val repository = FakeCharacterRepository()
     private val attacks = FakeAttackRepository()
-    private fun vm(handle: SavedStateHandle = SavedStateHandle(mapOf("id" to 7L))) = CharacterSheetViewModel(repository, FakeSpellRepository(), attacks, handle)
+    private fun vm(handle: SavedStateHandle = SavedStateHandle(mapOf("id" to 7L))) = CharacterSheetViewModel(repository, FakeSpellRepository(), attacks, CharacterTransitionCache(), handle)
 
     @Test fun givenMissingCharacter_whenAttacksEmit_thenShowsNotFoundWithoutCrash() = runTest {
         repository.characters.value = emptyList()
@@ -30,9 +35,10 @@ class CharacterSheetViewModelTest {
 
     @Test fun givenRapidChanges_whenSaved_thenPreservesBothFields() = runTest {
         val vm = vm(); advanceUntilIdle()
-        vm.onIntent(CharacterSheetIntent.Change(CharacterChange.Text(CharacterTextField.NOTES, "New notes")))
+        val note = Note("15412a7e-37e6-4e8a-92cb-af49e0759032", "Notes", RichText(plainText = "New notes"))
+        vm.onIntent(CharacterSheetIntent.Change(CharacterChange.AddNote(note)))
         vm.onIntent(CharacterSheetIntent.Change(CharacterChange.Health(10, 20, 3))); advanceUntilIdle()
-        assertEquals("New notes", vm.state.value.character?.notes)
+        assertEquals(listOf(note), vm.state.value.character?.notes)
         assertEquals(10, vm.state.value.character?.currentHp)
         assertEquals(0, vm.state.value.pendingWrites)
     }
@@ -62,10 +68,10 @@ class CharacterSheetViewModelTest {
     @Test fun givenFailedWriteAndLaterEdit_whenRetried_thenPreservesIntentOrder() = runTest {
         val vm = vm(); advanceUntilIdle()
         repository.failure = IllegalStateException()
-        vm.onIntent(CharacterSheetIntent.Change(CharacterChange.Text(CharacterTextField.NOTES, "First"))); advanceUntilIdle()
+        vm.onIntent(CharacterSheetIntent.Change(CharacterChange.Text(CharacterTextField.BACKSTORY, "First"))); advanceUntilIdle()
         repository.failure = null
-        vm.onIntent(CharacterSheetIntent.Change(CharacterChange.Text(CharacterTextField.NOTES, "Latest"))); advanceUntilIdle()
+        vm.onIntent(CharacterSheetIntent.Change(CharacterChange.Text(CharacterTextField.BACKSTORY, "Latest"))); advanceUntilIdle()
         vm.onIntent(CharacterSheetIntent.Retry); advanceUntilIdle()
-        assertEquals("Latest", repository.characters.value.single().notes)
+        assertEquals("Latest", repository.characters.value.single().backstory)
     }
 }

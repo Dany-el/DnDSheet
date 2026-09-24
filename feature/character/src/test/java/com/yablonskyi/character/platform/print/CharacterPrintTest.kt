@@ -4,6 +4,7 @@ import com.yablonskyi.character.platform.print.CharacterPrintEffect
 import com.yablonskyi.character.platform.print.CharacterPrintError
 import com.yablonskyi.character.platform.print.CharacterPrintState
 import com.yablonskyi.character.presentation.list.CharacterListViewModel
+import com.yablonskyi.character.presentation.common.CharacterTransitionCache
 
 import com.yablonskyi.domain.CharacterSheetHtmlRenderer
 import com.yablonskyi.domain.RenderedCharacterSheet
@@ -43,7 +44,7 @@ class CharacterPrintTest {
 
     @Before fun setUp() {
         Dispatchers.setMain(dispatcher)
-        viewModel = CharacterListViewModel(repository, renderer, FakeFiles(), SavedStateHandle())
+        viewModel = CharacterListViewModel(repository, renderer, FakeFiles(), CharacterTransitionCache(), SavedStateHandle())
     }
 
     @After fun tearDown() { Dispatchers.resetMain() }

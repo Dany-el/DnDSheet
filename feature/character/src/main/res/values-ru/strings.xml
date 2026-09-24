@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="note_add_topic">Добавить тему</string>
+    <string name="note_empty">Заметок пока нет.</string>
+    <string name="note_editor_title">Заметка</string>
+    <string name="note_character_missing">Персонаж не найден</string>
+    <string name="note_missing">Заметка не найдена</string>
+    <string name="note_draft_unavailable">Не удалось открыть этот черновик.</string>
+    <string name="note_topic">Тема</string>
+    <string name="note_body">Текст</string>
+    <string name="note_discard_title">Отменить изменения?</string>
+    <string name="note_discard_message">Изменения этой заметки будут потеряны.</string>
+    <string name="note_discard">Отменить</string>
+    <string name="note_delete_title">Удалить заметку?</string>
+    <string name="note_delete_message">Заметка будет удалена у персонажа.</string>
+    <string name="note_load_error">Не удалось загрузить персонажа.</string>
+    <string name="note_draft_error">Не удалось сохранить черновик.</string>
+    <string name="note_save_error">Не удалось сохранить заметку. Повторите попытку.</string>
+    <string name="note_conflict_error">Эта заметка изменилась в другом месте. Откройте её снова для редактирования новой версии.</string>
+    <string name="note_topic_required">Введите тему.</string>
+    <string name="note_stale_character">Персонаж изменился при восстановлении копии. Откройте заметку снова.</string>
+    <string name="note_format_bold">Полужирный</string>
+    <string name="note_format_italic">Курсив</string>
+    <string name="note_format_underline">Подчёркнутый</string>
+    <string name="note_format_strikethrough">Зачёркнутый</string>
+    <string name="note_format_more">Другие параметры форматирования</string>
+    <string name="note_format_clear">Очистить форматирование</string>
+</resources>

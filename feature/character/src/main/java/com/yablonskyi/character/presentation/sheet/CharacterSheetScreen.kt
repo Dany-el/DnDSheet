@@ -67,6 +67,7 @@ fun SharedTransitionScope.CharacterSheetScreen(
     onIntent: (CharacterSheetIntent) -> Unit,
     diceState: DiceRollState = DiceRollState(),
     onDiceIntent: (DiceIntent) -> Unit = {},
+    onOpenNote: (Long, String?) -> Unit = { _, _ -> },
     animatedVisibilityScope: AnimatedVisibilityScope
 ) {
     val character = uiState.character
@@ -118,6 +119,7 @@ fun SharedTransitionScope.CharacterSheetScreen(
                 val activeSheet = uiState.editor
                 val sheetState = rememberBottomSheetState(
                     initialValue = SheetValue.Hidden,
+                    enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
                 )
                 val closeSheet: () -> Unit = remember(scope, sheetState, onIntent) {
                     {
@@ -360,13 +362,8 @@ fun SharedTransitionScope.CharacterSheetScreen(
                             CharacterTab.NOTES -> {
                                 NotesSlide(
                                     notes = character.notes,
-                                    onSaveText = {
-                                        onIntent(
-                                            CharacterSheetIntent.Change(
-                                                CharacterChange.Text(CharacterTextField.NOTES, it)
-                                            )
-                                        )
-                                    },
+                                    onAddTopic = { onOpenNote(character.id, null) },
+                                    onOpenNote = { noteId -> onOpenNote(character.id, noteId) },
                                     modifier = modifier
                                 )
                             }
@@ -427,7 +424,10 @@ fun SharedTransitionScope.CharacterSheetScreen(
                     ) {
                         if (isWideScreen) {
                             WideCharacterLayout(
-                                character = character,
+                                maxHp = character.maxHp,
+                                currentHp = character.currentHp,
+                                tempHp = character.tempHp,
+                                initiativeBonus = character.initiativeBonus,
                                 leftSelectedTab = uiState.leftSelectedTab,
                                 rightSelectedTab = uiState.rightSelectedTab,
                                 onLeftTabSelected = {
@@ -444,7 +444,7 @@ fun SharedTransitionScope.CharacterSheetScreen(
                                         )
                                     )
                                 },
-                                onDiceButtonClick = { onDiceIntent(DiceIntent.RegularStringRoll(it)) },
+                                onInitiativeBonusRoll = { onDiceIntent(DiceIntent.InitiativeRoll(character.initiativeBonus)) },
                                 onRestClick = { onIntent(CharacterSheetIntent.Change(CharacterChange.LongRest)) },
                                 onHealthClick = onHealthClick,
                                 tabContent = movableTabContent
@@ -479,6 +479,8 @@ fun SharedTransitionScope.CharacterSheetScreen(
                     }
                 }
                 CharacterSheetBottomSheets(
+                    formWriteResult = uiState.formWriteResult,
+                    onHealthChange = { change, write -> onIntent(CharacterSheetIntent.Change(change, write)) },
                     activeSheet = activeSheet,
                     attacks = uiState.rawAttacks,
                     spells = uiState.allSpells,
@@ -486,7 +488,6 @@ fun SharedTransitionScope.CharacterSheetScreen(
                     sheetState = sheetState,
                     onDismiss = { onIntent(CharacterSheetIntent.EditorChanged(null)) },
                     onCloseSheet = closeSheet,
-                    onChange = { onIntent(CharacterSheetIntent.Change(it)) },
                     updateAbility = { ability, score ->
                         onIntent(
                             CharacterSheetIntent.Change(

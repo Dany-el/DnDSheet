@@ -21,6 +21,7 @@ data class CharacterSheetState(
     val lessDetails: Boolean = false,
     val editor: CharacterSheetEditor? = null,
     val pendingWrites: Int = 0,
+    val formWriteResult: com.yablonskyi.character.presentation.common.FormWriteResult? = null,
     val errors: Set<CharacterUiError> = emptySet(),
 ) {
     val spells get() = filterCharacterSpells(allSpells, currentFilter)
@@ -29,7 +30,7 @@ data class CharacterSheetState(
 }
 
 sealed interface CharacterSheetIntent {
-    data class Change(val change: CharacterChange) : CharacterSheetIntent
+    data class Change(val change: CharacterChange, val formWrite: com.yablonskyi.character.presentation.common.FormWrite? = null) : CharacterSheetIntent
     data class AttackSaved(val attack: Attack) : CharacterSheetIntent
     data class AttackDeleted(val attack: Attack) : CharacterSheetIntent
     data class FilterChanged(val filter: SpellFilter) : CharacterSheetIntent

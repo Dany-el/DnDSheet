@@ -8,24 +8,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
 @Stable
-class IntTextFieldController(initialValue: Int) {
+class IntTextFieldController(initialValue: Int, private val allowSigned: Boolean = false) {
     var text by mutableStateOf(initialValue.toString())
         private set
     var isFocused by mutableStateOf(false)
         private set
 
-    // Returns the parsed Int only when input is valid — null means ignore
     fun onTextChange(newText: String): Int? {
-        if (newText.isEmpty() || newText.all { it.isDigit() }) {
+        if (newText.isEmpty() || (allowSigned && newText == "-")) {
             text = newText
-            return newText.toIntOrNull()
+            return null
         }
-        return null  // invalid input — don't update, don't propagate
+        val digits = if (allowSigned) newText.removePrefix("-") else newText
+        if (digits.isEmpty() || !digits.all { it in '0'..'9' }) return null
+        val parsed = newText.toIntOrNull() ?: return null
+        text = newText
+        return parsed
     }
 
     fun onFocusChange(focused: Boolean, currentValue: Int) {
         isFocused = focused
-        if (!focused && text.isEmpty()) text = currentValue.toString()
+        if (!focused) text = currentValue.toString()
     }
 
     fun syncIfUnfocused(value: Int) {
@@ -34,5 +37,5 @@ class IntTextFieldController(initialValue: Int) {
 }
 
 @Composable
-fun rememberIntTextFieldController(initialValue: Int): IntTextFieldController =
-    remember { IntTextFieldController(initialValue) }
+fun rememberIntTextFieldController(initialValue: Int, allowSigned: Boolean = false): IntTextFieldController =
+    remember(allowSigned) { IntTextFieldController(initialValue, allowSigned) }

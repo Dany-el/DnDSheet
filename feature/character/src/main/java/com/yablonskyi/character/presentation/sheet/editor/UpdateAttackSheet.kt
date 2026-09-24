@@ -1,326 +1,226 @@
 package com.yablonskyi.character.presentation.sheet.editor
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.yablonskyi.model.character.Ability
-import com.yablonskyi.model.character.Attack
 import com.yablonskyi.model.character.AttackType
+import com.yablonskyi.model.character.AttackUsage
+import com.yablonskyi.model.character.DamageAbilityModifier
+import com.yablonskyi.model.character.DamageMode
 import com.yablonskyi.model.character.DamageType
+import com.yablonskyi.model.dice.DiceRoles
 import com.yablonskyi.ui.R
+import com.yablonskyi.ui.utils.DnDSheetOutlinedTextField
 import com.yablonskyi.ui.utils.EnumDropdown
-import com.yablonskyi.ui.utils.IntTextField
-import com.yablonskyi.ui.utils.NumbersTextField
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun UpdateAttackSheet(
-    attack: Attack,
-    onDismiss: () -> Unit,
-    onSave: (Attack) -> Unit,
-    onDelete: (Attack) -> Unit,
-) {
-    val isCreateMode = attack.attackId == 0L
-
-    var name by rememberSaveable(attack.attackId) { mutableStateOf(attack.name) }
-    var attackType by rememberSaveable(attack.attackId) { mutableStateOf(attack.attackType) }
-    var ability by rememberSaveable(attack.attackId) { mutableStateOf(attack.ability) }
-    var isProficient by rememberSaveable(attack.attackId) { mutableStateOf(attack.isProficient) }
-
-    var bonusToHit by rememberSaveable(attack.attackId) { mutableIntStateOf(attack.bonusToHit) }
-    var bonusToDamage by rememberSaveable(attack.attackId) { mutableIntStateOf(attack.bonusToDamage) }
-
-    var damageDice by rememberSaveable(attack.attackId) { mutableStateOf(attack.damageDice) }
-    var damageType by rememberSaveable(attack.attackId) { mutableStateOf(attack.damageType) }
-    var range by rememberSaveable(attack.attackId) { mutableStateOf(attack.range) }
-    var notes by rememberSaveable(attack.attackId) { mutableStateOf(attack.notes) }
-
-    val isNameValid = name.isNotBlank()
-    val isRangeValid = range.isNotBlank()
-    val isDamageDiceValid =
-        damageDice.isNotBlank() && Regex("""^([1-9]\d*)?[dDкК](4|6|8|10|12|20|100)$""").matches(
-            damageDice
-        )
-
-    val isFormValid = isNameValid && isRangeValid && isDamageDiceValid
-
-    Column(
+fun UpdateAttackSheet(state: AttackFormUiState, onIntent: (AttackFormIntent) -> Unit) {
+    val focus = LocalFocusManager.current
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp)
-            .padding(bottom = 48.dp)
+            .padding(16.dp)
+            .imePadding(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                stringResource(R.string.msg_attack),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold
-            )
-            IconButton(onClick = onDismiss) {
-                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close))
+        item {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(
+                    stringResource(R.string.msg_attack),
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                IconButton(
+                    onClick = { onIntent(AttackFormIntent.Dismiss) }
+                ) {
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close))
+                }
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        LazyColumn{
-            item {
-                AttackFormContent(
-                    name, { name = it },
-                    attackType, { attackType = it },
-                    ability, { ability = it },
-                    isProficient, { isProficient = it },
-                    bonusToHit, { bonusToHit = it },
-                    bonusToDamage, { bonusToDamage = it },
-                    damageDice, { damageDice = it },
-                    damageType, { damageType = it },
-                    range, { range = it },
-                    notes, { notes = it }
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-            }
-
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+        item { AttackFormContent(state, onIntent) }
+        item {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(
+                    onClick = { focus.clearFocus(); onIntent(AttackFormIntent.Submit) },
+                    enabled = state.isValid && !state.submitted,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Button(
-                        onClick = {
-                            val finalAttack = attack.copy(
-                                name = name.trim(),
-                                attackType = attackType,
-                                ability = ability,
-                                isProficient = isProficient,
-                                bonusToHit = bonusToHit,
-                                bonusToDamage = bonusToDamage,
-                                damageDice = damageDice,
-                                damageType = damageType,
-                                range = range,
-                                notes = notes.trim()
-                            )
-                            onSave(finalAttack)
-                            onDismiss()
-                        },
-                        enabled = isFormValid,
-                        modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(8.dp)
+                    Text(stringResource(if (state.original.attackId == 0L) R.string.add else R.string.save))
+                }
+                if (state.original.attackId != 0L) {
+                    OutlinedButton(
+                        onClick = { onIntent(AttackFormIntent.Delete) },
+                        enabled = !state.submitted,
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Text(
-                            text = (
-                                    if (isCreateMode)
-                                        stringResource(R.string.add)
-                                    else
-                                        stringResource(R.string.save)
-                                    ).uppercase()
-                        )
-                    }
-                    if (!isCreateMode) {
-                        OutlinedButton(
-                            onClick = {
-                                onDelete(attack)
-                                onDismiss()
-                            },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(8.dp),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.error,
-                                containerColor = Color.Transparent
-                            )
-                        ) {
-                            Text(stringResource(R.string.delete).uppercase())
-                        }
+                        Text(stringResource(R.string.delete))
                     }
                 }
             }
         }
     }
+}
 
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun AttackFormContent(state: AttackFormUiState, onIntent: (AttackFormIntent) -> Unit) {
+    DnDSheetOutlinedTextField(
+        state.name,
+        { onIntent(AttackFormIntent.TextChanged(AttackTextField.NAME, it)) },
+        stringResource(R.string.spell_name),
+        { onIntent(AttackFormIntent.TextFocusChanged(AttackTextField.NAME, it)) },
+        isRequired = true
+    )
+    AttackNumberInput(state, AttackNumberField.RANGE, R.string.msg_distance, onIntent)
+    EnumDropdown(
+        state.attackType,
+        R.string.attack_type,
+        AttackType.entries,
+        nameMapper = { stringResource(it.resId) },
+        onSelected = { onIntent(AttackFormIntent.TypeChanged(it)) })
+    EnumDropdown(
+        state.ability,
+        R.string.ability,
+        Ability.entries,
+        nameMapper = { stringResource(it.nameRes) },
+        onSelected = { onIntent(AttackFormIntent.AbilityChanged(it)) })
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(stringResource(R.string.is_proficient))
+        Switch(state.proficient, { onIntent(AttackFormIntent.ProficiencyChanged(it)) })
+    }
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        AttackUsage.entries.forEach { usage ->
+            FilterChip(
+                selected = usage in state.usages,
+                onClick = { onIntent(AttackFormIntent.UsageChanged(usage)) },
+                label = { Text(stringResource(usage.labelRes())) })
+        }
+    }
+    if (state.usages.isEmpty()) Text(
+        stringResource(R.string.attack_usage_required),
+        color = MaterialTheme.colorScheme.error
+    )
+    EnumDropdown(
+        state.damageMode, R.string.attack_damage_mode, DamageMode.entries,
+        nameMapper = { stringResource(if (it == DamageMode.DICE) R.string.attack_dice else R.string.attack_fixed) },
+        onSelected = { onIntent(AttackFormIntent.ModeChanged(it)) })
+    if (state.damageMode == DamageMode.DICE) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            AttackNumberInput(
+                state,
+                AttackNumberField.DICE_COUNT,
+                R.string.attack_dice_count,
+                onIntent,
+                Modifier.weight(1f)
+            )
+            EnumDropdown(
+                state.die,
+                R.string.attack_die,
+                DiceRoles.entries,
+                Modifier.weight(1f),
+                nameMapper = { it.name.lowercase() },
+                onSelected = { onIntent(AttackFormIntent.DieChanged(it)) })
+        }
+        if (state.diceParseError) Text(
+            stringResource(R.string.form_invalid_dice),
+            color = MaterialTheme.colorScheme.error
+        )
+    } else AttackNumberInput(
+        state,
+        AttackNumberField.FIXED_DAMAGE,
+        R.string.attack_fixed_damage,
+        onIntent
+    )
+    EnumDropdown(
+        state.damageType,
+        R.string.damage_type,
+        DamageType.entries,
+        nameMapper = { stringResource(it.resId) },
+        onSelected = { onIntent(AttackFormIntent.DamageTypeChanged(it)) })
+    EnumDropdown(
+        state.damageAbilityModifier,
+        R.string.attack_damage_modifier,
+        DamageAbilityModifier.entries,
+        nameMapper = {
+            stringResource(
+                when (it) {
+                    DamageAbilityModifier.FULL -> R.string.attack_modifier_full
+                    DamageAbilityModifier.NONE -> R.string.attack_modifier_none
+                    DamageAbilityModifier.NEGATIVE_ONLY -> R.string.attack_modifier_negative
+                }
+            )
+        },
+        onSelected = { onIntent(AttackFormIntent.ModifierChanged(it)) })
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        AttackNumberInput(
+            state,
+            AttackNumberField.HIT_BONUS,
+            R.string.bonus_hit,
+            onIntent,
+            Modifier.weight(1f)
+        )
+        AttackNumberInput(
+            state,
+            AttackNumberField.DAMAGE_BONUS,
+            R.string.bonus_damage,
+            onIntent,
+            Modifier.weight(1f)
+        )
+    }
+    DnDSheetOutlinedTextField(
+        state.notes,
+        { onIntent(AttackFormIntent.TextChanged(AttackTextField.NOTES, it)) },
+        stringResource(R.string.notes),
+        { onIntent(AttackFormIntent.TextFocusChanged(AttackTextField.NOTES, it)) },
+        maxLines = 8
+    )
 }
 
 @Composable
-fun AttackFormContent(
-    name: String, onNameChange: (String) -> Unit,
-    attackType: AttackType, onTypeChange: (AttackType) -> Unit,
-    ability: Ability, onAbilityChange: (Ability) -> Unit,
-    isProficient: Boolean, onProfChange: (Boolean) -> Unit,
-    bonusToHit: Int, onBonusHitChange: (Int) -> Unit,
-    bonusToDamage: Int, onBonusDamageChange: (Int) -> Unit,
-    damageDice: String, onDamageDiceChange: (String) -> Unit,
-    damageType: DamageType, onDamageTypeChange: (DamageType) -> Unit,
-    range: String, onRangeChange: (String) -> Unit,
-    notes: String, onNotesChange: (String) -> Unit
+private fun AttackNumberInput(
+    state: AttackFormUiState, field: AttackNumberField, label: Int,
+    onIntent: (AttackFormIntent) -> Unit, modifier: Modifier = Modifier.fillMaxWidth()
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier
-            .padding(bottom = 16.dp)
-    ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            OutlinedTextField(
-                value = name,
-                onValueChange = {
-                    if (it.length <= 50) onNameChange(it)
-                },
-                label = { Text(stringResource(R.string.spell_name) + "*") },
-                isError = name.isBlank(),
-                modifier = Modifier.weight(1f),
-                singleLine = true
-            )
-            IntTextField(
-                value = range.run {
-                    Regex("\\d+").find(this)?.value?.toInt() ?: 0
-                },
-                validate = { input ->
-                    (input.toIntOrNull() ?: 0) <= 1000
-                },
-                onValueChange = {
-                    onRangeChange(it.toString())
-                },
-                isError = range.isBlank() || range.run {
-                    Regex("\\d+").find(this)?.value?.toInt() ?: 0
-                } == 0,
-                label = stringResource(R.string.msg_distance) + "*",
-                modifier = Modifier.weight(0.6f),
-            )
-        }
+    val number = state.number(field)
+    DnDSheetOutlinedTextField(
+        number, { onIntent(AttackFormIntent.NumberChanged(field, it)) }, stringResource(label),
+        { onIntent(AttackFormIntent.NumberFocusChanged(field, it)) }, modifier,
+        allowSigned = number.minValue < 0, showMaximum = field == AttackNumberField.DICE_COUNT
+    )
+}
 
-        EnumDropdown(
-            value = attackType,
-            labelRes = R.string.attack_type,
-            options = AttackType.entries,
-            nameMapper = { stringResource(it.resId) },
-            onSelected = onTypeChange,
-        )
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable(onClick = { onProfChange(!isProficient) })
-            ) {
-                Checkbox(checked = isProficient, onCheckedChange = onProfChange)
-                Text(stringResource(R.string.is_proficient))
-            }
-            EnumDropdown(
-                value = ability,
-                labelRes = R.string.ability,
-                options = Ability.entries,
-                nameMapper = { stringResource(it.nameRes) },
-                onSelected = onAbilityChange,
-                modifier = Modifier
-                    .padding(bottom = 4.dp)
-                    .weight(1f)
-            )
-        }
-
-        HorizontalDivider()
-
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-
-            val damageDiceTypingRegex = Regex("""^([1-9]\d*)?([dDкК](1(00?|2)?|20?|4|6|8)?)?$""")
-
-            val damageDiceValidRegex = Regex("""^([1-9]\d*)?[dDкК](4|6|8|10|12|20|100)$""")
-
-            val isDamageDiceError =
-                damageDice.isBlank() || !damageDiceValidRegex.matches(damageDice)
-
-            OutlinedTextField(
-                value = damageDice,
-                onValueChange = {
-                    if (it.isEmpty() || damageDiceTypingRegex.matches(it)) {
-                        onDamageDiceChange(it)
-                    }
-                },
-                label = { Text(stringResource(R.string.damage_dice) + "*") },
-                supportingText = {
-                    if (isDamageDiceError)
-                        Text(
-                            stringResource(
-                                R.string.supporting_text_dice
-                            )
-                        )
-                },
-                isError = isDamageDiceError,
-                modifier = Modifier.weight(1f),
-                singleLine = true
-            )
-            EnumDropdown(
-                value = damageType,
-                labelRes = R.string.damage_type,
-                options = DamageType.entries,
-                nameMapper = { stringResource(it.resId) },
-                onSelected = onDamageTypeChange,
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            NumbersTextField(
-                value = bonusToHit,
-                label = stringResource(R.string.bonus_hit),
-                validate = { input -> (input.toIntOrNull() ?: 0) in (-100..100) },
-                onValueChange = {
-                    onBonusHitChange(it)
-                },
-                modifier = Modifier.weight(1f)
-            )
-            NumbersTextField(
-                value = bonusToDamage,
-                label = stringResource(R.string.bonus_damage),
-                validate = { input -> (input.toIntOrNull() ?: 0) in (-100..100) },
-                onValueChange = {
-                    onBonusDamageChange(it)
-                },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        OutlinedTextField(
-            value = notes,
-            onValueChange = onNotesChange,
-            label = { Text(stringResource(R.string.notes)) },
-            modifier = Modifier.fillMaxWidth(),
-            maxLines = 1
-        )
-    }
+fun AttackUsage.labelRes(): Int = when (this) {
+    AttackUsage.ACTION -> R.string.attack_action
+    AttackUsage.BONUS_ACTION -> R.string.attack_bonus_action
+    AttackUsage.REACTION -> R.string.attack_reaction
 }

@@ -11,13 +11,14 @@ data class CharacterSettingsState(
     val status: CharacterLoadStatus = CharacterLoadStatus.LOADING,
     val drafts: Map<CharacterTextField, String> = emptyMap(),
     val pendingWrites: Int = 0,
+    val formWriteResults: Map<String, com.yablonskyi.character.presentation.common.FormWriteResult> = emptyMap(),
     val isPickingImage: Boolean = false,
     val isSavingImage: Boolean = false,
     val errors: Set<CharacterUiError> = emptySet(),
 )
 
 sealed interface CharacterSettingsIntent {
-    data class Change(val change: CharacterChange) : CharacterSettingsIntent
+    data class Change(val change: CharacterChange, val formWrite: com.yablonskyi.character.presentation.common.FormWrite? = null) : CharacterSettingsIntent
     data object ImagePickerClicked : CharacterSettingsIntent
     data class ImageSelected(val uri: String?) : CharacterSettingsIntent
     data object BackClicked : CharacterSettingsIntent

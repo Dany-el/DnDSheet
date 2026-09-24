@@ -12,6 +12,8 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@org.junit.runner.RunWith(org.robolectric.RobolectricTestRunner::class)
+@org.robolectric.annotation.Config(sdk = [34])
 class CharacterSettingsViewModelTest {
     @get:Rule val main = MainDispatcherRule()
     private val repository = FakeCharacterRepository()
@@ -49,5 +51,29 @@ class CharacterSettingsViewModelTest {
         vm.onIntent(CharacterSettingsIntent.Retry); advanceUntilIdle()
         assertEquals(listOf(7L to "content://image"), images.replacements)
         assertFalse(vm.state.value.isSavingImage)
+    }
+
+    @Test fun givenTwoFormWrites_whenCompletedBeforeCollection_thenAcknowledgesBothFields() = runTest {
+        val vm = vm(); advanceUntilIdle()
+        val first = com.yablonskyi.character.presentation.common.FormWrite("settings:7", 1)
+        val second = first.copy(revision = 2)
+        vm.onIntent(CharacterSettingsIntent.Change(CharacterChange.Text(CharacterTextField.NAME, "New"), first))
+        vm.onIntent(CharacterSettingsIntent.Change(CharacterChange.Number(CharacterNumberField.LEVEL, 20), second))
+        advanceUntilIdle()
+        assertEquals(setOf(first, second), vm.state.value.formWriteResults.values.map { it.write }.toSet())
+        assertTrue(vm.state.value.formWriteResults.values.all { it.accepted })
+        assertTrue(vm.state.value.drafts.isEmpty())
+    }
+
+    @Test fun givenFailedFormWrite_whenAbandoned_thenReportsPersistedValue() = runTest {
+        val vm = vm(); advanceUntilIdle()
+        repository.failure = IllegalStateException("failed")
+        vm.onIntent(CharacterSettingsIntent.Change(CharacterChange.Number(CharacterNumberField.LEVEL, 20),
+            com.yablonskyi.character.presentation.common.FormWrite("settings:7", 1)))
+        advanceUntilIdle()
+        vm.onIntent(CharacterSettingsIntent.DismissError); advanceUntilIdle()
+        val result = vm.state.value.formWriteResults.values.single()
+        assertFalse(result.accepted)
+        assertEquals(1, result.persisted!!.level)
     }
 }

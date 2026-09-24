@@ -2,6 +2,7 @@ package com.yablonskyi.character.presentation.list
 
 import androidx.lifecycle.SavedStateHandle
 import com.yablonskyi.character.testutil.*
+import com.yablonskyi.character.presentation.common.CharacterTransitionCache
 import com.yablonskyi.domain.CharacterSheetHtmlRenderer
 import com.yablonskyi.domain.RenderedCharacterSheet
 import com.yablonskyi.model.character.Character
@@ -20,7 +21,7 @@ class CharacterListViewModelTest {
     private val repository = FakeCharacterRepository()
     private val files = FakeCharacterFileRepository()
     private fun viewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) = CharacterListViewModel(repository,
-        CharacterSheetHtmlRenderer { _, _ -> Result.success(RenderedCharacterSheet("html", "Hero")) }, files, savedStateHandle)
+        CharacterSheetHtmlRenderer { _, _ -> Result.success(RenderedCharacterSheet("html", "Hero")) }, files, CharacterTransitionCache(), savedStateHandle)
 
     @Test fun givenFilteredCharacters_whenMoved_thenPreservesHiddenPositionsAndSelection() = runTest {
         repository.characters.value = listOf(

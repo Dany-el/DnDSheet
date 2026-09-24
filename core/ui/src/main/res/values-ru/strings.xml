@@ -160,7 +160,7 @@
     <string name="backstory">Предыстория</string>
     <string name="settings">Настройки</string>
     <string name="char_name">Имя</string>
-    <string name="char_race">Расса</string>
+    <string name="char_race">Раса</string>
     <string name="char_class">Класс</string>
     <string name="char_subclass">Подкласс</string>
     <string name="char_ac">КД</string>
@@ -212,7 +212,7 @@
     <string name="q_delete_spell">Удаление заклинания</string>
     <string name="edit">Изменить</string>
     <string name="placeholder_dice">1к12</string>
-    <string name="btn_full_heal">Вы Живой</string>
+    <string name="btn_full_heal">Полное ХП</string>
     <string name="btn_you_are_dead">Вы Мертвы</string>
     <string name="confirm_import">Загрузить</string>
     <string name="export_spells">Сохранить</string>
@@ -478,4 +478,29 @@
     <string name="proficiency_level">Уровень владения: %1$s</string>
     <string name="subtract">Уменьшить</string>
     <string name="localized_description">Локализованное описание</string>
+    <string name="change_character_profile_picture">Нажмите на область, чтобы сменить фотографию</string>
+    <string name="form_invalid_number">Значение вне допустимого диапазона</string>
+    <string name="form_invalid_name">Введите имя от 1 до 50 символов</string>
+    <string name="form_invalid_dice">Выберите число и тип костей</string>
+    <string name="attack_damage_mode">Режим урона</string>
+    <string name="attack_dice">Кости</string>
+    <string name="attack_fixed">Фиксированный</string>
+    <string name="attack_dice_count">Количество костей</string>
+    <string name="attack_die">Кость</string>
+    <string name="attack_fixed_damage">Базовый урон</string>
+    <string name="attack_damage_modifier">Модификатор характеристики к урону</string>
+    <string name="attack_modifier_full">Полный модификатор</string>
+    <string name="attack_modifier_none">Без модификатора</string>
+    <string name="attack_modifier_negative">Только отрицательный</string>
+    <string name="attack_action">Действие</string>
+    <string name="attack_bonus_action">Бонусное действие</string>
+    <string name="attack_reaction">Реакция</string>
+    <string name="attack_usage_required">Выберите хотя бы один способ использования</string>
+    <string name="attack_show_description">Показать описание</string>
+    <string name="attack_hide_description">Скрыть описание</string>
+    <string name="attack_no_description">Нет описания</string>
+    <string name="level_increase">Повысить уровень</string>
+    <string name="level_decrease">Понизить уровень</string>
+    <string name="attack_description_expanded">Описание раскрыто</string>
+    <string name="attack_description_collapsed">Описание скрыто</string>
 </resources>

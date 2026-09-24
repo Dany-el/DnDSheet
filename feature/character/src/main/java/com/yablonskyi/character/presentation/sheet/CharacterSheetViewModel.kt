@@ -15,6 +15,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -58,6 +59,7 @@ class CharacterSheetViewModel @Inject constructor(
         viewModelScope.launch {
             for (intent in writes) {
                 try {
+                    var accepted = false
                     var retry: Boolean
                     do {
                         retry = false
@@ -71,6 +73,7 @@ class CharacterSheetViewModel @Inject constructor(
                         is CharacterSheetIntent.AttackDeleted -> attacks.deleteAttack(intent.attack.copy(characterId = id))
                         else -> Unit
                     }
+                            accepted = true
                         } catch (cancelled: CancellationException) { throw cancelled }
                         catch (_: Exception) {
                             waitingForRetry = true
@@ -79,6 +82,12 @@ class CharacterSheetViewModel @Inject constructor(
                             waitingForRetry = false
                         }
                     } while (retry)
+                    if (intent is CharacterSheetIntent.Change && intent.formWrite != null) {
+                        val persisted = try { characters.getCharacterById(id).first() }
+                            catch (cancelled: CancellationException) { throw cancelled }
+                            catch (_: Exception) { state.value.character }
+                        mutableState.update { it.copy(formWriteResult = com.yablonskyi.character.presentation.common.FormWriteResult(intent.formWrite, intent.change, accepted, persisted)) }
+                    }
                 } finally { reduce(CharacterSheetMutation.WriteCount(-1)) }
             }
         }

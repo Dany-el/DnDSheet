@@ -44,6 +44,7 @@ class CharacterSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             for (intent in writes) {
                 try {
+                    var accepted = false
                     var retry: Boolean
                     do {
                         retry = false
@@ -53,6 +54,7 @@ class CharacterSettingsViewModel @Inject constructor(
                                 is CharacterSettingsIntent.ImageSelected -> intent.uri?.let { images.replace(id, it) }
                                 else -> Unit
                             }
+                            accepted = true
                         } catch (cancelled: CancellationException) { throw cancelled }
                         catch (_: Exception) {
                             waitingForRetry = true
@@ -68,6 +70,19 @@ class CharacterSettingsViewModel @Inject constructor(
                             }
                         }
                     } while (retry)
+                    if (intent is CharacterSettingsIntent.Change && intent.formWrite != null) {
+                        val persisted = try { repository.getCharacterById(id).first() }
+                            catch (cancelled: CancellationException) { throw cancelled }
+                            catch (_: Exception) { state.value.character }
+                        val key = when (val change = intent.change) {
+                            is CharacterChange.Text -> "text:${change.field}"
+                            is CharacterChange.Number -> "number:${change.field}"
+                            is CharacterChange.SlotMaximum -> "slot:${change.level}"
+                            else -> change.javaClass.name
+                        }
+                        val result = com.yablonskyi.character.presentation.common.FormWriteResult(intent.formWrite, intent.change, accepted, persisted)
+                        mutableState.update { it.copy(formWriteResults = it.formWriteResults + (key to result)) }
+                    }
                 } finally {
                     reduce(CharacterSettingsMutation.WriteCount(-1))
                     if (intent is CharacterSettingsIntent.ImageSelected) reduce(CharacterSettingsMutation.SavingImage(false))
@@ -80,7 +95,7 @@ class CharacterSettingsViewModel @Inject constructor(
         when (intent) {
             is CharacterSettingsIntent.Change -> {
                 if (state.value.character == null) return
-                if (intent.change is CharacterChange.Text) {
+                if (intent.formWrite == null && intent.change is CharacterChange.Text) {
                     savedStateHandle["draft:${intent.change.field.name}"] = intent.change.value
                     reduce(CharacterSettingsMutation.Draft(intent.change))
                 }

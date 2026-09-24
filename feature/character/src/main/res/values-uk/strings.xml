@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="note_add_topic">Додати тему</string>
+    <string name="note_empty">Нотаток ще немає.</string>
+    <string name="note_editor_title">Нотатка</string>
+    <string name="note_character_missing">Персонажа не знайдено</string>
+    <string name="note_missing">Нотатку не знайдено</string>
+    <string name="note_draft_unavailable">Не вдалося відкрити цю чернетку.</string>
+    <string name="note_topic">Тема</string>
+    <string name="note_body">Текст</string>
+    <string name="note_discard_title">Відхилити зміни?</string>
+    <string name="note_discard_message">Зміни в цій нотатці буде втрачено.</string>
+    <string name="note_discard">Відхилити</string>
+    <string name="note_delete_title">Видалити нотатку?</string>
+    <string name="note_delete_message">Нотатку буде видалено з персонажа.</string>
+    <string name="note_load_error">Не вдалося завантажити персонажа.</string>
+    <string name="note_draft_error">Не вдалося зберегти чернетку.</string>
+    <string name="note_save_error">Не вдалося зберегти нотатку. Спробуйте ще раз.</string>
+    <string name="note_conflict_error">Цю нотатку змінено в іншому місці. Відкрийте її знову, щоб редагувати поточну версію.</string>
+    <string name="note_topic_required">Введіть тему.</string>
+    <string name="note_stale_character">Персонажа змінено під час відновлення копії. Відкрийте нотатку знову.</string>
+    <string name="note_format_bold">Жирний</string>
+    <string name="note_format_italic">Курсив</string>
+    <string name="note_format_underline">Підкреслений</string>
+    <string name="note_format_strikethrough">Закреслений</string>
+    <string name="note_format_more">Інші параметри форматування</string>
+    <string name="note_format_clear">Очистити форматування</string>
+</resources>

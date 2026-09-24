@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="note_add_topic">Add topic</string>
+    <string name="note_empty">No notes yet.</string>
+    <string name="note_editor_title">Note</string>
+    <string name="note_character_missing">Character not found</string>
+    <string name="note_missing">Note not found</string>
+    <string name="note_draft_unavailable">This draft could not be opened.</string>
+    <string name="note_topic">Topic</string>
+    <string name="note_body">Body</string>
+    <string name="note_discard_title">Discard changes?</string>
+    <string name="note_discard_message">Your changes to this note will be lost.</string>
+    <string name="note_discard">Discard</string>
+    <string name="note_delete_title">Delete note?</string>
+    <string name="note_delete_message">This note will be removed from the character.</string>
+    <string name="note_load_error">Could not load the character.</string>
+    <string name="note_draft_error">Could not save the draft.</string>
+    <string name="note_save_error">Could not save the note. Try again.</string>
+    <string name="note_conflict_error">This note changed elsewhere. Reopen it to edit the latest version.</string>
+    <string name="note_topic_required">Enter a topic.</string>
+    <string name="note_stale_character">This character changed during backup restore. Reopen the note.</string>
+    <string name="note_format_bold">Bold</string>
+    <string name="note_format_italic">Italic</string>
+    <string name="note_format_underline">Underline</string>
+    <string name="note_format_strikethrough">Strikethrough</string>
+    <string name="note_format_more">More formatting options</string>
+    <string name="note_format_clear">Clear formatting</string>
+</resources>

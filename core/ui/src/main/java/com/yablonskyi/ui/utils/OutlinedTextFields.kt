@@ -82,34 +82,39 @@ fun DnDSheetOutlinedTextField(
     modifier: Modifier = Modifier,
     supportingText: String? = null,
     errorText: String? = null,
+    allowSigned: Boolean = false,
+    showMaximum: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions(
         keyboardType = KeyboardType.Number,
         imeAction = ImeAction.Next
     ),
 ) {
-    val controller = rememberIntTextFieldController(fieldState.value)
+    val controller = rememberIntTextFieldController(fieldState.value, allowSigned)
 
     LaunchedEffect(fieldState.value) {
         controller.syncIfUnfocused(fieldState.value)
     }
 
+    val resolvedError = errorText ?: fieldState.error?.let { stringResource(it) }
     OutlinedTextField(
         value = controller.text,
         onValueChange = { controller.onTextChange(it)?.let(onValueChange) },
         label = { Text(label) },
-        isError = fieldState.error != null,
-        suffix = {
-            Text(
-                text = "/ ${fieldState.maxValue}",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        },
+        isError = resolvedError != null,
+        suffix = if (showMaximum) {
+            {
+                Text(
+                    text = "/ ${fieldState.maxValue}",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        } else null,
         supportingText = {
             when {
-                errorText != null ->
+                resolvedError != null ->
                     Text(
-                        text = errorText,
+                        text = resolvedError,
                         color = MaterialTheme.colorScheme.error
                     )
                 supportingText != null ->

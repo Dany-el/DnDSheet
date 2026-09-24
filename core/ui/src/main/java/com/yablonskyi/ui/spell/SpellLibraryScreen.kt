@@ -313,10 +313,8 @@ fun SpellLibraryScreen(
     uiState.showBottomSheet?.let { spell ->
         ModalBottomSheet(
             sheetState = rememberBottomSheetState(
-                initialValue = SheetValue.Expanded,
-                confirmValueChange = { newValue ->
-                    newValue != SheetValue.Expanded
-                }
+                initialValue = SheetValue.Hidden,
+                enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
             ),
             onDismissRequest = { onIntent(SpellsIntent.DismissDetails) }
         ) {
