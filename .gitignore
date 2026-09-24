@@ -19,3 +19,6 @@
 .cxx
 local.properties
 keystore.jks
+/.android/
+/.tool-home/
+/build-form-*.log
