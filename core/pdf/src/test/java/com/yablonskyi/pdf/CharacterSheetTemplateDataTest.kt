@@ -1,17 +1,28 @@
 package com.yablonskyi.pdf
 
-import com.yablonskyi.model.character.*
+import com.yablonskyi.model.character.Attack
+import com.yablonskyi.model.character.Character
+import com.yablonskyi.model.character.CharacterSheet
+import com.yablonskyi.model.character.DamageAbilityModifier
+import com.yablonskyi.model.character.DamageMode
+import com.yablonskyi.model.character.Money
+import com.yablonskyi.model.character.Note
+import com.yablonskyi.model.character.ProficiencyLevel
+import com.yablonskyi.model.character.RichText
+import com.yablonskyi.model.character.Skill
+import com.yablonskyi.model.character.Spell
+import com.yablonskyi.model.character.TextFormat
+import com.yablonskyi.model.character.TextSpan
 import com.yablonskyi.pdf.html.CharacterSheetPdfGenerator
-import com.yablonskyi.pdf.html.HtmlTemplateRenderer
-import kotlinx.coroutines.Dispatchers
 import com.yablonskyi.ui.provider.CharacterImageLoader
-import org.junit.Assert.*
+import kotlinx.coroutines.Dispatchers
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class CharacterSheetTemplateDataTest {
     private val generator = CharacterSheetPdfGenerator(object : CharacterImageLoader {
         override fun loadImageBytes(imagePath: String?): ByteArray? = null
-    }, HtmlTemplateRenderer { _, _ -> error("Template data test must not start Python") }, Dispatchers.Unconfined)
+    }, { _, _ -> error("Template data test must not start Python") }, Dispatchers.Unconfined)
 
     @Test
     fun `export preserves expertise and applies jack of all trades only to untrained skills`() {

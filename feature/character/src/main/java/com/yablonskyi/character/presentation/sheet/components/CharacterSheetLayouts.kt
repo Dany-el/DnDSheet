@@ -22,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.yablonskyi.character.presentation.sheet.model.CharacterTab
-import com.yablonskyi.model.character.Character
 
 @Composable
 fun VerticalCharacterLayout(

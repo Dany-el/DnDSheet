@@ -1,17 +1,23 @@
 package com.yablonskyi.character.presentation.list
 
 import androidx.lifecycle.SavedStateHandle
-import com.yablonskyi.character.testutil.*
 import com.yablonskyi.character.presentation.common.CharacterTransitionCache
-import com.yablonskyi.domain.CharacterSheetHtmlRenderer
+import com.yablonskyi.character.testutil.FakeCharacterFileRepository
+import com.yablonskyi.character.testutil.FakeCharacterRepository
+import com.yablonskyi.character.testutil.MainDispatcherRule
 import com.yablonskyi.domain.RenderedCharacterSheet
 import com.yablonskyi.model.character.Character
 import com.yablonskyi.model.character.CharacterSheet
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.*
-import org.junit.Assert.*
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -21,7 +27,7 @@ class CharacterListViewModelTest {
     private val repository = FakeCharacterRepository()
     private val files = FakeCharacterFileRepository()
     private fun viewModel(savedStateHandle: SavedStateHandle = SavedStateHandle()) = CharacterListViewModel(repository,
-        CharacterSheetHtmlRenderer { _, _ -> Result.success(RenderedCharacterSheet("html", "Hero")) }, files, CharacterTransitionCache(), savedStateHandle)
+        { _, _ -> Result.success(RenderedCharacterSheet("html", "Hero")) }, files, CharacterTransitionCache(), savedStateHandle)
 
     @Test fun givenFilteredCharacters_whenMoved_thenPreservesHiddenPositionsAndSelection() = runTest {
         repository.characters.value = listOf(

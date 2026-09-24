@@ -1,8 +1,5 @@
 package com.yablonskyi.character.platform.print
 
-import com.yablonskyi.character.platform.print.CharacterPrintEffect
-import com.yablonskyi.character.platform.print.CharacterPrintError
-import com.yablonskyi.character.platform.print.CharacterPrintState
 import com.yablonskyi.character.presentation.list.CharacterListViewModel
 import com.yablonskyi.character.presentation.common.CharacterTransitionCache
 

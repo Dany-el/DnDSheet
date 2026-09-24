@@ -5,12 +5,8 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -46,33 +42,6 @@ sealed interface NavAnimation {
                     towards = AnimatedContentTransitionScope.SlideDirection.Right
                 )
             }
-
-        val popEnterSlideTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition) =
-            {
-                slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(durationMillis = DURATION_MILLIS, easing = LinearEasing)
-                ) + scaleIn(
-                    initialScale = 0.8f
-                )
-            }
-
-        val popExitSlideTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition) =
-            {
-                slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Right,
-                    animationSpec = tween(durationMillis = DURATION_MILLIS, easing = LinearEasing)
-                ) + scaleOut(
-                    targetScale = 0.8f
-                )
-            }
-    }
-
-    object FadeTransition : NavAnimation {
-        private const val DURATION_MILLIS = 300
-
-        val enterTransition = fadeIn(tween(DURATION_MILLIS))
-        val exitTransition = fadeOut(tween(DURATION_MILLIS))
     }
 }
 

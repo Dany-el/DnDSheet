@@ -120,7 +120,6 @@ class HealthFormViewModel @Inject constructor(private val saved: SavedStateHandl
                         mutable.value = before.copy(temporary = before.temporary.copy(value = (before.temporary.value.toLong() - before.amount.value).coerceAtLeast(0).toInt()),
                             current = before.current.copy(value = (before.current.value.toLong() - remaining).coerceAtLeast(0).toInt()))
                     }
-                    else -> Unit
                 }
                 if (mutable.value.change() != before.change()) {
                     dirty = true

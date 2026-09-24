@@ -310,36 +310,6 @@ fun SpellCastingRow(
 }
 
 @Composable
-private fun SpellStatPill(
-    label: String,
-    modifier: Modifier = Modifier,
-    trailingContent: @Composable (() -> Unit),
-) {
-    Surface(
-        shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        color = Color.Transparent,
-        modifier = modifier
-            .heightIn(min = 48.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.padding(start = 12.dp)
-        ) {
-            Text(
-                text = label.uppercase(),
-                style = MaterialTheme.typography.titleSmall,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-            trailingContent()
-        }
-    }
-}
-
-@Composable
 fun SpellLevelHeader(
     level: SpellLevel,
     slot: SpellSlot,

@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import com.yablonskyi.character.presentation.common.validation.CharacterFormValidators as Validators
 import com.yablonskyi.model.character.*
 import com.yablonskyi.model.dice.DiceRoles
-import com.yablonskyi.ui.R
 import com.yablonskyi.ui.validation.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel

@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -209,12 +208,13 @@ fun AttackFormContent(state: AttackFormUiState, onIntent: (AttackFormIntent) -> 
 @Composable
 private fun AttackNumberInput(
     state: AttackFormUiState, field: AttackNumberField, label: Int,
-    onIntent: (AttackFormIntent) -> Unit, modifier: Modifier = Modifier.fillMaxWidth()
+    onIntent: (AttackFormIntent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val number = state.number(field)
     DnDSheetOutlinedTextField(
         number, { onIntent(AttackFormIntent.NumberChanged(field, it)) }, stringResource(label),
-        { onIntent(AttackFormIntent.NumberFocusChanged(field, it)) }, modifier,
+        { onIntent(AttackFormIntent.NumberFocusChanged(field, it)) }, modifier.fillMaxWidth(),
         allowSigned = number.minValue < 0, showMaximum = field == AttackNumberField.DICE_COUNT
     )
 }

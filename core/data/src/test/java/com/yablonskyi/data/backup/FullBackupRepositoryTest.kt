@@ -10,7 +10,6 @@ import com.yablonskyi.model.backup.*
 import com.yablonskyi.model.character.Character
 import com.yablonskyi.model.character.RichText
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope

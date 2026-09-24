@@ -1,14 +1,5 @@
 package com.yablonskyi.data.backup
 
-import org.junit.Assert.*
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
-import java.io.File
-import java.time.Instant
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
-import java.util.zip.ZipFile
 import com.yablonskyi.domain.repository.BackupError
 import com.yablonskyi.model.backup.BackupManifest
 import com.yablonskyi.model.backup.BackupRecordCounts
@@ -16,14 +7,24 @@ import com.yablonskyi.model.backup.BackupValidationException
 import com.yablonskyi.model.backup.BackupValidationFailure
 import com.yablonskyi.model.backup.BackupValidator
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import org.junit.Assert.assertArrayEquals
+import org.junit.Assert.assertEquals
+import org.junit.Assert.fail
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+import java.io.File
 import java.security.MessageDigest
+import java.time.Instant
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 
 class BackupArchiveCodecTest {
     @get:Rule val temporary = TemporaryFolder()
